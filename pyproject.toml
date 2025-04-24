@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "generators"
+version = "0.0.03"
+description = "Пакет Python с генераторами последовательностей. Демонстрирует работу с интерфейсами (typing.Protocol) и dependency_injector (containers, providers)."
+authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
+readme = "README.md"
+packages = [{include = "generators"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^2.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

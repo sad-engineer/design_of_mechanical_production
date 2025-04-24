@@ -1,0 +1,596 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#------------------------------------------------------------------------------
+# Name:        word                                                          
+# Purpose:     Модуль вывода данных в файл MS Word
+#              
+# Author:      ANKorenuk                                                        
+#                                                                               
+# Created:     07.11.2021                                                       
+# Copyright:   (c) ANKorenuk 2021                                               
+# Licence:     <your licence>                                                   
+#------------------------------------------------------------------------------
+from output.textfile.word.methods import OutputDataToDocx
+from output.textfile.word.numerator import numerator  
+
+from decimal import Decimal, ROUND_HALF_UP  # для округления
+# import pandas as pd    # для формирования таблиц данных  
+# import numpy as np
+
+d = OutputDataToDocx()
+
+#точность округления  
+ORDER = 3 
+#------------------------------------------------------------------------------
+
+
+def round_off_result(variable, order=ORDER):
+    """
+    Функция округления.
+    round - работает не так как надо
+    round применяю только для выбора значений из таблиц, для отсечения 
+    миллионных погрешностей
+
+    Parameters
+    ----------
+    variable : float
+        переменная или результат вычислений.
+    order : int, optional
+        точность округления. The default is ORDER.
+
+    Returns
+    -------
+    variable : float
+        Возвращает значение variable, округленное до order-знака после запятой.
+        Округляет вверх, если цифра пять и больше.
+
+    """
+    
+    if order > 0: 
+        order = '1.' + '0'*order
+    else: 
+        order = '1'
+        
+    variable = Decimal(variable)
+    variable = variable.quantize(Decimal(order), ROUND_HALF_UP)
+    variable = float(variable)
+    
+    return variable
+#------------------------------------------------------------------------------
+
+
+def text(string, text_alignment=3):
+    """
+    Вывод текста. Исключительно для краткости записи
+    """
+    d.output_a_string_in_docx(string, text_alignment)
+    
+    
+def form(string):
+    """
+    Вывод формулы. Исключительно для краткости записи
+    """
+    d.output_a_formula_in_docx(string)
+    
+    
+def nform(formula, number):
+    """
+    Вывод формулы номером. Исключительно для краткости записи
+    """
+    d.numbered_formula_in_table(formula, number)
+    
+    
+def calc(formula, dimension, data):
+    """
+    Вывод формулы. Исключительно для краткости записи
+    """
+    d.output_of_calculations_in_docx(formula, dimension, data)
+    
+    
+def var(string, name_variable, text_alignment=3):
+    """
+    Вывод формулы. Исключительно для краткости записи
+    """
+    d.output_text_with_the_variable_name(string, name_variable, text_alignment)
+
+
+def tab(table, heading):
+    """
+    Вывод таблицы. Исключительно для краткости записи
+    """
+    # !!! Доделать
+    if "total" in table.index:
+        row = table.loc["total"]
+        for index_row, value in row.items():
+            
+            if value == 'None None':
+                value = None
+                table.loc["total", index_row] = None
+            
+            if not isinstance(value, type(None)): 
+                if list(row).index(value) == 0:
+                    break
+                else:
+                    i = list(row).index(value) - 1
+                    table.loc["total", list(table.columns)[i]] = "Итого:"
+                break
+    
+    table.index = range(1, len(table) + 1)
+    table = table.transpose()
+    table[0] = heading
+    table = table.transpose()
+    table = table.sort_index(ascending=True)
+    
+    table = table.transpose()
+    table = table.reset_index()
+    # table.pop('index')
+    del table['index']
+
+    table = table.transpose()
+    
+    d.output_table_in_docx(table)
+    
+    
+def graf(table, heading):
+    """
+    Вывод графика. Исключительно для краткости записи
+    
+    """
+    pass
+
+
+
+    
+    
+#------------------------------------------------------------------------------
+def main(data, nt_:int=None, np_:int=None, nr_:int=None, nf_:int=None):
+    
+    
+    # Начальный номер таблиц
+    nt = numerator()
+    if isinstance(nt_, type(None)):
+        nt = numerator(number = 0, prefix = "Таблица ", suffix=" - ")
+    else:
+        nt = numerator(number = nt_, prefix = "Таблица ", suffix=" - ")
+    
+    # Начальный номер параграфов
+    if isinstance(np_, type(None)):
+        np = numerator(number = 0, prefix = "", suffix=". ")
+    else:
+        np = numerator(number = np_, prefix = "", suffix=". ")
+        
+        
+    # Начальный номер рисунков
+    if isinstance(nr_, type(None)):
+        nr = numerator(number = 0, prefix = "Рисунок ", suffix=" - ")
+    else:
+        nr = numerator(number = nr_, prefix = "Рисунок ", suffix=" - ")
+        
+    # Начальный номер формулы
+    nf = numerator()
+    if isinstance(nf_, type(None)):
+        nf = numerator(number = 0, prefix = "(", suffix=")")
+    else:
+        nf = numerator(number = nf_, prefix = "(", suffix=")") 
+        
+    # Печать в текстовый файл MS Word
+    #--------------------------------------------------------------------------
+    complexity_norm = data["complexity_norm"]
+    annual_output_volume = data["annual_output_volume"]
+    calculated_data = data["calculated_data"]
+    fund_of_working = data["fund_of_working"]
+    kp = data["kp"]
+    
+    #--------------------------------------------------------------------------
+    text(np() + "Расчёт необходимого количества оборудования и его загрузки")
+    text("")
+    text("Исходные данные:")
+    text(f"Трудоемкость изготовления 1 тонны изделия − {complexity_norm} нормо-часа.")
+    text(f"Годовой объем выпуска продукции – {annual_output_volume} шт.")
+    text("Трудоемкость производственной программы по операциям определяется по формуле:")
+    nform('Т_ОП = t_g * N * П_ОП,', nf())
+    var('где t_g –  трудоёмкость детале-операции, ч.;', 't_g')
+    var(f't_g = {complexity_norm} н-ч.;', 't_g')
+    text("N – годовой объём выпуска;")
+    text(f"N = {annual_output_volume} шт.;")
+    var('П_ОП – процентное содержание операции, %.', 'П_ОП')
+    text("")
+    
+    text(nt() + "Наименование операций")
+    table = calculated_data[["namber", "name", "per", "comp_op",]]
+    heading = ["№ операции", 
+                "Наименование операции", 
+                "Доля от общей трудоемкости", 
+                "T_штi, н-ч"]
+    tab(table, heading)
+    
+    text('Расчётное количество станков на каждой операции ([1]):')
+    nform('С_Р = t_g_i/(F_g * K_V * K_P),', nf())
+    var('где t_g_i – трудоемкость i-той операций, ч.;', 't_g_i')
+    var('F_g – действительный фонд времени работы одного станка, ч;', 'F_g') 
+    var(f'F_g = {fund_of_working} ч. − при двухсменном режиме работы;', 'F_g') 
+    var('K_V − коэффициент выполнения норм, принимается ориентировочно 1,1... 1,25; для станков с ЧПУ его следует принимать равным 1;', 'K_V')
+    var('K_P – коэффициент прогрессивности технологии проектируемого цеха;', 'K_P') 
+    var(f'K_P = {kp}.', 'K_P')
+    text('Расчётное количество оборудования округляем до целого.')
+    
+    for index in list(calculated_data.index):   
+        if isinstance(index, int):
+            row = calculated_data.loc[index]
+            namber = str(row["namber"])
+            name = str(row["name"])
+            tg = str(row["comp_op"])
+            kv = str(row["kv"])
+            cp = str(row["num_of_mach"])
+            cpr = str(int(row["accepted_num_of_mach"]))
+            form(f'С_(Р {namber} {name}) = {tg}/({fund_of_working} * {kv} * {kp}) = {cp},')
+            var(f'принимаем С_(ПР {namber} {name}) = {cpr}', f'С_(ПР {namber} {name})')
+     
+    text('Коэффициент загрузки:')
+    nform('К_З = С_Р/С_ПРР,', nf())
+    var('где С_Р − расчётное количество станков;', 'С_Р')
+    var('С_ПР − принятое количество станков.', 'С_ПР')
+    for index in list(calculated_data.index):   
+        if isinstance(index, int):
+            row = calculated_data.loc[index]
+            cp = str(row["num_of_mach"])
+            cpr = str(int(row["accepted_num_of_mach"]))
+            load_factor = str(row["load_factor"])
+            namber = str(row["namber"])
+            name = str(row["name"])
+            form(f'К_(З {namber} {name}) = {cp}/{cpr} = {load_factor},')
+    
+    text('Средний коэффициент загрузки для всего станочного парка:')
+    nform(f'К_(З СР) = (СУМ С_Р)/(СУМ С_ПР),', nf())
+    a = "("
+    b = "("
+    
+    col = list(calculated_data.index)
+    col.remove("total")
+    col.pop(-1)
+    for index in list(calculated_data.index):
+        row = calculated_data.loc[index]
+        if isinstance(index, int):
+            cp = str(row["num_of_mach"])
+            cpr = str(int(row["accepted_num_of_mach"]))
+            if index in col: 
+                a = a + f"{cp} + "
+                b = b + f"{cpr} + "
+            else:
+                a = a + f"{cp})"
+                b = b + f"{cpr})"
+        else:
+            total_load_factor = str(row["load_factor"])
+    form(f'К_(З СР) = {a}/{b} = {total_load_factor}.')
+    nam = nt()
+    text(f'Значения коэффициентов загрузки каждого станка, а также средний коэффициент загрузки заносим в таблицу {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text("")
+    
+    text(nam + 'Необходимое количество станков и их загрузка')
+    # Выбираем нужные данные из общей таблицы и готовим к выводу
+    table = calculated_data[["namber", 
+                              "name", 
+                              "num_of_mach", 
+                              "accepted_num_of_mach",
+                              "load_factor",]].copy()
+    names = list(map(lambda x, y: str(x) + " " + str(y), 
+                              table["namber"], 
+                              table["name"],
+                              ))
+    del table["namber"]
+    del table["name"]
+    table["names"] = names
+    table = table.reindex(columns=['names','num_of_mach','accepted_num_of_mach','load_factor'])
+    table.loc["total","load_factor"] = total_load_factor
+    heading = ["№ и наименование операции", 
+                "Расчетное количество станков, ед", 
+                "Принятое количество станков, ед", 
+                "Коэффициент загрузки"]
+    tab(table, heading)
+    text("")
+    
+    nam = nr()
+    text(f'График загрузки оборудования представлен на графике {nam.replace("Рисунок ", "").replace(" - ", "")}.')
+    # graf(table)
+    text("")
+    
+    text(nam + 'График загрузки оборудования')
+    text("")
+    
+    text('Для централизованной переточки режущего инструмента в цехе организовывается заточное отделение. Основным оборудованием являются заточные станки:')
+    K = str(data["K_c_zat"] * 100) + "%"
+    nform(f'С_зат = {K} * С_О', nf())
+    var('где С_О − число станков основного производства.', 'С_О')
+    form(f'С_ЗАТ = {K} * {int(calculated_data["accepted_num_of_mach"]["total"])} = {data["K_c_zat"]}.')
+    var(f'принимаем С_(ПР ЗАТ) = {int(data["accepted_C_zat"])}', 'С_(ПР ЗАТ)')
+     
+    text('В состав цеха кроме заточного отделения может входить и ремонтное отделение. Количество станков ремонтного отделения можно принимать от числа обслуживаемых станков:')
+    K = str(data["K_c_rem"] * 100) + "%"
+    nform(f'С_рем = {K} * С_О', nf())
+    var('где С_О − число станков основного производства.', 'С_О')
+    form(f'С_рем = {K} * {int(calculated_data["accepted_num_of_mach"]["total"])} = {data["K_c_rem"]}.')
+    var(f'принимаем С_(ПР РЕМ) = {int(data["accepted_C_rem"])}', 'С_(ПР РЕМ)')
+    
+    text('Общее количество станков цеха:')
+    nform('С_ОБЩ = С_О + С_(ПР ЗАТ) + С_(ПР РЕМ)', nf())
+    form(f'С_ОБЩ = {int(calculated_data["accepted_num_of_mach"]["total"])} + {int(data["accepted_C_zat"])} + {int(data["accepted_C_rem"])} = {int(data["C_ob"])}')
+    
+    nam = nt()
+    text(f'Для определения общей стоимости всех станков цеха необходимо составить сводную ведомость. Данные по принятому оборудованию и определение его полной стоимости производится в таблице {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text(nam + 'Необходимое количество станков и их загрузка')
+    table = calculated_data[["namber", 
+                              "name", 
+                              "machine", 
+                              "accepted_num_of_mach",
+                              "gabarit",]].copy()
+    names = list(map(lambda x, y: str(x) + " " + str(y), 
+                              table["namber"], 
+                              table["name"],
+                              ))
+    del table["namber"]
+    del table["name"]
+    table["names"] = names
+    table = table.reindex(columns=['names','machine','accepted_num_of_mach','gabarit'])
+    heading = ["№ и наименование операции", 
+                "Наименование станков", 
+                "Количество, шт.", 
+                "Габаритные размеры, мм"]
+    tab(table, heading)
+    text("")
+    
+    #--------------------------------------------------------------------------
+    text(np() + "Расчет численности работающих")
+    text("")
+    text('Общее количество участвующих в работе проектируемого цеха составляют:')
+    text('– производственные рабочие, главным образом станочники;')
+    text('– вспомогательные рабочие;')
+    text('– младший обслуживающий персонал (МОП);')
+    text('–  служащие, инженерно-технические рабочие (ИТР) и счетно-конторский персонал (СКП).')
+    text('Расчет численности  производственных рабочих:')
+    
+    nform('Р_СТ = (F_g * С_ПР * k_З)/(F_ДР * K_М),', nf())
+    var('где Р_СТ количество рабочих-станочников, чел.;', 'Р_СТ')
+    var('F_g – действительный фонд времени работы одного станка, ч;', 'F_g') 
+    var(f'F_g = {data["fund_of_working"]} ч. − при двухсменном режиме работы;', 'F_g') 
+    var('С_ПР – принятое количество станков, ед.;', 'С_ПР') 
+    var('k_З – коэффициент загрузки станков;', 'k_З')
+    var('F_ДР – действительный годовой фонд времени рабочего, ч.;', 'F_ДР') 
+    var(f'F_ДР = {data["fund_of_worker"]} ч.', 'F_ДР') 
+    var('K_М – коэффициент многостаночности: ', 'K_М') 
+    var('K_М = 1 – для универсальных токарных, сверлильных, фрезерных, круглошлифовальных, станков непрерывного действия и др.;', 'K_М') 
+    var('K_М = 1,5 – для токарных многорезцовых станков, токарных полуавтоматов.', 'K_М') 
+    
+    col = list(calculated_data.index)
+    col.remove("total")
+    col.pop(-1)
+    txt = 'Р_СТ = '
+    for index in list(calculated_data.index):
+        row = calculated_data.loc[index]
+        if isinstance(index, int):
+            cpr = str(int(row["accepted_num_of_mach"]))
+            load_factor = str(row["load_factor"])
+            km = str(row["km"]) 
+            num_operators = str(row["num_operators"]) 
+            accepted_num_operators = str(int(row["accepted_num_operators"]))
+            namber = str(row["namber"])
+            name = str(row["name"])
+            form(f'Р_(СТ {namber} {name}) = ({data["fund_of_working"]}*{cpr}*{load_factor})/({data["fund_of_worker"]}*{km}) = {num_operators},')
+            var(f'принимаем P_(ПР СТ {namber} {name}) = {accepted_num_operators}', f'P_(ПР СТ {namber} {name})')
+            if index in col:
+                txt = txt + accepted_num_operators + " + "
+            else:
+                txt = txt + accepted_num_operators + f" = {int(calculated_data.loc['total']['accepted_num_operators'])} чел."
+    text('Общая численность основных рабочих:')
+    form(txt)
+    
+    nam = nt()
+    text(f'Расчет численности производственных рабочих представлен в таблице {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text('')
+    text(nam + 'Состав основных производственных рабочих цеха')
+    
+    col = []
+    for i in range(len(calculated_data.columns)):
+        if calculated_data.columns[i].find("digit") != -1:
+            col.append(calculated_data.columns[i])
+    
+    table = calculated_data[["namber", "name", "professions", "num_operators", "accepted_num_operators"]]
+    heading = ["№ операции", 
+                "Наименование операции", 
+                "Профессия", 
+                "Расчетное количество рабочих", 
+                "Принятое количество рабочих"]
+    tab(table, heading)
+    text('')
+    
+    nam = nt()
+    text(f'Распределение рабочих по квалификациям и разрядам представлено в таблице {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text('')
+    text(nam + 'Сводная ведомость состава производственных рабочих цеха')
+    col = []
+    for i in range(len(calculated_data.columns)):
+        if calculated_data.columns[i].find("digit") != -1:
+            col.append(calculated_data.columns[i])
+    
+    table = calculated_data[["namber", "name", "professions", "accepted_num_operators"] + col]
+    heading = ["№ операции", 
+                "Наименование операции", 
+                "Профессия", 
+                "Количество рабочих"]
+    for i in range(len(col)):
+        heading = heading + [str(i + 1)]
+    tab(table, heading)
+        
+    text('Для выполнения вспомогательных работ в цехе в состав рабочего персонала включаются вспомогательные рабочие. К ним относятся наладчики станков, раздатчики инструмента, кладовщики, шорники, смазчики, контролеры, крановщики, слесаря по ремонту оборудования, электромонтеры, транспортные и другие подсобные рабочие.')
+    text('Количество вспомогательных рабочих определяется в процентном отношении от количества производственных рабочих.')
+    nform('ЧР_ВСП = 25% * ЧР_ПР,', nf())
+    form(f'ЧР_ВСП = 25% * {int(calculated_data["accepted_num_operators"]["total"])} = {int(data["num_auxiliary_workers"])}.')
+    
+    text('Общее количество рабочих в цехе:')
+    nform('ЧР_ОБЩ = ЧР_ПР + ЧР_ВСП,', nf())
+    form(f'ЧР_ОБЩ = {int(calculated_data["accepted_num_operators"]["total"])} + {int(data["num_auxiliary_workers"])} = {int(data["workers"])}.')
+    
+    nam = nt()
+    text(f'Распределение вспомогательных рабочих по квалификациям и разрядам представлено в таблице {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text('')
+    text(nam + 'Сводная ведомость состава вспомогательных рабочих цеха')
+    table = data["table_auxiliary_workers"]
+    
+    col = []
+    for i in range(len(table.columns)):
+        if table.columns[i].find("digit") != -1:
+            col.append(table.columns[i])
+            
+    table = table.reindex(columns=(['professions','num_auxiliary_workers'] + col))        
+    heading = ["Профессия", 
+                "Количество вспомогательных рабочих",]
+    for i in range(len(col)):
+        heading = heading + [str(i + 1)]
+    tab(table, heading)
+    text('')
+    
+    text('Расчет численности младшего обслуживающего персонала (МОП).')
+    text('К МОП относятся уборщики цеховых и бытовых помещений:')
+    nform('ЧР_МОП = (2 - 3)% * ЧР_ОБЩ,', nf())
+    form(f'ЧР_МОП = 0,025 * {int(calculated_data["accepted_num_operators"]["total"])} = {data["P_MOP"]} чел.,')
+    var(f'принимаем ЧР_(ПР МОП) = {int(data["P_MOP_accept"])} чел.', 'ЧР_(ПР МОП)')
+   
+    text('Расчет численности служащих, инженерно-технических рабочих (ИТР) и счетно-конторского персонала (СКП).')
+    nform('ЧР_СКП = 15% * ЧР_ОБЩ,', nf())
+    form(f'ЧР_СКП = 0,15% * {int(calculated_data["accepted_num_operators"]["total"])} = {data["P_SKP"]} чел.,')
+    var(f'принимаем ЧР_(ПР СКП) = {int(data["P_SKP_accept"])} чел.', 'ЧР_(ПР СКП)')
+    
+    nform('ЧР_ИТР = 12 * ЧР_ОБЩ,', nf())
+    form(f'ЧР_ИТР = 0,12 * {int(calculated_data["accepted_num_operators"]["total"])} = {data["P_ITR"]} чел.,')
+    var(f'принимаем ЧР_(ПР ИТР) = {int(data["P_ITR_accept"])} чел.', 'ЧР_(ПР ИТР)')
+    
+    nform('ЧР_МОП = ЧР_(ПР СКП) - ЧР_(ПР ИТР),', nf())
+    form(f'ЧР_МОП = {int(data["P_SKP_accept"])} - {int(data["P_ITR_accept"])} = {int(data["P_MOP_accept"])},')
+    
+    nam = nt()
+    text(f'Полученные данные сведем в таблицу {nam.replace("Таблица ", "").replace(" - ", "")}.')
+    text('')
+    text(nam + 'Сводная ведомость общего состава работающих в цехе')
+    table = data["people"]
+    heading = ["Категория рабочих", 
+                "Количество рабочих",
+                "В % от основного количества рабочих",
+                "В % от общего количества работающих в цехе",]
+    tab(table, heading)
+    
+    #--------------------------------------------------------------------------
+    text(np() + "Расчёт площади участка")
+    text("")
+    text("Определение размеров площади станочного отделения ([2]).")
+    text("Площадь станочного отделения рассчитывается по формуле:")
+    
+    nform('S_СП = (a x b + 10)*C_ПР,', nf())
+    text('где a,b - габаритные размеры оборудования, м.;')
+    text('10 – место на проходы;')
+    var('С_ПР - принятое количество оборудования.', 'С_ПР') 
+    
+    tot = "S_(УД СТ) = "
+    int_ind = [x for x in calculated_data.index if isinstance(x, (int, float))]
+    int_ind_tot = int_ind.copy()
+    del int_ind_tot[-1]
+    for index in int_ind:
+        row = calculated_data.loc[index]
+        if isinstance(index, int):
+            L = str(row["L"])
+            B = str(row["B"])
+            accepted_num_of_mach = str(int(row["accepted_num_of_mach"]))
+            S_CP = str(row["S_CP"]) 
+            namber = str(row["namber"])
+            name = str(row["name"])
+            form(f'S_({namber} {name}) = ({L} * {B} + 10) * {accepted_num_of_mach} = {S_CP}  м^2;')
+            if index in int_ind_tot:
+                tot = tot + f"{S_CP} + "
+            else:
+                tot = tot + f"{S_CP} = "
+            
+    text('Суммарную площадь станочного отделения рассчитываем по формуле:') 
+    nform('S_(УД СТ) = СУМ S_СТ,', nf())
+    var('где S_(УД СТ) - суммарная площадь станочного отделения.', 'S_(УД СТ)')
+    tot = tot + f'{round_off_result(calculated_data["S_CP"]["total"])} м^2'
+    form(tot)
+    
+    text('При написании данного раздела были использованы источники [3]')
+    
+    #--------------------------------------------------------------------------
+    text(np() + "Корректировка компоновки технологического оборудования дополнительными площадями")
+    text("")
+    
+    text("Дополнительная площадь цеха складывается из ([3]):")
+    text("а) инструментально-раздаточная кладовая")
+    
+    text("Площадь склада инструмента:")
+    nform('S_(С.И.) = S_УД * C_ОБЩ,', nf())
+    var('S_УД – удельная площадь склада инструмента на 1 станок, в зависимостиот вида производства при работе в 2 смены, ;', 'S_УД')
+    var(f'S_УД = {data["S_ud_si"]} м^2;', 'S_УД')
+    var('C_ОБЩ –  общее количество оборудования проектируемого участка.', 'C_ОБЩ')
+    form(f'S_(С.И.) = {data["S_ud_si"]} * {data["C_ob"]} = {data["S_si"]} м^2')
+    
+    text("Площадь склада приспособлений")
+    nform('S_(С.П.) = S_УД * C_ОБЩ,', nf())
+    var('S_УД – удельная площадь склада приспособлений на 1 станок;', 'S_УД')
+    var(f'S_УД = {data["S_ud_sp"]} м^2;', 'S_УД')
+    form(f'S_(С.П.) = {data["S_ud_sp"]} * {data["C_ob"]} = {data["S_sp"]} м^2')
+    
+    text("Общая площадь инструментально-раздаточной кладовой:")
+    nform('S_ИРК = S_(С.И.) + S_(С.П.),', nf())
+    form(f'S_ИРК = {data["S_si"]} + {data["S_sp"]} = {data["S_irk"]} м^2')
+    
+    text("б) склады материалов и заготовок, межоперационных, готовых деталей")
+    var('Общая площадь промежуточных складов S_(С.К.П.) составляет 30 % от площади станочного отделения:', 'S_(С.К.П.)')
+    nform(f'S_(С.К.П.) = {data["K_s_skp"]} * S_(УД СТ),', nf())
+    form(f'S_(С.К.П.) = {data["K_s_skp"]} * {round_off_result(calculated_data["S_CP"]["total"])} = {data["S_skp"]} м^2')
+    
+    text("в) площадь контрольного отделения:")
+    nform(f'S_КОНТР = {data["K_s_kontr"]} * S_(УД СТ),', nf())
+    form(f'S_КОНТР = {data["K_s_kontr"]} * {data["S_ud_san"]} = {data["S_san"]} м^2')
+    
+    text(f"На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по {data['S_ud_san']} м^2 каждый.")
+    form(f'S_САН = {data["N_san"]} * {round_off_result(calculated_data["S_CP"]["total"])} = {data["S_kontr"]} м^2')
+    
+    text("Размер дополнительной площади цеха составляет:")
+    nform('S_ДОП = S_КОНТР + S_САН,', nf())
+    form(f'S_ДОП = {data["S_kontr"]} + {data["S_san"]} = {data["S_dop"]}')
+    
+    text("Размер общей площади цеха")
+    nform('S_Ц = S_(УД СТ) + S_ИРК + S_(С.К.П.) + S_ДОП,', nf())
+    form(f'S_Ц = {round_off_result(calculated_data["S_CP"]["total"])} + {data["S_irk"]} + {data["S_skp"]} + {data["S_dop"]} = {data["S_workshop"]} м^2.')
+    
+    text("Общие размеры и площади цеха определяют на основе планирования оборудования и всех помещений участка.")
+    text("Размеры пролета принимают в зависимости от рода машиностроения ихарактера выполняемых работ.")
+    text(f'Принимаем ширину пролета цеха l = {data["workshop_span"]} м, число пролетов − {data["workshop_nam"]}.')
+    text("Длина пролета участка определяется суммой размеров производственных и вспомогательных отделений, последовательно расположенных вдоль пролета, проходов и других цехов участка. Основным размером, определяющим длину пролета, является длина технологической линии станков, расположенных вдоль пролета. ")
+    
+    text("Длина пролёта:")
+    nform('L = (S_Ц)/(l),', nf())
+    text("где L – длина пролета;")
+    var('S_Ц – общая площадь участка;', 'S_Ц')
+    text("l – суммарная ширина пролетов")
+    form(f'L =({data["S_workshop"]})/({data["workshop_span"] * data["workshop_nam"]}) = {data["L_workshop_span"]} м,')
+    
+    # text(f'Общая длина цеха должна быть кратна величине шага колон, т.е. 12 или 6м. Окончательно принимаем длину цеха L = {data["L_accept_workshop_span"]} м.')
+    # text("Высота пролёта определяется исходя из размеров изготавливаемых изделий, габаритных размеров оборудования (по высоте), размеров и конструкции мостовых кранов, а также санитарно-гигиенических требований.")
+    # text("В зданиях с мостовыми кранами высоту помещений следует принимать независимо от грузоподъёмности кранов.")
+    # var(f'При l = {data["workshop_span"] * data["workshop_nam"]} м, h_np = 16,5 м; ', 'h_np')
+    
+    # text("Фактическую площадь здания участка можно рассчитать по формуле:")
+    # nform('S_(Ф.Ц.) = L / l,', nf())
+    # var("где S_(Ф.Ц.) – фактическая площадь здания участка", "S_(Ф.Ц.)")
+    # form('S_(Ф.Ц.) = ({data["L_accept_workshop_span"]})/({data["workshop_span"] * data["workshop_nam"]}) = {data["S_workshop_f"]} м')
+    
+    # text("Объем здания будет рассчитывается по формуле:")
+    # nform('V_ЗД = S_(Ф.Ц.) * h_ПР,', nf())
+    # var("где V_ЗД – объем здания,", "V_ЗД")
+    # var("h_ПР – высота пролета.", "h_ПР")
+    # form('V_ЗД = {data["S_workshop_f"]} * 16,5 = ,', nf())
+
+    
+    #--------------------------------------------------------------------------
+    d.close_a_docx_document()
+    
+    result = True
+    
+    return result
