@@ -1,73 +1,94 @@
-#------------------------------------------------------------------------------
-# Name:        main                                                          
-# Purpose:     Главный модуль программы
-#              
-# Author:      ANKorenuk                                                        
-#                                                                               
-# Created:     07.11.2021                                                       
-# Copyright:   (c) ANKorenuk 2021                                               
-# Licence:     <your licence>                                                   
-#------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------------------------
-from inputdata.initial_data import main as initial_data
-from processing.calculation import main as processing_data
-from output.textfile.to_text_file import main as to_text_file
-#------------------------------------------------------------------------------
-def input_initial_data():
-    # Ввод начальных данных
-    # 1) годовой объем выпуска продукции в штуках
-    # 2) Датафрейм техпроцесса (с наименованиями и последовательностью операций 
-    # и штучным временем для каждой)
-    
-    input_result = initial_data()
-
-    return input_result
+# ---------------------------------------------------------------------------------------------------------------------
+import os
+from decimal import Decimal
+from domain.entities.workshop import Workshop
+from domain.entities.equipment import Equipment
+from domain.entities.worker import Worker
+from domain.entities.operation import Operation
+from domain.entities.process import Process
+from infrastructure.input.excel_reader import ExcelReader
+from infrastructure.output.text_report import TextReportGenerator
+from domain.services.workshop_calculator import WorkshopCalculator
+from inputdata.create_initial_data import create_initial_data
 
 
-def processing(data):
-    # Обработка данных: Расчет количества оборудования, загрузки, рабочих и площадей
+def create_workshop_from_data(parameters_data: dict, worker_data: list, process_data: list) -> Workshop:
+    """
+    Создает объект цеха из входных данных.
+    """
+    # Создаем список рабочих
+    workers_list = []
+    for wr_data in worker_data:
+        worker = Worker(
+            name=wr_data['name'],
+            position=wr_data['position'],
+            qualification=int(wr_data['qualification']),
+            hourly_rate=Decimal(str(wr_data['hourly_rate']))
+        )
+        workers_list.append(worker)
     
-    processing_result = processing_data(data)
+    # Создаем список операций
+    operations = []
+    for op_data in process_data:
+        equipment = Equipment(
+            model=op_data['machine'],
+        )
+        operation = Operation(
+            number=op_data['number'],
+            name=op_data['name'],
+            time=Decimal(str(op_data['time'])),
+            equipment=equipment
+        )
+        operations.append(operation)
+    
+    # Создаем технологический процесс
+    process = Process(operations=operations)
+    
+    # Создаем цех
+    workshop = Workshop(
+        name=parameters_data['name'],
+        total_area=Decimal('0'),  # Будет рассчитано позже
+        production_volume=int(parameters_data['production_volume']),
+        workers_list=workers_list,
+        mass_detail=Decimal(str(parameters_data['mass_detail'])),
+        process=process
+    )
+    
+    # Рассчитываем требуемую площадь
+    required_area = workshop.calculate_required_area()
+    workshop.total_area = required_area
+    
+    return workshop
 
-    return processing_result
-    
 
-def output_to_textfile(data):
-    # Печать в текстовый файл 
-    
-    is_output_to_file_successful = to_text_file(data)
-    
-    return is_output_to_file_successful
-    
-
-def output_to_kompas(data):
-    # Построение планировки цеха в программе КОМПАС 3D 
-    
-    print ("Модуль вывода в КОМПАС-3D не реализован.")
-    
-    return False    
-
-
-#------------------------------------------------------------------------------
 def main():
-    
-    initial_data = input_initial_data()
-    
-    result = processing(initial_data)
-    
-    if output_to_textfile(result):
-        print ("Вывод в текстовый файл успешно завершен ->")
+    # Проверяем существование файла с начальными данными
+    initial_data_file = 'inputdata/initial_data.xlsx'
+    if not os.path.exists(initial_data_file):
+        print("Файл с начальными данными не найден. Создаем новый файл...")
+        create_initial_data()
+        print("Файл с начальными данными успешно создан.")
+
+    # Чтение данных
+    reader = ExcelReader(initial_data_file)
+    parameters_data = reader.read_parameters_data()
+    worker_data = reader.read_worker_data()
+    process_data = reader.read_process_data()
+
+    # Создание объекта цеха
+    workshop = create_workshop_from_data(parameters_data, worker_data, process_data)
+
+    # Генерация и сохранение отчета
+    report_generator = TextReportGenerator()
+    report = report_generator.generate_report(workshop)
+
+    if report_generator.save_report(report, 'output/report.txt'):
+        print("Отчет успешно сгенерирован и сохранен в output/report.txt")
     else:
-        print ("Вывод в текстовый файл не выполнен ->")
-        
-    # if output_to_kompas(result):
-    #     print ("Вывод в файл КОМПАС-3D успешно завершен ->")
-    # else:
-    #     print ("Вывод в файл КОМПАС-3D не выполнен ->")
+        print("Ошибка при сохранении отчета")
 
 
-#------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
