@@ -18,18 +18,6 @@ class Process:
     operations: List[Operation]  # Список операций
     total_time: Decimal = Decimal('0')
 
-    def get_operations_by_machine(self, machine: str) -> List[Operation]:
-        """
-        Возвращает список операций, выполняемых на указанном станке.
-        """
-        return [op for op in self.operations if op.equipment == machine]
-
-    def get_operations_by_type(self, operation_type: str) -> List[Operation]:
-        """
-        Возвращает список операций указанного типа.
-        """
-        return [op for op in self.operations if operation_type in op.name]
-    
     def calculate_required_machines(self,
                                     production_volume: int,
                                     fund_of_working: int = int(get_setting('fund_of_working')),
@@ -87,7 +75,7 @@ class Process:
     @property
     def calculated_machines_count(self) -> Decimal:
         """
-        Общее количество станков.
+        Общее расчетное количество станков.
         """
         return sum(op.calculated_machines_count for op in self.operations)
     

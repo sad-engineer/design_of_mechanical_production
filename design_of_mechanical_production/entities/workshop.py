@@ -12,6 +12,7 @@ from design_of_mechanical_production.entities.workshop_zone import (
     MachineInfo,
     SpecificWorkshopZone
 )
+from design_of_mechanical_production.entities.equipment_factory import EquipmentFactory
 from design_of_mechanical_production.settings import get_setting
 
 
@@ -21,7 +22,6 @@ class Workshop:
     Класс, представляющий машиностроительный цех.
     """
     name: str
-
     production_volume: int
     mass_detail: Decimal
     process: Process
@@ -30,6 +30,12 @@ class Workshop:
     total_area: Decimal = Decimal("0")
     required_area: Decimal = Decimal("0")
     length: Decimal = Decimal("0")
+
+    def __post_init__(self):
+        """
+        Инициализирует фабрику оборудования после создания объекта.
+        """
+        self.equipment_factory = EquipmentFactory()
 
     @property
     def total_machines_count(self) -> int:
@@ -87,7 +93,7 @@ class Workshop:
             name='Заточное отделение',
             machines={
                 "Станок универсально-заточной 3В642": MachineInfo(
-                    model=Equipment(model="3В642"),
+                    model=self.equipment_factory.create_equipment("3В642"),
                     calculated_count=self.zones['main_zone'].total_machines_count * grinding_zone_percent
                 )
             },

@@ -6,9 +6,9 @@ from typing import List
 from decimal import Decimal
 
 from design_of_mechanical_production.entities.workshop import Workshop
-from design_of_mechanical_production.entities.equipment import Equipment
 from design_of_mechanical_production.entities.operation import Operation
 from design_of_mechanical_production.entities.process import Process
+from design_of_mechanical_production.entities.equipment_factory import EquipmentFactory
 from design_of_mechanical_production.inputdata.excel_reader import ExcelReader
 from design_of_mechanical_production.output.text_report import TextReportGenerator
 from inputdata.create_initial_data import create_initial_data
@@ -18,12 +18,13 @@ def create_workshop_from_data(parameters_data: dict, process_data: List[dict]) -
     """
     Создает объект цеха из входных данных.
     """
+    # Создаем фабрику оборудования
+    equipment_factory = EquipmentFactory()
+    
     # Создаем список операций
     operations = []
     for op_data in process_data:
-        equipment = Equipment(
-            model=op_data['machine'],
-        )
+        equipment = equipment_factory.create_equipment(op_data['machine'])
         operation = Operation(
             number=op_data['number'],
             name=op_data['name'],
