@@ -20,6 +20,7 @@ class Operation:
     calculated_machines_count: Decimal = Decimal('0')   # Расчетное количество станков
     accepted_machines_count: int = 0                    # Принятое количество станков (округленное вверх)
     load_factor: Decimal = Decimal('0')                 # Коэффициент загрузки станков
+    percentage: Decimal = Decimal('0')                  # Доля от общей трудоемкости
     
     def accept_machines_count(self) -> None:
         """

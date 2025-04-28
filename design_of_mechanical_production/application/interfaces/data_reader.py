@@ -18,20 +18,6 @@ class DataReader(ABC):
         pass
     
     @abstractmethod
-    def read_equipment_data(self) -> Dict[str, Any]:
-        """
-        Читает данные об оборудовании.
-        """
-        pass
-    
-    @abstractmethod
-    def read_worker_data(self) -> Dict[str, Any]:
-        """
-        Читает данные о рабочих.
-        """
-        pass
-    
-    @abstractmethod
     def read_process_data(self) -> Dict[str, Any]:
         """
         Читает данные о технологическом процессе.

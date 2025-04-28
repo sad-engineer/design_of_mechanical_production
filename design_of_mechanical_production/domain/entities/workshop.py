@@ -6,7 +6,6 @@ from typing import List, Dict
 from decimal import Decimal
 
 from design_of_mechanical_production.domain.entities.equipment import Equipment
-from design_of_mechanical_production.domain.entities.worker import Worker
 from design_of_mechanical_production.domain.entities.process import Process
 from design_of_mechanical_production.domain.entities.workshop_zone import (
     WorkshopZone,
@@ -22,13 +21,15 @@ class Workshop:
     Класс, представляющий машиностроительный цех.
     """
     name: str
-    total_area: Decimal
+
     production_volume: int
-    workers_list: List[Worker]
     mass_detail: Decimal
     process: Process
     equipment_list: List[Equipment] = field(default_factory=list)
     zones: Dict[str, WorkshopZone] = field(default_factory=dict)  # Словарь зон цеха
+    total_area: Decimal = Decimal("0")
+    required_area: Decimal = Decimal("0")
+    length: Decimal = Decimal("0")
 
     @property
     def total_machines_count(self) -> int:
@@ -37,18 +38,36 @@ class Workshop:
         """
         total_count = 0
         for name, zone in self.zones.items():
-            total_count += zone.total_machines_count
+            if hasattr(zone, 'total_machines_count'):
+                total_count += zone.total_machines_count
         return total_count
 
-    def calculate_required_area(self) -> Decimal:
+    def calculate_total_area(self) -> Decimal:
         """
-        Рассчитывает требуемую площадь цеха с учетом проходов и проездов.
+        Рассчитывает общую площадь цеха.
+        Итоговая площадь рассчитывается как (ширина пролета * количество пролетов) * длину пролета
+        Длина пролета рассчитывается как required_area / (ширина пролета * количество пролетов)
+        Общая площадь округляется в большую сторону до числа, кратного 6
         """
-        equipment_area = self.calculate_total_equipment_area()
-        area_coefficient = Decimal(str(get_setting('area_coefficient', '1.7')))
-        return equipment_area * area_coefficient
+        # Получаем настройки из конфигурации
+        width_span = Decimal(str(get_setting('workshop_span')))
+        number_spans = Decimal(str(get_setting('workshop_nam')))
+        
+        # Рассчитываем длину пролета
+        self.length = self.required_area / (width_span * number_spans)
 
-    def calculate_total_equipment_area(self) -> Decimal:
+        # Рассчитываем общую площадь
+        total_area = width_span * number_spans * self.length
+        
+        # Округляем до ближайшего большего числа, кратного 6
+        remainder = total_area % 6
+        if remainder != 0:
+            total_area = total_area + (6 - remainder)
+        
+        self.total_area = total_area
+        return self.total_area
+
+    def calculate_required_area(self) -> Decimal:
         """
         Рассчитывает общую площадь, занимаемую оборудованием.
         """
@@ -131,44 +150,31 @@ class Workshop:
             total_equipment_count=2 
         )
         self.zones['sanitary_zone'] = sanitary_zone
-        
-
-
 
         # Суммируем площади с учетом количества станков
-        total_area = main_zone.area
-        total_area += tool_storage_zone.area
-        total_area += equipment_warehouse_zone.area 
-        total_area += work_piece_storage_zone.area
-        total_area += control_department_zone.area
-        total_area += sanitary_zone.area
+        total_required_area = main_zone.area
+        total_required_area += tool_storage_zone.area
+        total_required_area += equipment_warehouse_zone.area
+        total_required_area += work_piece_storage_zone.area
+        total_required_area += control_department_zone.area
+        total_required_area += sanitary_zone.area
 
-        return total_area
+        self.required_area = total_required_area
+
+        return total_required_area
 
     def add_equipment(self, equipment: Equipment) -> None:
         """
         Добавляет оборудование в цех.
         """
         self.equipment_list.append(equipment)
-    
-    def add_worker(self, worker: Worker) -> None:
-        """
-        Добавляет рабочего в цех.
-        """
-        self.workers_list.append(worker)
-    
+
     def get_equipment_count(self) -> Dict[str, Decimal]:
         """
         Возвращает необходимое количество оборудования по каждому типу станков.
         """
         return self.process.calculate_required_machines(self.production_volume)
-    
-    def get_workers_count(self) -> int:
-        """
-        Возвращает количество рабочих в цехе.
-        """
-        return len(self.workers_list)
-    
+
     def get_equipment_details(self) -> List[dict]:
         """
         Возвращает детальную информацию об оборудовании с учетом необходимого количества.

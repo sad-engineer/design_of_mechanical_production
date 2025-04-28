@@ -10,3 +10,5 @@ specific_areas:
   sanitary_zone: 8
   tool_storage: 0.3
   work_piece_storage: 0.3
+workshop_nam: 3
+workshop_span: 12

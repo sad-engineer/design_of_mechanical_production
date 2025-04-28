@@ -2,33 +2,22 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 import os
+from typing import List
 from decimal import Decimal
+
 from domain.entities.workshop import Workshop
 from domain.entities.equipment import Equipment
-from domain.entities.worker import Worker
 from domain.entities.operation import Operation
 from domain.entities.process import Process
 from infrastructure.input.excel_reader import ExcelReader
 from infrastructure.output.text_report import TextReportGenerator
-from domain.services.workshop_calculator import WorkshopCalculator
 from inputdata.create_initial_data import create_initial_data
 
 
-def create_workshop_from_data(parameters_data: dict, worker_data: list, process_data: list) -> Workshop:
+def create_workshop_from_data(parameters_data: dict, process_data: List[dict]) -> Workshop:
     """
     Создает объект цеха из входных данных.
     """
-    # Создаем список рабочих
-    workers_list = []
-    for wr_data in worker_data:
-        worker = Worker(
-            name=wr_data['name'],
-            position=wr_data['position'],
-            qualification=int(wr_data['qualification']),
-            hourly_rate=Decimal(str(wr_data['hourly_rate']))
-        )
-        workers_list.append(worker)
-    
     # Создаем список операций
     operations = []
     for op_data in process_data:
@@ -45,21 +34,20 @@ def create_workshop_from_data(parameters_data: dict, worker_data: list, process_
     
     # Создаем технологический процесс
     process = Process(operations=operations)
-    
+    process.calculate_percentage()
+
     # Создаем цех
     workshop = Workshop(
         name=parameters_data['name'],
-        total_area=Decimal('0'),  # Будет рассчитано позже
         production_volume=int(parameters_data['production_volume']),
-        workers_list=workers_list,
         mass_detail=Decimal(str(parameters_data['mass_detail'])),
         process=process
     )
     
     # Рассчитываем требуемую площадь
-    required_area = workshop.calculate_required_area()
-    workshop.total_area = required_area
-    
+    workshop.calculate_required_area()
+    workshop.calculate_total_area()
+
     return workshop
 
 
@@ -74,11 +62,10 @@ def main():
     # Чтение данных
     reader = ExcelReader(initial_data_file)
     parameters_data = reader.read_parameters_data()
-    worker_data = reader.read_worker_data()
     process_data = reader.read_process_data()
 
     # Создание объекта цеха
-    workshop = create_workshop_from_data(parameters_data, worker_data, process_data)
+    workshop = create_workshop_from_data(parameters_data, process_data)
 
     # Генерация и сохранение отчета
     report_generator = TextReportGenerator()

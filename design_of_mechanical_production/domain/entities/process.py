@@ -16,6 +16,7 @@ class Process:
     Класс, представляющий технологический процесс.
     """
     operations: List[Operation]  # Список операций
+    total_time: Decimal = Decimal('0')
 
     def get_operations_by_machine(self, machine: str) -> List[Operation]:
         """
@@ -90,12 +91,11 @@ class Process:
         """
         return sum(op.calculated_machines_count for op in self.operations)
     
-    @property
-    def total_time(self) -> Decimal:
+    def calculate_total_time(self) -> Decimal:
         """
         Общее время на выполнение всех операций.
         """
-        return sum(op.time for op in self.operations)
+        self.total_time = sum(op.time for op in self.operations)
 
     @property
     def average_load_factor(self) -> Decimal:
@@ -105,3 +105,12 @@ class Process:
         sum_calculated_machines_count = sum(op.calculated_machines_count for op in self.operations)
         sum_accepted_machines_count = sum(op.accepted_machines_count for op in self.operations)
         return sum_calculated_machines_count/sum_accepted_machines_count
+    
+    def calculate_percentage(self) -> None:
+        """
+        Рассчитывает долю от общей трудоемкости для каждой операции.
+        """
+        self.calculate_total_time()
+        for operation in self.operations:
+            operation.percentage = (operation.time / self.total_time) * 100
+            

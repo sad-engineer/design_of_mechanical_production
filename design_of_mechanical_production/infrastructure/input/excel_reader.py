@@ -28,32 +28,13 @@ class ExcelReader(DataReader):
         except Exception as e:
             raise Exception(f"Ошибка при чтении данных о параметрах: {str(e)}")
     
-    def read_equipment_data(self) -> Dict[str, Any]:
-        """
-        Читает данные об оборудовании из Excel.
-        """
-        try:
-            df = pd.read_excel(self.filepath, sheet_name='Equipment')
-            return df.to_dict('records')
-        except Exception as e:
-            raise Exception(f"Ошибка при чтении данных об оборудовании: {str(e)}")
-    
-    def read_worker_data(self) -> Dict[str, Any]:
-        """
-        Читает данные о рабочих из Excel.
-        """
-        try:
-            df = pd.read_excel(self.filepath, sheet_name='Workers')
-            return df.to_dict('records')
-        except Exception as e:
-            raise Exception(f"Ошибка при чтении данных о рабочих: {str(e)}")
-    
     def read_process_data(self) -> Dict[str, Any]:
         """
         Читает данные о технологическом процессе из Excel.
         """
         try:
-            df = pd.read_excel(self.filepath, sheet_name='Process')
+            # Указываем тип данных для колонки number как строковый
+            df = pd.read_excel(self.filepath, sheet_name='Process', dtype={'number': str})
             return df.to_dict('records')
         except Exception as e:
             raise Exception(f"Ошибка при чтении данных о технологическом процессе: {str(e)}")
