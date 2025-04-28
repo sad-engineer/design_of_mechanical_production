@@ -5,12 +5,12 @@ import os
 from typing import List
 from decimal import Decimal
 
-from domain.entities.workshop import Workshop
-from domain.entities.equipment import Equipment
-from domain.entities.operation import Operation
-from domain.entities.process import Process
-from infrastructure.input.excel_reader import ExcelReader
-from infrastructure.output.text_report import TextReportGenerator
+from design_of_mechanical_production.entities.workshop import Workshop
+from design_of_mechanical_production.entities.equipment import Equipment
+from design_of_mechanical_production.entities.operation import Operation
+from design_of_mechanical_production.entities.process import Process
+from design_of_mechanical_production.inputdata.excel_reader import ExcelReader
+from design_of_mechanical_production.output.text_report import TextReportGenerator
 from inputdata.create_initial_data import create_initial_data
 
 

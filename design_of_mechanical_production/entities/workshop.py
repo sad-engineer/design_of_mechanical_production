@@ -5,9 +5,9 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 from decimal import Decimal
 
-from design_of_mechanical_production.domain.entities.equipment import Equipment
-from design_of_mechanical_production.domain.entities.process import Process
-from design_of_mechanical_production.domain.entities.workshop_zone import (
+from design_of_mechanical_production.entities.equipment import Equipment
+from design_of_mechanical_production.entities.process import Process
+from design_of_mechanical_production.entities.workshop_zone import (
     WorkshopZone,
     MachineInfo,
     SpecificWorkshopZone

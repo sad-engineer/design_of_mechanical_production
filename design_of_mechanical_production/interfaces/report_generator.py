@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 from abc import ABC, abstractmethod
-from design_of_mechanical_production.domain.entities.workshop import Workshop
+from design_of_mechanical_production.entities.workshop import Workshop
 
 
 class ReportGenerator(ABC):

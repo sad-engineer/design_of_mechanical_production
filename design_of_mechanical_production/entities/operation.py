@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from math import ceil
 
-from design_of_mechanical_production.domain.entities.equipment import Equipment
+from design_of_mechanical_production.entities.equipment import Equipment
 
 
 @dataclass

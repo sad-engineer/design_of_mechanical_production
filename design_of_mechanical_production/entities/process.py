@@ -5,8 +5,8 @@ from dataclasses import dataclass
 from typing import List, Dict
 from decimal import Decimal
 
-from design_of_mechanical_production.domain.entities.operation import Operation
-from design_of_mechanical_production.domain.entities.workshop_zone import MachineInfo
+from design_of_mechanical_production.entities.operation import Operation
+from design_of_mechanical_production.entities.workshop_zone import MachineInfo
 from design_of_mechanical_production.settings import get_setting
 
 

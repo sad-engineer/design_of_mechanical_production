@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import pandas as pd
 from typing import Dict, Any
-from design_of_mechanical_production.application.interfaces.data_reader import DataReader
+from design_of_mechanical_production.interfaces.data_reader import DataReader
 
 
 class ExcelReader(DataReader):
