@@ -23,6 +23,11 @@ class MechanicalProductionApp(MDApp):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # Устанавливаем размер окна
+        Window.minimum_width = 910
+        Window.minimum_height = 500
+
         # Устанавливаем цветовую схему по умолчанию
         self.theme_cls.primary_palette = "Blue"  # Основной цвет
         self.theme_cls.accent_palette = "Amber"  # Акцентный цвет
