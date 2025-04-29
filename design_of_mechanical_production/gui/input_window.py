@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
@@ -11,139 +11,64 @@ from kivy.core.window import Window
 from kivymd.uix.label import MDLabel
 from kivymd.app import MDApp
 from kivymd.uix.button import MDIconButton
-from kivymd.icon_definitions import md_icons
 
 
-class InputWindow(BoxLayout):
-    def __init__(self, **kwargs):
+class InputWindow(FloatLayout):
+    def __init__(self, screen_manager=None, **kwargs):
         super().__init__(**kwargs)
-        self.orientation = 'vertical'
-        self.spacing = 0
-        self.padding = 0
-        
-        # Создаем контейнер для заголовка
-        anchor_layout = AnchorLayout(
-            anchor_x='center',
-            anchor_y='top',
-            size_hint_y=None,
-            height=30
-        )
-        
-        # Горизонтальный контейнер для заголовка и иконок
-        header_layout = BoxLayout(
+        self.screen_manager = screen_manager
+
+        # Создаем однострочный контейнер для иконок
+        self.header = BoxLayout(
             orientation='horizontal',
-            size_hint_y=None,
-            height=30,
-            spacing=10,
-            padding=[10, 0, 10, 0]
+            size_hint=(None, None),  # Отключаем растягивание
+            width=50,  # Минимальная ширина для двух иконок
+            height=40,
+            padding=0,
+            spacing=0,
+            pos=(Window.width - 100, Window.height - 50)  # Отступ справа и сверху
         )
-        
-        # Заголовок
-        header_layout.add_widget(MDLabel(
-            text='Ввод начальных условий',
-            size_hint_x=None,
-            width=250,
-            halign='center',
-            valign='middle'
-        ))
-        
-        # Добавляем растягивающийся виджет для заполнения пространства
-        header_layout.add_widget(BoxLayout())
-        
-        # Иконки
-        self.theme_button = MDIconButton(
+
+        # Добавляем иконки
+        self.theme_btn = MDIconButton(
             icon="theme-light-dark",
             size_hint=(None, None),
-            size=(30, 30),
-            pos_hint={'center_y': 0.5}
+            size=(40, 40),
+            padding=0,
+            on_release=self.toggle_theme
         )
-        header_layout.add_widget(self.theme_button)
-        
-        self.settings_button = MDIconButton(
+        self.header.add_widget(self.theme_btn)
+
+        self.settings_btn = MDIconButton(
             icon="cog",
             size_hint=(None, None),
-            size=(30, 30),
-            pos_hint={'center_y': 0.5}
+            size=(40, 40),
+            padding=0,
+            on_release=self.open_settings
         )
-        header_layout.add_widget(self.settings_button)
-        
-        # Добавляем header_layout в anchor_layout
-        anchor_layout.add_widget(header_layout)
-        
-        # Добавляем anchor_layout в основной контейнер
-        self.add_widget(anchor_layout)
-        
-        # Основной контейнер для содержимого
-        content_layout = BoxLayout(
-            orientation='vertical',
-            padding=[20, 20, 20, 20],
-            spacing=10
+        self.header.add_widget(self.settings_btn)
+
+        self.add_widget(self.header)
+
+        # Добавляем заголовок
+        self.label = MDLabel(
+            text='Ввод начальных условий',
+            size_hint=(1, None),  # Растягиваем по ширине
+            height=50,
+            pos=(0, Window.height - 50),  # Центрируем по ширине
+            halign='center',
+            font_style='H5'
         )
-        
-        # Название цеха
-        content_layout.add_widget(MDLabel(
-            text='Название цеха:',
-            size_hint_y=None,
-            height=30
-        ))
-        self.name_input = TextInput(
-            multiline=False,
-            size_hint_y=None,
-            height=30,
-            background_color=(1, 1, 1, 1) if MDApp.get_running_app().theme_cls.theme_style == "Light" else (0.2, 0.2, 0.2, 1)
-        )
-        content_layout.add_widget(self.name_input)
-        
-        # Годовой объем производства
-        content_layout.add_widget(MDLabel(
-            text='Годовой объем производства (шт.):',
-            size_hint_y=None,
-            height=30
-        ))
-        self.volume_input = TextInput(
-            multiline=False,
-            size_hint_y=None,
-            height=30,
-            background_color=(1, 1, 1, 1) if MDApp.get_running_app().theme_cls.theme_style == "Light" else (0.2, 0.2, 0.2, 1)
-        )
-        content_layout.add_widget(self.volume_input)
-        
-        # Масса детали
-        content_layout.add_widget(MDLabel(
-            text='Масса детали (кг):',
-            size_hint_y=None,
-            height=30
-        ))
-        self.mass_input = TextInput(
-            multiline=False,
-            size_hint_y=None,
-            height=30,
-            background_color=(1, 1, 1, 1) if MDApp.get_running_app().theme_cls.theme_style == "Light" else (0.2, 0.2, 0.2, 1)
-        )
-        content_layout.add_widget(self.mass_input)
-        
-        # Кнопки управления
-        button_layout = BoxLayout(size_hint_y=None, height=50, spacing=10)
-        self.save_button = Button(
-            text='Сохранить',
-        )
-        self.save_button.bind(on_press=self.save_data)
-        button_layout.add_widget(self.save_button)
-        
-        self.cancel_button = Button(
-            text='Отмена',
-        )
-        self.cancel_button.bind(on_press=self.cancel)
-        button_layout.add_widget(self.cancel_button)
-        
-        content_layout.add_widget(button_layout)
-        self.add_widget(content_layout)
-        
-        # Установка начальных значений
-        self.name_input.text = 'Механический цех №1'
-        self.volume_input.text = '10000'
-        self.mass_input.text = '112.8'
-    
+        self.add_widget(self.label)
+
+        # Привязываем обработчик изменения размера окна
+        Window.bind(size=self.update_positions)
+
+    def update_positions(self, instance, size):
+        width, height = size
+        self.header.pos = (width - 100, height - 50)
+        self.label.pos = (0, height - 50)
+
     def save_data(self, instance):
         try:
             data = {
@@ -159,6 +84,19 @@ class InputWindow(BoxLayout):
     def cancel(self, instance):
         # Здесь можно добавить закрытие окна
         print("Отмена ввода")
+
+    def toggle_theme(self, instance):
+        app = MDApp.get_running_app()
+        if app.theme_cls.theme_style == "Light":
+            app.theme_cls.theme_style = "Dark"
+        else:
+            app.theme_cls.theme_style = "Light"
+
+    def open_settings(self, instance):
+        if self.screen_manager:
+            self.screen_manager.current = 'settings'
+        else:
+            print("screen_manager не передан!")
 
 
 class InputApp(App):

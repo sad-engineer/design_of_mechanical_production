@@ -43,7 +43,7 @@ class MechanicalProductionApp(MDApp):
         main_layout = FloatLayout()
         
         # Создаем и добавляем окно ввода
-        input_window = InputWindow()
+        input_window = InputWindow(screen_manager=self.screen_manager)
         input_window.size_hint = (0.8, 0.8)
         input_window.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         main_layout.add_widget(input_window)
