@@ -79,7 +79,7 @@ class Process:
         """
         return sum(op.calculated_machines_count for op in self.operations)
     
-    def calculate_total_time(self) -> Decimal:
+    def calculate_total_time(self) -> None:
         """
         Общее время на выполнение всех операций.
         """

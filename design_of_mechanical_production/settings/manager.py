@@ -6,6 +6,19 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 from abc import ABC, abstractmethod
+from decimal import Decimal
+
+
+class DecimalConstructor(yaml.constructor.Constructor):
+    """
+    Конструктор YAML с поддержкой Decimal.
+    """
+    def construct_yaml_str(self, node):
+        value = self.construct_scalar(node)
+        try:
+            return Decimal(value)
+        except:
+            return value
 
 
 class ConfigRepository(ABC):
@@ -31,12 +44,19 @@ class YamlConfigRepository(ConfigRepository):
     def load(self) -> Dict[str, Any]:
         try:
             with open(self.file_path, "r", encoding="utf-8") as file:
+                # Используем наш конструктор для поддержки Decimal
+                yaml.add_constructor('tag:yaml.org,2002:str', DecimalConstructor.construct_yaml_str)
                 return yaml.safe_load(file) or {}
         except FileNotFoundError:
             return {}
 
     def save(self, config: Dict[str, Any]) -> None:
         with open(self.file_path, "w", encoding="utf-8") as file:
+            # Преобразуем Decimal в строки при сохранении
+            def decimal_representer(dumper, data):
+                return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
+            
+            yaml.add_representer(Decimal, decimal_representer)
             yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
 
 
@@ -112,34 +132,41 @@ class ConfigManager:
 
 
 # Инициализация путей
-cur_dir = Path(__file__).parent.parent
+cur_dir = Path(__file__).parent.parent.parent
 CONFIG_FILE = cur_dir / "settings.yaml"
 
 # Настройки по умолчанию
-DEFAULT_CONFIG = {
-    # Действительный фонд времени работы одного станка, ч
-    'fund_of_working': 4080,  
+DEFAULT_CONFIG: Dict[str, Any] = {
+    # Пути к файлам
+    'input_data_path': str(cur_dir/'inputdata'/'initial_data.xlsx'),
+    'report_path': str(cur_dir/'output'/'report.txt'),
+    
+    # Настройки цеха
+    'workshop_span': 18,  # Ширина пролета цеха в метрах
+    'workshop_nam': 1,    # Количество пролетов
+    
+    # Фонд рабочего времени
+    'fund_of_working': 4015,  # Фонд рабочего времени в часах
+    
     # Коэффициенты
-    'kv': 1.00,  # Коэффициент выполнения норм
-    'kp': 1.45,  # Коэффициент прогрессивности технологии
+    'kv': 1.0,  # Коэффициент выполнения норм
+    'kp': 1.0,  # Коэффициент прогрессивности технологии
     
-    # Процентные соотношения для вспомогательных зон
-    'grinding_zone_percent': 0.05,  # 5% для заточного отделения
-    'repair_zone_percent': 0.025,  # 2.5% для ремонтного отделения
+    # Проценты для зон
+    'grinding_zone_percent': '0.05',  # 5% для заточного отделения
+    'repair_zone_percent': '0.03',    # 3% для ремонтного отделения
     
-    # Настройки для расчета площади
-    'passage_area': 10,  # Площадь для проходов между станками, м²
-    'workshop_span': 12,  # Ширина пролета цеха, м
-    'workshop_nam': 3,  # Количество пролетов
-    
-    # Удельные площади вспомогательных зон (м² на единицу)
+    # Удельные площади
     'specific_areas': {
-        'tool_storage': 0.3,  # Склад инструмента
-        'equipment_warehouse': 0.2,  # Склад приспособлений
-        'work_piece_storage': 0.3,  # Склад заготовок
-        'control_department': 0.05,  # Отделение контроля
-        'sanitary_zone': 8,  # Санитарная зона
-    }
+        'tool_storage': '0.3',        # Склад инструмента
+        'equipment_warehouse': '0.2',  # Склад приспособлений
+        'work_piece_storage': '0.1',  # Склад заготовок и деталей
+        'control_department': '0.1',   # Контрольное отделение
+        'sanitary_zone': '8.0'        # Санитарно-бытовые помещения
+    },
+    
+    # Площадь проходов
+    'passage_area': '2.0'  # Площадь проходов в м²
 }
 
 # Создаем экземпляр менеджера конфигурации
@@ -150,11 +177,18 @@ config_manager = ConfigManager(config_repository, DEFAULT_CONFIG)
 # Функции для удобства использования
 def get_setting(key_path: str) -> Any:
     """Получает значение настройки по ключу (вложенные ключи через точку)."""
-    return config_manager.get_setting(key_path)
+    value = config_manager.get_setting(key_path)
+    # Преобразуем строковые значения в Decimal при необходимости
+    if isinstance(value, str) and value.replace('.', '').isdigit():
+        return Decimal(value)
+    return value
 
 
 def set_setting(key_path: str, new_value: Any) -> None:
     """Изменяет значение настройки и сохраняет его в config.yaml."""
+    # Преобразуем Decimal в строки при сохранении
+    if isinstance(new_value, Decimal):
+        new_value = str(new_value)
     config_manager.set_setting(key_path, new_value)
 
 

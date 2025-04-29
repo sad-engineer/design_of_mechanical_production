@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from abc import ABC, abstractmethod
+from typing import Protocol
 from design_of_mechanical_production.entities.workshop import Workshop
 
 
-class ReportGenerator(ABC):
+class IReportGenerator(Protocol):
     """
-    Абстрактный класс для генерации отчетов.
+    Интерфейс для генерации отчетов.
     """
-    
-    @abstractmethod
     def generate_report(self, workshop: Workshop) -> str:
         """
         Генерирует отчет о цехе.
@@ -21,9 +19,8 @@ class ReportGenerator(ABC):
         Returns:
             str: Текст отчета
         """
-        pass
+        ...
     
-    @abstractmethod
     def save_report(self, report: str, filepath: str) -> bool:
         """
         Сохраняет отчет в файл.
@@ -35,4 +32,4 @@ class ReportGenerator(ABC):
         Returns:
             bool: Успешность сохранения
         """
-        pass
+        ...

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------------------------------------------------------
 import pandas as pd
-from decimal import Decimal
+from design_of_mechanical_production.settings.manager import DEFAULT_CONFIG
 
 
 def create_initial_data():
@@ -35,7 +36,7 @@ def create_initial_data():
     df_process = pd.DataFrame(process_data)
     
     # Создаем Excel файл
-    with pd.ExcelWriter('inputdata/initial_data.xlsx', engine='openpyxl') as writer:
+    with pd.ExcelWriter(DEFAULT_CONFIG['input_data_path'], engine='openpyxl') as writer:
         df_parameters.to_excel(writer, sheet_name='Parameters', index=False)
         df_process.to_excel(writer, sheet_name='Process', index=False)
 

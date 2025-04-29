@@ -3,15 +3,17 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import pandas as pd
 from typing import Dict, Any
-from design_of_mechanical_production.interfaces.data_reader import DataReader
+from pathlib import Path
+
+from design_of_mechanical_production.interfaces.data_reader import IDataReader
 
 
-class ExcelReader(DataReader):
+class ExcelReader(IDataReader):
     """
     Класс для чтения данных из Excel файлов.
     """
     
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: Path):
         self.filepath = filepath
     
     def read_parameters_data(self) -> Dict[str, Any]:

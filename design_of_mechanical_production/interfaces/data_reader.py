@@ -1,25 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict, Any, Protocol
 
 
-class DataReader(ABC):
+class IDataReader(Protocol):
     """
-    Абстрактный класс для чтения входных данных.
+    Интерфейс для чтения входных данных.
     """
-    
-    @abstractmethod
     def read_parameters_data(self) -> Dict[str, Any]:
         """
         Читает данные о цехе и параметрах.
         """
-        pass
+        ...
     
-    @abstractmethod
     def read_process_data(self) -> Dict[str, Any]:
         """
         Читает данные о технологическом процессе.
         """
-        pass
+        ...

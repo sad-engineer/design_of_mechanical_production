@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------------------------------------------------------
+from typing import Dict, Union
+from decimal import Decimal
+
+from design_of_mechanical_production.entities.types import IAreaCalculator
+from design_of_mechanical_production.entities.machine_info import MachineInfo
+
+
+class AreaCalculator(IAreaCalculator):
+    """
+    Реализация калькулятора площади для основной зоны цеха.
+    """
+    def __init__(self, passage_area: Decimal):
+        self.passage_area = passage_area
+
+    def calculate_area(self, machines: Dict[str, MachineInfo]) -> Decimal:
+        area = Decimal('0')
+        for machine in machines.values():
+            length = machine.model.length
+            width = machine.model.width
+            area += (length * width + self.passage_area) * machine.accepted_count
+        return area
+
+
+class SpecificAreaCalculator(IAreaCalculator):
+    """
+    Реализация калькулятора площади для вспомогательной зоны цеха.
+    """
+    def __init__(self, specific_area: Decimal, total_equipment_count: Union[int, Decimal, float]):
+        self.specific_area = specific_area
+        self.total_equipment_count = total_equipment_count
+
+    def calculate_area(self, machines: Dict[str, MachineInfo]) -> Decimal:
+        return self.specific_area * self.total_equipment_count 
+    

@@ -1,0 +1,16 @@
+fund_of_working: 4015
+grinding_zone_percent: '0.05'
+input_data_path: C:\Users\Korenyk.A\Documents\Проекты\design_of_mechanical_production\inputdata\initial_data.xlsx
+kp: 1.0
+kv: 1.0
+passage_area: '2.0'
+repair_zone_percent: '0.03'
+report_path: C:\Users\Korenyk.A\Documents\Проекты\design_of_mechanical_production\output\report.txt
+specific_areas:
+  control_department: '0.1'
+  equipment_warehouse: '0.2'
+  sanitary_zone: '8.0'
+  tool_storage: '0.3'
+  work_piece_storage: '0.1'
+workshop_nam: 1
+workshop_span: 18

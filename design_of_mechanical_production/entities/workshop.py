@@ -9,6 +9,7 @@ from design_of_mechanical_production.entities.equipment import Equipment
 from design_of_mechanical_production.entities.process import Process
 from design_of_mechanical_production.entities.workshop_zone import (
     WorkshopZone,
+    BaseWorkshopZone,
     MachineInfo,
     SpecificWorkshopZone
 )
@@ -26,7 +27,7 @@ class Workshop:
     mass_detail: Decimal
     process: Process
     equipment_list: List[Equipment] = field(default_factory=list)
-    zones: Dict[str, WorkshopZone] = field(default_factory=dict)  # Словарь зон цеха
+    zones: Dict[str, BaseWorkshopZone] = field(default_factory=dict)  # Словарь зон цеха
     total_area: Decimal = Decimal("0")
     required_area: Decimal = Decimal("0")
     length: Decimal = Decimal("0")
@@ -58,18 +59,18 @@ class Workshop:
         # Получаем настройки из конфигурации
         width_span = Decimal(str(get_setting('workshop_span')))
         number_spans = Decimal(str(get_setting('workshop_nam')))
-        
+
         # Рассчитываем длину пролета
         self.length = self.required_area / (width_span * number_spans)
 
         # Рассчитываем общую площадь
         total_area = width_span * number_spans * self.length
-        
+
         # Округляем до ближайшего большего числа, кратного 6
         remainder = total_area % 6
         if remainder != 0:
             total_area = total_area + (6 - remainder)
-        
+
         self.total_area = total_area
         return self.total_area
 
@@ -94,7 +95,7 @@ class Workshop:
             machines={
                 "Станок универсально-заточной 3В642": MachineInfo(
                     model=self.equipment_factory.create_equipment("3В642"),
-                    calculated_count=self.zones['main_zone'].total_machines_count * grinding_zone_percent
+                    calculated_count=self.zones['main_zone'].total_equipment_count * grinding_zone_percent
                 )
             },
         )
@@ -107,21 +108,21 @@ class Workshop:
             machines={
                 "Станки в ремонте": MachineInfo(
                     model="Станки в ремонте",
-                    calculated_count=self.zones['main_zone'].total_machines_count * repair_zone_percent
+                    calculated_count=self.zones['main_zone'].total_equipment_count * repair_zone_percent
                 )
             },
         )
         self.zones['repair_zone'] = repair_zone
-        
 
         # Расчет вспомогательных зон
-        total_machines_count = main_zone.total_machines_count + grinding_zone.total_machines_count + repair_zone.total_machines_count
+        total_machines_count = \
+            main_zone.total_equipment_count + grinding_zone.total_equipment_count + repair_zone.total_equipment_count
 
         # Склад инструмента
         tool_storage_zone = SpecificWorkshopZone(
             name='Склад инструмента',
             specific_area=Decimal(str(get_setting('specific_areas.tool_storage'))),
-            total_equipment_count=total_machines_count 
+            total_equipment_count=total_machines_count
         )
         self.zones['tool_storage_zone'] = tool_storage_zone
 
@@ -129,7 +130,7 @@ class Workshop:
         equipment_warehouse_zone = SpecificWorkshopZone(
             name='Склад приспособлений',
             specific_area=Decimal(str(get_setting('specific_areas.equipment_warehouse'))),
-            total_equipment_count=total_machines_count 
+            total_equipment_count=total_machines_count
         )
         self.zones['equipment_warehouse_zone'] = equipment_warehouse_zone
 
@@ -137,7 +138,7 @@ class Workshop:
         work_piece_storage_zone = SpecificWorkshopZone(
             name='Склад заготовок',
             specific_area=Decimal(str(get_setting('specific_areas.work_piece_storage'))),
-            total_equipment_count=main_zone.area 
+            total_equipment_count=main_zone.area
         )
         self.zones['work_piece_storage_zone'] = work_piece_storage_zone
 
@@ -145,15 +146,15 @@ class Workshop:
         control_department_zone = SpecificWorkshopZone(
             name='Отделение контроля',
             specific_area=Decimal(str(get_setting('specific_areas.control_department'))),
-            total_equipment_count=total_machines_count 
+            total_equipment_count=total_machines_count
         )
         self.zones['control_department_zone'] = control_department_zone
-        
+
         # Санитарная зона 1
         sanitary_zone = SpecificWorkshopZone(
             name='Санитарная зона 1',
             specific_area=Decimal(str(get_setting('specific_areas.sanitary_zone'))),
-            total_equipment_count=2 
+            total_equipment_count=2
         )
         self.zones['sanitary_zone'] = sanitary_zone
 
@@ -175,32 +176,11 @@ class Workshop:
         """
         self.equipment_list.append(equipment)
 
-    def get_equipment_count(self) -> Dict[str, Decimal]:
+    def get_equipment_count(self) -> Dict[str, MachineInfo]:
         """
         Возвращает необходимое количество оборудования по каждому типу станков.
         """
         return self.process.calculate_required_machines(self.production_volume)
-
-    def get_equipment_details(self) -> List[dict]:
-        """
-        Возвращает детальную информацию об оборудовании с учетом необходимого количества.
-        """
-        details = []
-        machines_count = self.process.calculate_required_machines(self.production_volume)
-        
-        for equipment in self.equipment_list:
-            if equipment.model in machines_count:
-                required_count = machines_count[equipment.model]
-                details.append({
-                    'name': equipment.name,
-                    'model': equipment.model,
-                    'required_count': required_count,
-                    'total_area': equipment.area * required_count,
-                    'total_power': equipment.power_consumption * required_count,
-                    'total_workers': equipment.worker_count * required_count
-                })
-        
-        return details
 
     def get_machines_count(self) -> Dict[str, int]:
         """
@@ -208,9 +188,10 @@ class Workshop:
         """
         machines_count = {}
         for zone in self.zones:
-            for machine, count in zone.machines.items():
-                if machine in machines_count:
-                    machines_count[machine] += count
-                else:
-                    machines_count[machine] = count
+            if hasattr(zone, "machines"):
+                for machine, count in zone.machines.items():
+                    if machine in machines_count:
+                        machines_count[machine] += count
+                    else:
+                        machines_count[machine] = count
         return machines_count

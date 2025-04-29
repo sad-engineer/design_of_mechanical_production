@@ -2,16 +2,19 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 import os
+from pathlib import Path
 from typing import List
 from decimal import Decimal
 
-from design_of_mechanical_production.entities.workshop import Workshop
-from design_of_mechanical_production.entities.operation import Operation
-from design_of_mechanical_production.entities.process import Process
-from design_of_mechanical_production.entities.equipment_factory import EquipmentFactory
-from design_of_mechanical_production.inputdata.excel_reader import ExcelReader
-from design_of_mechanical_production.output.text_report import TextReportGenerator
-from inputdata.create_initial_data import create_initial_data
+from design_of_mechanical_production.entities import (
+    Workshop,
+    Operation,
+    Process,
+    EquipmentFactory
+)
+from design_of_mechanical_production.inputdata import ExcelReader, create_initial_data
+from design_of_mechanical_production.output import TextReportGenerator
+from design_of_mechanical_production.settings.manager import get_setting, set_setting
 
 
 def create_workshop_from_data(parameters_data: dict, process_data: List[dict]) -> Workshop:
@@ -52,9 +55,24 @@ def create_workshop_from_data(parameters_data: dict, process_data: List[dict]) -
     return workshop
 
 
+def ensure_directories_exist():
+    """
+    Создает необходимые директории, если они не существуют.
+    """
+    # Создаем директории для входных и выходных данных
+    input_dir = Path(get_setting('input_data_path')).parent
+    output_dir = Path(get_setting('report_path')).parent
+    
+    input_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+
 def main():
+    # Создаем необходимые директории
+    ensure_directories_exist()
+    
     # Проверяем существование файла с начальными данными
-    initial_data_file = 'inputdata/initial_data.xlsx'
+    initial_data_file = Path(get_setting('input_data_path'))
     if not os.path.exists(initial_data_file):
         print("Файл с начальными данными не найден. Создаем новый файл...")
         create_initial_data()
@@ -72,7 +90,8 @@ def main():
     report_generator = TextReportGenerator()
     report = report_generator.generate_report(workshop)
 
-    if report_generator.save_report(report, 'output/report.txt'):
+    report_path = Path(get_setting('report_path'))
+    if report_generator.save_report(report, report_path):
         print("Отчет успешно сгенерирован и сохранен в output/report.txt")
     else:
         print("Ошибка при сохранении отчета")

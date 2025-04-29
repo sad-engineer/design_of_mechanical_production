@@ -477,6 +477,18 @@ files = [
 typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
+name = "pysimplegui"
+version = "5.0.8.3"
+description = "PySimpleGUI is now located on a private PyPI server.  Please add to your pip command: --extra-index-url https://PySimpleGUI.net/install"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "pysimplegui-5.0.8.3-py3-none-any.whl", hash = "sha256:67e35ad6dd76e9369051261114f4711308e87815a0488f7fa28b37c29a546f8b"},
+    {file = "pysimplegui-5.0.8.3.tar.gz", hash = "sha256:4c77436f527b6ee5c6e097a07028c83d85dc2513bcb51b78c9bfcc1b55123bd1"},
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
@@ -640,4 +652,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "20da7664bec57b72fcf66a3dee678b0d0160d6e7984b5cece0f432cdabf3d475"
+content-hash = "68069eb86c2d894df0ff2ec48b481b8703b111ba68324f79846fd69d03ce487c"
