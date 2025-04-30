@@ -21,12 +21,13 @@ class EditableTable(FloatLayout):
     Редактируемая таблица с прокруткой, рамкой и заголовком.
     """
     def __init__(self, config: TableConfig, row_factory: TableRowFactory, event_manager: TableEventManager,
-                 table_title: str = 'Название таблицы', **kwargs):
+                 table_title: str = 'Название таблицы', height: float = 300,  **kwargs):
         super().__init__(**kwargs)
         self.config = config
         self.row_factory = row_factory
         self.event_manager = event_manager
         self.table_rows = []
+        self.height = height
 
         # Заголовок таблицы (будет вне рамки)
         self.table_label = MDLabel(
@@ -40,7 +41,7 @@ class EditableTable(FloatLayout):
         self.add_widget(self.table_label)
 
         # Основной вертикальный layout (headers+scroll)
-        self.vbox = BoxLayout(orientation='vertical', size_hint=(1, None), height=300, pos_hint={'x': 0, 'top': 0.91})
+        self.vbox = BoxLayout(orientation='vertical', size_hint=(1, None), height=self.height, pos_hint={'x': 0, 'top': 0.91})
 
         # Заголовки
         self.headers = GridLayout(
@@ -77,7 +78,7 @@ class EditableTable(FloatLayout):
         # Прокрутка
         self.scroll = ScrollView(
             size_hint=(1, None),
-            height=260  # высота области прокрутки (можно менять)
+            height=self.height - 30  # высота области прокрутки (можно менять)
         )
         self.scroll.add_widget(self.grid)
         self.vbox.add_widget(self.scroll)
@@ -100,7 +101,7 @@ class EditableTable(FloatLayout):
         x = self.vbox.x - padding
         y = self.vbox.y - padding
         w = self.vbox.width + 2 * padding
-        h = self.vbox.height + 2 * padding - 10
+        h = self.vbox.height + 2 * padding
         self._border.rectangle = (x, y, w, h)
 
     def _init_rows(self):

@@ -56,20 +56,7 @@ class InputWindow(FloatLayout):
         """Инициализирует пользовательский интерфейс."""
         self._create_header()
         self._create_columns()
-
-        buttons_box = BoxLayout(
-            orientation='horizontal',
-            size_hint=(None, None),
-            width=400,
-            height=40,
-            spacing=5,
-            pos_hint={'center_x': 0.75, 'y': 0.01}
-        )
-        calc_btn = Button(text='Начать расчет', on_release=self.save_data)
-        cancel_btn = Button(text='Отмена', on_release=self._create_header)
-        buttons_box.add_widget(calc_btn)
-        buttons_box.add_widget(cancel_btn)
-        self.add_widget(buttons_box)
+        self._create_buttons()
 
         # Программно изменяем размер окна для пересчета позиций
         def trigger_resize(dt):
@@ -117,7 +104,7 @@ class InputWindow(FloatLayout):
         # Добавляем заголовок
         self.label = MDLabel(
             text='Ввод начальных условий',
-            size_hint=(1, None),
+            size_hint=(1.25, None),
             height=50,
             pos=(0, Window.height - 50),
             halign='center',
@@ -136,7 +123,21 @@ class InputWindow(FloatLayout):
 
     def _create_columns(self):
         """Создает основные колонки интерфейса."""
-        columns = BoxLayout(orientation='horizontal', size_hint=(1.2, 1), spacing=0, padding=0)
+        # Основной контейнер с отступом снизу для кнопок
+        main_layout = BoxLayout(
+            orientation='vertical',
+            size_hint=(1, 1),
+            spacing=0,
+            padding=[10, -50, 10, 60],  # отступ снизу для кнопок
+        )
+
+        # Контейнер для колонок
+        columns = BoxLayout(
+            orientation='horizontal',
+            # size_hint=(1, 1),
+            spacing=20,
+            padding=0
+        )
 
         # Левый столбец
         left_col = self._create_left_column()
@@ -146,22 +147,52 @@ class InputWindow(FloatLayout):
         right_col = self._create_table_column()
         columns.add_widget(right_col)
 
-        self.add_widget(columns)
+        main_layout.add_widget(columns)
+        self.add_widget(main_layout)
+
+    def _create_buttons(self):
+        """Создает кнопки управления."""
+        # Контейнер для кнопок
+        buttons_box = BoxLayout(
+            orientation='horizontal',
+            size_hint=(0.5, None),
+            height=50,
+            spacing=5,
+            padding=[0, 0, 0, 5],
+            pos_hint={'center_x': 0.5, 'bottom': 0}  # Привязка к нижнему краю
+        )
+
+        # Кнопки
+        calc_btn = Button(
+            text='Начать расчет',
+            size_hint_x=0.5,
+            height=40,
+            on_release=self.save_data
+        )
+        cancel_btn = Button(
+            text='Отмена',
+            size_hint_x=0.5,
+            height=40,
+            on_release=self.cancel
+        )
+        buttons_box.add_widget(calc_btn)
+        buttons_box.add_widget(cancel_btn)
+        self.add_widget(buttons_box)
 
     def _create_left_column(self):
         """Создает левую колонку с настройками."""
         left_col = FloatLayout(
             size_hint_x=None,
-            width=300
+            width=275
         )
 
         # Создаем контейнер для элементов
         content = BoxLayout(
             orientation='vertical',
             size_hint=(None, None),
-            width=270,
+            width=275,
             height=200,
-            pos_hint={'x': 0.025, 'top': 1},  # Позиционируем контент сверху
+            pos_hint={'x': 0, 'top': 1},  # Позиционируем контент сверху
             spacing=0
         )
 
@@ -186,7 +217,7 @@ class InputWindow(FloatLayout):
 
     def _create_table_column(self):
         """Создает правую колонку с таблицей."""
-        right_col = FloatLayout(size_hint_x=None, width=600)
+        right_col = FloatLayout(size_hint_x=None, width=585)
 
         # Создаем конфигурацию таблицы
         table_config = TableConfig(
@@ -217,9 +248,9 @@ class InputWindow(FloatLayout):
             config=table_config,
             row_factory=row_factory,
             event_manager=None,
-            pos_hint={'x': 0.05, 'top': 0.94},
-            size_hint=(0.9, None),
-            height=300,
+            pos_hint={'x': 0, 'top': 1},
+            size_hint=(1, 1),
+            height=400,
             table_title='Технологический процесс изготовления детали'
         )
         self.table.event_manager = TableEventManagerImpl(self.table)
