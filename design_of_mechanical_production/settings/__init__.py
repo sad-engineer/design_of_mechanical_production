@@ -8,9 +8,8 @@
 - получения и установки настроек
 - сохранения и загрузки настроек
 """
-
 from design_of_mechanical_production.settings.manager import (
-    # Функции
+    DEFAULT_CONFIG,
     get_setting,
     set_setting,
 )
@@ -19,4 +18,5 @@ __all__ = [
     # Функции
     'get_setting',
     'set_setting',
+    'DEFAULT_CONFIG',
 ]

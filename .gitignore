@@ -14,4 +14,6 @@ env.bak /
 .idea/
 temp/
 dist/
-machine_tools/logs
+input/
+output/
+settings.yaml

@@ -11,10 +11,11 @@ class MySpinnerOption(SpinnerOption):
     """
     Опция для выпадающего списка с настраиваемой высотой.
     """
+
     def __init__(self, **kwargs):
         """
         Инициализирует опцию выпадающего списка.
-        
+
         Args:
             **kwargs: Дополнительные аргументы для SpinnerOption.
         """

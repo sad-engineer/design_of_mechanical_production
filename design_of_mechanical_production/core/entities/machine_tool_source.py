@@ -1,43 +1,66 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import Protocol
+from __future__ import annotations
+
+from dataclasses import dataclass
 from decimal import Decimal
-from machine_tools import MachineTool, MachineToolsContainer as Container
+from typing import Optional
+
+from machine_tools import MachineTool
+from machine_tools import MachineToolsContainer as Container
 
 
-class MachineToolSource(Protocol):
+@dataclass
+class MachineTool:
     """
-    Интерфейс для источников данных об оборудовании.
+    Класс, представляющий станок.
     """
-    def get_machine_tool(self, model_name: str) -> MachineTool:
+
+    model: str
+    length: float
+    width: float
+    height: float
+    automation: str
+    weight: float
+    power_lathe_passport_kvt: float
+
+
+class MachineToolSource:
+    """
+    Базовый класс для источников данных о станках.
+    """
+
+    @staticmethod
+    def get_machine_tool(model_name: str) -> Optional[MachineTool]:
         """
-        Получает данные об оборудовании по модели.
-        
+        Получает информацию о станке по модели.
+
         Args:
-            model_name: Имя модели оборудования
-            
+            model_name: Модель станка
+
         Returns:
-            Объект с данными об оборудовании
+            Optional[MachineTool]: Информация о станке или None
         """
-        pass
+        raise NotImplementedError
 
 
-class DatabaseMachineToolSource:
+class DatabaseMachineToolSource(MachineToolSource):
     """
-    Источник данных об оборудовании из базы данных.
+    Источник данных о станках из базы данных.
     """
+
     @staticmethod
     def get_machine_tool(model_name: str) -> MachineTool:
         """
         Получает данные об оборудовании из базы данных.
-        
+
         Args:
             model_name: Имя модели оборудования
-            
+
         Returns:
             Объект с данными об оборудовании
-            
+
         Raises:
             TypeError: Если оборудование не найдено в базе данных
         """
@@ -45,10 +68,11 @@ class DatabaseMachineToolSource:
         return creator.by_name(model_name)
 
 
-class DefaultMachineToolSource:
+class DefaultMachineToolSource(MachineToolSource):
     """
-    Источник данных об оборудовании по умолчанию.
+    Источник данных о станках по умолчанию.
     """
+
     @staticmethod
     def get_machine_tool(model_name: str) -> MachineTool:
         """
@@ -64,13 +88,13 @@ class DefaultMachineToolSource:
             ValueError: Если модель не поддерживается
         """
         if model_name == "DMG CTX beta 2000":
-            return MachineTool.construct(
+            return MachineTool(
                 model="DMG CTX beta 2000",
                 length=Decimal("6234"),
                 width=Decimal("3210"),
                 height=Decimal("2052"),
                 automation="Автоматическая",
                 weight=Decimal(10000.0),
-                power_consumption=Decimal(35.0),
+                power_lathe_passport_kvt=Decimal(35.0),
             )
         raise ValueError(f"Модель {model_name} не поддерживается")

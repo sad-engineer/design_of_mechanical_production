@@ -4,10 +4,11 @@
 """
 Модуль содержит константы и утилиты для работы со станками.
 """
-import os
 import json
+import os
 import pickle
-from typing import List, Any, Optional, Dict
+from typing import Any, Dict, List, Optional
+
 import pkg_resources
 from machine_tools import MachineToolsContainer as Container
 
@@ -16,6 +17,7 @@ class MachineToolsCache:
     """
     Кэш для списка станков с проверкой версии.
     """
+
     CACHE_DIR = os.path.join(os.path.dirname(__file__), '.cache')
     CACHE_FILE = os.path.join(CACHE_DIR, 'machine_tools.pkl')
     VERSION_FILE = os.path.join(CACHE_DIR, 'version.json')

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 from typing import List
+
 from design_of_mechanical_production.gui.components.interfaces import TableEventManager
 from design_of_mechanical_production.gui.components.table import EditableTable
 
@@ -9,15 +10,15 @@ from design_of_mechanical_production.gui.components.table import EditableTable
 class TableEventManagerImpl(TableEventManager):
     """
     Реализация менеджера событий таблицы.
-    
+
     Attributes:
         table: Экземпляр таблицы, для которой обрабатываются события.
     """
-    
+
     def __init__(self, table: EditableTable):
         """
         Инициализирует менеджер событий.
-        
+
         Args:
             table: Экземпляр таблицы, для которой обрабатываются события.
         """
@@ -26,7 +27,7 @@ class TableEventManagerImpl(TableEventManager):
     def on_row_changed(self, row_index: int, data: List[str]):
         """
         Обрабатывает изменение строки.
-        
+
         Args:
             row_index: Индекс измененной строки.
             data: Новые данные строки.

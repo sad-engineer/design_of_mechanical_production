@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ----------------------------------------------------------------------------------------------------------------------
-import yaml
 import os
-from pathlib import Path
-from typing import Any, Dict, Optional
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import yaml
 
 
 class DecimalConstructor(yaml.constructor.Constructor):
     """
     Конструктор YAML с поддержкой Decimal.
     """
+
     def construct_yaml_str(self, node):
         value = self.construct_scalar(node)
         try:
@@ -55,7 +57,7 @@ class YamlConfigRepository(ConfigRepository):
             # Преобразуем Decimal в строки при сохранении
             def decimal_representer(dumper, data):
                 return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
-            
+
             yaml.add_representer(Decimal, decimal_representer)
             yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
 
@@ -81,17 +83,17 @@ class ConfigManager:
     def get_setting(self, key_path: str) -> Any:
         """
         Получает значение настройки по ключу (вложенные ключи через точку).
-        
+
         Parameters
         ----------
         key_path : str
             Путь к настройке через точку (например, "common.paths.for_reports")
-            
+
         Returns
         -------
         Any
             Значение настройки
-            
+
         Raises
         ------
         ValueError
@@ -108,7 +110,7 @@ class ConfigManager:
     def set_setting(self, key_path: str, new_value: Any) -> None:
         """
         Изменяет значение настройки и сохраняет его.
-        
+
         Parameters
         ----------
         key_path : str
@@ -138,35 +140,29 @@ CONFIG_FILE = cur_dir / "settings.yaml"
 # Настройки по умолчанию
 DEFAULT_CONFIG: Dict[str, Any] = {
     # Пути к файлам
-    'input_data_path': str(cur_dir/'inputdata'/'initial_data.xlsx'),
-    'report_path': str(cur_dir/'output'/'report.txt'),
-    
+    'input_data_path': str(cur_dir / 'input' / 'initial_data.xlsx'),
+    'report_path': str(cur_dir / 'output' / 'report.txt'),
     # Настройки цеха
     'workshop_span': "12",  # Ширина пролета цеха в метрах
-    'workshop_nam': "3",    # Количество пролетов
-    
+    'workshop_nam': "3",  # Количество пролетов
     # Фонд рабочего времени
     'fund_of_working': "4080",  # Фонд рабочего времени в часах
-    
     # Коэффициенты
     'kv': "1.0",  # Коэффициент выполнения норм
     'kp': "1.45",  # Коэффициент прогрессивности технологии
-    
     # Проценты для зон
     'grinding_zone_percent': '0.05',  # 5% для заточного отделения
-    'repair_zone_percent': '0.03',    # 3% для ремонтного отделения
-    
+    'repair_zone_percent': '0.03',  # 3% для ремонтного отделения
     # Удельные площади
     'specific_areas': {
-        'tool_storage': '0.3',          # Склад инструмента
-        'equipment_warehouse': '0.2',   # Склад приспособлений
-        'work_piece_storage': '0.3',    # Склад заготовок и деталей
-        'control_department': '0.05',   # Контрольное отделение
-        'sanitary_zone': '8.0'          # Санитарно-бытовые помещения
+        'tool_storage': '0.3',  # Склад инструмента
+        'equipment_warehouse': '0.2',  # Склад приспособлений
+        'work_piece_storage': '0.3',  # Склад заготовок и деталей
+        'control_department': '0.05',  # Контрольное отделение
+        'sanitary_zone': '8.0',  # Санитарно-бытовые помещения
     },
-    
     # Площадь проходов
-    'passage_area': '10.0'  # Площадь проходов в м²
+    'passage_area': '10.0',  # Площадь проходов в м²
 }
 
 # Создаем экземпляр менеджера конфигурации

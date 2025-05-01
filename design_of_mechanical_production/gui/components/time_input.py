@@ -12,14 +12,15 @@ class TimeTextInput(TextInput):
     Текстовое поле для ввода времени.
     Разрешает ввод только цифр, запятой и точки.
     """
+
     def insert_text(self, substring: str, from_undo: bool = False) -> str:
         """
         Обрабатывает вставку текста в поле.
-        
+
         Args:
             substring: Вставляемый текст.
             from_undo: Флаг, указывающий, что вставка происходит при отмене действия.
-            
+
         Returns:
             str: Обработанный текст для вставки.
         """
@@ -33,10 +34,10 @@ class TimeTextInput(TextInput):
     def filter_text(text: str) -> bool:
         """
         Фильтрует вводимый текст.
-        
+
         Args:
             text: Текст для проверки.
-            
+
         Returns:
             bool: True, если текст допустим, иначе False.
         """

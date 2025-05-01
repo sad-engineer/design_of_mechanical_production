@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
+from typing import List
+
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
-from kivy.core.window import Window
-from typing import List
+from kivy.uix.textinput import TextInput
 
 
 class MachineToolSuggestField(BoxLayout):
     """
     Поле с автодополнением для выбора станка.
-    
+
     Attributes:
         machine_tools_names: Список доступных станков.
         text_input: Текстовое поле для ввода.
         suggestions_layout: Layout для отображения подсказок.
     """
+
     def __init__(self, machine_tools_names: List[str], **kwargs):
         """
         Инициализирует поле с автодополнением.
-        
+
         Args:
             machine_tools_names: Список доступных станков.
             **kwargs: Дополнительные аргументы для BoxLayout.
@@ -36,7 +38,7 @@ class MachineToolSuggestField(BoxLayout):
     def on_text(self, instance: TextInput, value: str):
         """
         Обрабатывает изменение текста в поле ввода.
-        
+
         Args:
             instance: Экземпляр TextInput
             value: Новое значение текста
@@ -49,20 +51,12 @@ class MachineToolSuggestField(BoxLayout):
                 row_height = 30
                 max_height = max_rows * row_height
                 content_height = row_height * len(filtered)
-                box = BoxLayout(
-                    orientation='vertical',
-                    size_hint_y=None,
-                    height=content_height
-                )
+                box = BoxLayout(orientation='vertical', size_hint_y=None, height=content_height)
                 for tool in filtered:
                     btn = Button(text=tool, size_hint_y=None, height=row_height)
                     btn.bind(on_release=lambda btn, name=tool: self.select_tool(name))
                     box.add_widget(btn)
-                scroll = ScrollView(
-                    size_hint=(None, None),
-                    size=(self.text_input.width, min(max_height, content_height)),
-                    bar_width=8
-                )
+                scroll = ScrollView(size_hint=(None, None), size=(self.text_input.width, min(max_height, content_height)), bar_width=8)
                 scroll.add_widget(box)
                 self.suggestions_layout = scroll
                 x_win, y_win = self.text_input.to_window(self.text_input.x, self.text_input.y)
@@ -78,7 +72,7 @@ class MachineToolSuggestField(BoxLayout):
     def select_tool(self, tool: str):
         """
         Выбирает станок из подсказок.
-        
+
         Args:
             tool: Название выбранного станка.
         """
@@ -89,7 +83,7 @@ class MachineToolSuggestField(BoxLayout):
     def text(self) -> str:
         """
         Возвращает текст из поля ввода.
-        
+
         Returns:
             str: Текст из поля ввода.
         """
@@ -99,7 +93,7 @@ class MachineToolSuggestField(BoxLayout):
     def text(self, value: str):
         """
         Устанавливает текст в поле ввода.
-        
+
         Args:
             value: Новое значение текста.
         """
