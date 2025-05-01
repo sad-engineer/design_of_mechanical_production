@@ -1,27 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
+from __future__ import annotations
+
 from dataclasses import dataclass
 from decimal import Decimal
 from math import ceil
+from typing import Optional
 
-from design_of_mechanical_production.entities.equipment import Equipment
+from design_of_mechanical_production.core.entities.types import IEquipment, IOperation
 
 
 @dataclass
-class Operation:
+class Operation(IOperation):
     """
-    Класс, представляющий технологическую операцию.
+    Класс, представляющий операцию технологического процесса.
     """
-    number: str                                         # Номер операции
-    name: str                                           # Название операции
-    time: Decimal                                       # Норма времени на операцию
-    equipment: Equipment                                # Модель станка
-    calculated_machines_count: Decimal = Decimal('0')   # Расчетное количество станков
-    accepted_machines_count: int = 0                    # Принятое количество станков (округленное вверх)
-    load_factor: Decimal = Decimal('0')                 # Коэффициент загрузки станков
-    percentage: Decimal = Decimal('0')                  # Доля от общей трудоемкости
-    
+
+    number: int
+    name: str
+    time: Decimal
+    equipment: IEquipment
+    calculated_machines_count: Decimal = Decimal('0')  # Расчетное количество станков
+    accepted_machines_count: int = 0  # Принятое количество станков (округленное вверх)
+    load_factor: Decimal = Decimal('0')  # Коэффициент загрузки станков
+    percentage: Optional[Decimal] = None
+
     def accept_machines_count(self) -> None:
         """
         Округляет расчетное количество станков вверх до целого числа
@@ -29,7 +33,7 @@ class Operation:
         """
         self.accepted_machines_count = ceil(self.calculated_machines_count)
         self.calculate_load_factor()
-        
+
     def calculate_load_factor(self) -> None:
         """
         Рассчитывает коэффициент загрузки станков по формуле:
@@ -42,4 +46,12 @@ class Operation:
             self.load_factor = self.calculated_machines_count / Decimal(self.accepted_machines_count)
         else:
             self.load_factor = Decimal('0')
-        
+
+    def calculate_percentage(self, total_time: Decimal) -> None:
+        """
+        Рассчитывает процентное соотношение операции.
+
+        Args:
+            total_time: Общее время процесса
+        """
+        self.percentage = (self.time / total_time) * Decimal('100')

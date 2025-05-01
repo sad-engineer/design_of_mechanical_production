@@ -14,6 +14,5 @@ env.bak /
 .idea/
 temp/
 dist/
-input/
-output/
 settings.yaml
+launch_config.json
