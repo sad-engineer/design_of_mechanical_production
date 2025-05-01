@@ -5,12 +5,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from design_of_mechanical_production.core.entities.equipment_factory import EquipmentFactory
-from design_of_mechanical_production.core.entities.machine_info import MachineInfo
-from design_of_mechanical_production.core.entities.types import IEquipment, IMachineInfo, IProcess, IWorkshop, IWorkshopZone, MachineCountType
-from design_of_mechanical_production.core.entities.workshop_zone import SpecificWorkshopZone, WorkshopZone
+from design_of_mechanical_production.core.entities.types import IEquipment, IMachineInfo, IProcess, IWorkshop, IWorkshopZone
 from design_of_mechanical_production.settings import get_setting
 
 
@@ -29,13 +26,6 @@ class Workshop(IWorkshop):
     total_area: Decimal = Decimal("0")
     required_area: Decimal = Decimal("0")
     length: Decimal = Decimal("0")
-    equipment_factory: Optional[EquipmentFactory] = None
-
-    def __post_init__(self) -> None:
-        """
-        Инициализирует фабрику оборудования после создания объекта.
-        """
-        self.equipment_factory = EquipmentFactory()
 
     @property
     def total_machines_count(self) -> int:
@@ -44,8 +34,8 @@ class Workshop(IWorkshop):
         """
         total_count = 0
         for name, zone in self.zones.items():
-            if hasattr(zone, 'total_machines_count'):
-                total_count += zone.total_machines_count
+            if hasattr(zone, 'accepted_machines_count'):
+                total_count += zone.accepted_machines_count
         return total_count
 
     def calculate_total_area(self) -> Decimal:
@@ -77,9 +67,10 @@ class Workshop(IWorkshop):
         """
         Рассчитывает общую площадь, занимаемую оборудованием.
         """
+        total_required_area = Decimal("0")
         for zone in self.zones.values():
             # Суммируем площади с учетом количества станков
-            total_required_area = zone.area
+            total_required_area += zone.area
         self.required_area = total_required_area
 
         return total_required_area
@@ -103,7 +94,7 @@ class Workshop(IWorkshop):
         machines = self.get_equipment_count()
         return {name: info.accepted_count for name, info in machines.items()}
 
-    def add_zone(self, name: str, zone: WorkshopZone) -> None:
+    def add_zone(self, name: str, zone: IWorkshopZone) -> None:
         """
         Добавляет зону в цех.
 

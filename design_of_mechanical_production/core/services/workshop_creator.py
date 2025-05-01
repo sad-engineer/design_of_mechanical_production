@@ -52,7 +52,7 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     grinding_zone_percent = Decimal(str(get_setting('grinding_zone_percent')))
     grinding_zone = WorkshopZone(
         name='Заточное отделение',
-        machines={"Станок универсально-заточной 3В642": MachineInfo(model=equipment_factory.create_equipment("3В642"), calculated_count=main_zone.total_equipment_count * grinding_zone_percent)},
+        machines={"Станок универсально-заточной 3В642": MachineInfo(model=equipment_factory.create_equipment("3В642"), calculated_count=main_zone.accepted_machines_count * grinding_zone_percent)},
     )
     workshop.add_zone('grinding_zone', grinding_zone)
 
@@ -60,12 +60,12 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     repair_zone_percent = Decimal(str(get_setting('repair_zone_percent')))
     repair_zone = WorkshopZone(
         name='Ремонтное отделение',
-        machines={"Станки в ремонте": MachineInfo(model="Станки в ремонте", calculated_count=main_zone.total_equipment_count * repair_zone_percent)},
+        machines={"Станки в ремонте": MachineInfo(model="Станки в ремонте", calculated_count=main_zone.accepted_machines_count * repair_zone_percent)},
     )
     workshop.add_zone('repair_zone', repair_zone)
 
     # Расчет вспомогательных зон
-    total_machines_count = main_zone.total_equipment_count + grinding_zone.total_equipment_count + repair_zone.total_equipment_count
+    total_machines_count = main_zone.accepted_machines_count + grinding_zone.accepted_machines_count + repair_zone.accepted_machines_count
 
     # Склад инструмента
     tool_storage_zone = SpecificWorkshopZone(name='Склад инструмента', specific_area=Decimal(str(get_setting('specific_areas.tool_storage'))), total_equipment_count=total_machines_count)

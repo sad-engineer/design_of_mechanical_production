@@ -20,8 +20,12 @@ class AreaCalculator(IAreaCalculator):
     def calculate_area(self, machines: Dict[str, IMachineInfo]) -> Decimal:
         area = Decimal('0')
         for machine in machines.values():
-            length = machine.model.length
-            width = machine.model.width
+            if hasattr(machine.model, 'length') and hasattr(machine.model, 'width'):
+                length = machine.model.length
+                width = machine.model.width
+            else:
+                length = Decimal('2.000')
+                width = Decimal('1.000')
             area += (length * width + self.passage_area) * machine.accepted_count
         return area
 

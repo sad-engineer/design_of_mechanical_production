@@ -10,6 +10,7 @@ from typing import Dict, Union
 
 from design_of_mechanical_production.core.entities.area_calculator import AreaCalculator, SpecificAreaCalculator
 from design_of_mechanical_production.core.entities.types import AreaCalculatorType, IAreaCalculator, IMachineInfo, IWorkshopZone
+from design_of_mechanical_production.settings import get_setting
 
 
 class BaseWorkshopZone(ABC):
@@ -27,33 +28,6 @@ class BaseWorkshopZone(ABC):
         """
         pass
 
-    @property
-    @abstractmethod
-    def total_equipment_count(self) -> int:
-        """
-        Возвращает общее количество оборудования в зоне.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def total_calculated_equipment_count(self) -> Decimal:
-        """
-        Возвращает расчетное количество оборудования в зоне.
-        """
-        pass
-
-    @abstractmethod
-    def add_machine(self, name: str, machine: IMachineInfo) -> None:
-        """
-        Добавляет станок в зону.
-
-        Args:
-            name: Название станка
-            machine: Информация о станке
-        """
-        pass
-
 
 @dataclass
 class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
@@ -63,8 +37,6 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
 
     name: str
     machines: Dict[str, IMachineInfo] = field(default_factory=dict)
-    area: Decimal = Decimal('0')
-    total_equipment_count: int = 0
     _area_calculator: IAreaCalculator = None
 
     def __post_init__(self) -> None:
@@ -72,17 +44,13 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
         Инициализирует калькулятор площади после создания объекта.
         """
         if self._area_calculator is None:
-            if self.name == "Основная зона":
-                self._area_calculator = AreaCalculator(Decimal('2.5'))
-            else:
-                self._area_calculator = SpecificAreaCalculator(Decimal('4.5'), self.total_equipment_count)
+            self._area_calculator = AreaCalculator(Decimal(get_setting("passage_area")))
 
     def calculate_area(self) -> Decimal:
         """
         Рассчитывает площадь зоны.
         """
-        self.area = self._area_calculator.calculate_area(self.machines)
-        return self.area
+        return self._area_calculator.calculate_area(self.machines)
 
     def add_machine(self, name: str, machine: IMachineInfo) -> None:
         """
@@ -93,14 +61,27 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
             machine: Информация о станке
         """
         self.machines[name] = machine
-        self.total_equipment_count += machine.accepted_count
 
     @property
-    def total_calculated_equipment_count(self) -> Decimal:
+    def calculated_machines_count(self) -> Decimal:
         """
         Общее расчетное количество станков в зоне.
         """
         return sum(machine.calculated_count for machine in self.machines.values())
+
+    @property
+    def accepted_machines_count(self) -> int:
+        """
+        Возвращает количество станков в зоне.
+        """
+        return sum(machine.accepted_count for machine in self.machines.values())
+
+    @property
+    def area(self) -> Decimal:
+        """
+        Возвращает площадь зоны.
+        """
+        return self._area_calculator.calculate_area(self.machines)
 
 
 @dataclass

@@ -97,7 +97,7 @@ class Process(IProcess):
         for operation in self.operations:
             operation.percentage = (operation.time / self.total_time) * 100
 
-    def add_operation(self, operation: Operation) -> None:
+    def add_operation(self, operation: IOperation) -> None:
         """
         Добавляет операцию в процесс.
 

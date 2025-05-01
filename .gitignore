@@ -16,3 +16,7 @@ temp/
 dist/
 settings.yaml
 launch_config.json
+input
+input/
+output
+output/

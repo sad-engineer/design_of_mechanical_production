@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "design_of_mechanical_production"
-version = "0.0.13"
+version = "0.0.15"
 description = "Расчет площади цеха"
 authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
 readme = "README.md"
-packages = [{include = "design_of_mechanical_production"}]
+packages = [{ include = "design_of_mechanical_production" }]
 license = "MIT"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -18,7 +18,7 @@ classifiers = [
 python = "^3.9"
 pandas = "2.2.3"
 pyyaml = "6.0.2"
-machine-tools = {git = "https://github.com/sad-engineer/machine_tools.git", rev = "dbf0d5ee591bb4edd80ccec91c53c041cc1728f5"}
+machine-tools = { git = "https://github.com/sad-engineer/machine_tools.git", rev = "dbf0d5ee591bb4edd80ccec91c53c041cc1728f5" }
 kivy = "2.3.1"
 kivymd = "1.2.0"
 openpyxl = "3.1.5"

@@ -31,8 +31,9 @@ class IProcess(Protocol):
     """
 
     operations: List['IOperation']
+    total_time: Decimal
 
-    def calculate_required_machines(self, production_volume: int) -> Dict[str, 'IMachineInfo']:
+    def calculate_required_machines(self, production_volume: float) -> Dict[str, 'IMachineInfo']:
         """
         Рассчитывает необходимое количество станков.
 
@@ -44,9 +45,52 @@ class IProcess(Protocol):
         """
         ...
 
+    @property
+    def machines_count(self) -> Dict[str, IMachineInfo]:
+        """
+        Количество станков по типам.
+        """
+        ...
+
+    @property
+    def total_machines_count(self) -> int:
+        """
+        Общее количество станков.
+        """
+        return ...
+
+    @property
+    def calculated_machines_count(self) -> Decimal:
+        """
+        Общее расчетное количество станков.
+        """
+        return ...
+
+    def calculate_total_time(self) -> None:
+        """
+        Общее время на выполнение всех операций.
+        """
+        ...
+
+    @property
+    def average_load_factor(self) -> Decimal:
+        """
+        Средний коэффициент загрузки станков.
+        """
+        ...
+
     def calculate_percentage(self) -> None:
         """
-        Рассчитывает процентное соотношение операций.
+        Рассчитывает долю от общей трудоемкости для каждой операции.
+        """
+        ...
+
+    def add_operation(self, operation: 'IOperation') -> None:
+        """
+        Добавляет операцию в процесс.
+
+        Args:
+            operation: Операция для добавления
         """
         ...
 
@@ -60,7 +104,22 @@ class IOperation(Protocol):
     name: str
     time: Decimal
     equipment: 'IEquipment'
+    calculated_machines_count: Decimal  # Расчетное количество станков
+    accepted_machines_count: int  # Принятое количество станков (округленное вверх)
+    load_factor: Decimal  # Коэффициент загрузки станков
     percentage: Optional[Decimal]
+
+    def accept_machines_count(self) -> None:
+        """
+        Округляет количество станков до целого числа.
+        """
+        ...
+
+    def calculate_load_factor(self) -> None:
+        """
+        Рассчитывает коэффициент загрузки станков.
+        """
+        ...
 
     def calculate_percentage(self, total_time: Decimal) -> None:
         """
@@ -71,18 +130,6 @@ class IOperation(Protocol):
         """
         ...
 
-    def calculate_load_factor(self) -> None:
-        """
-        Рассчитывает коэффициент загрузки станков.
-        """
-        ...
-
-    def accept_machines_count(self) -> None:
-        """
-        Округляет количество станков до целого числа.
-        """
-        ...
-
 
 class IWorkshop(Protocol):
     """
@@ -90,7 +137,7 @@ class IWorkshop(Protocol):
     """
 
     name: str
-    production_volume: int
+    production_volume: float
     mass_detail: Decimal
     process: IProcess
     equipment_list: List[IEquipment]
@@ -98,13 +145,6 @@ class IWorkshop(Protocol):
     total_area: Decimal
     required_area: Decimal
     length: Decimal
-    equipment_factory: Optional['IEquipmentFactory']
-
-    def __post_init__(self) -> None:
-        """
-        Инициализирует фабрику оборудования после создания объекта.
-        """
-        ...
 
     @property
     def total_machines_count(self) -> int:
@@ -161,12 +201,41 @@ class IWorkshopZone(Protocol):
 
     name: str
     machines: Dict[str, 'IMachineInfo']
-    area: Decimal
-    total_equipment_count: int
 
     def calculate_area(self) -> Decimal:
         """
         Рассчитывает площадь зоны.
+        """
+        ...
+
+    def add_machine(self, name: str, machine: IMachineInfo) -> None:
+        """
+        Добавляет станок в зону.
+
+        Args:
+            name: Название станка
+            machine: Информация о станке
+        """
+        ...
+
+    @property
+    def calculated_machines_count(self) -> Decimal:
+        """
+        Общее расчетное количество станков в зоне.
+        """
+        ...
+
+    @property
+    def accepted_machines_count(self) -> int:
+        """
+        Возвращает количество станков в зоне.
+        """
+        ...
+
+    @property
+    def area(self) -> Decimal:
+        """
+        Возвращает площадь зоны.
         """
         ...
 
