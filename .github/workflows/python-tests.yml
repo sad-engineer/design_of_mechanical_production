@@ -29,6 +29,13 @@ jobs:
         pip install -r requirements.txt
         echo "End installing dependencies at $(date)"
 
+    - name: Install SQLite dependencies
+      run: sudo apt-get install sqlite3
+
+    - name: Initialize database
+      run: |
+        python -c "from machine_tools import MachineToolsContainer; MachineToolsContainer().creator().initialize()"
+
     - name: Run tests
       run: |
         echo "Start pytest at $(date)"
