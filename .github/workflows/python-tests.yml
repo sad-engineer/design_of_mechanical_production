@@ -1,4 +1,8 @@
 name: Python Tests
+run: |
+    echo "Start pytest at $(date)"
+    python -m pytest tests/ --cov=design_of_mechanical_production --cov-report=xml
+    echo "End pytest at $(date)"
 
 on:
   push:
@@ -11,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: [3.9, 3.10, 3.11]
 
     steps:
     - uses: actions/checkout@v3
