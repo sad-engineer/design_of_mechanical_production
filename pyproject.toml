@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "design_of_mechanical_production"
-version = "0.0.15"
+version = "0.0.16"
 description = "Расчет площади цеха"
 authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
 readme = "README.md"
@@ -22,8 +22,8 @@ machine-tools = { git = "https://github.com/sad-engineer/machine_tools.git", rev
 kivy = "2.3.1"
 kivymd = "1.2.0"
 openpyxl = "3.1.5"
-black = "^25.1.0"
-isort = "^6.0.1"
+black = "25.1.0"
+isort = "6.0.1"
 
 [tool.poetry.scripts]
 design-of-mechanical-production = "design_of_mechanical_production.main:main"
@@ -33,7 +33,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
-line-length = 200
+line-length = 120
 target-version = ['py39']
 include = '\.pyi?$'
 skip-string-normalization = true
@@ -54,7 +54,7 @@ extend-exclude = '''
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-line_length = 200
+line_length = 120
 
 [tool.mypy]
 python_version = "3.9"

@@ -4,7 +4,7 @@
 from decimal import Decimal
 from typing import List
 
-from design_of_mechanical_production.core.interfaces.formatters import INumberFormatter, ITableFormatter
+from design_of_mechanical_production.core.interfaces.i_formatters import INumberFormatter, ITableFormatter
 
 
 class NumberFormatter(INumberFormatter):

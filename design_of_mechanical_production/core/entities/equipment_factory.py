@@ -6,9 +6,13 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Dict, Optional
 
-from design_of_mechanical_production.core.entities.equipment import Equipment
-from design_of_mechanical_production.core.entities.machine_tool_source import DatabaseMachineToolSource, DefaultMachineToolSource, MachineToolSource
-from design_of_mechanical_production.core.entities.types import IEquipment, IEquipmentFactory
+from design_of_mechanical_production.core.entities import Equipment
+from design_of_mechanical_production.core.entities.machine_tool_source import (
+    DatabaseMachineToolSource,
+    DefaultMachineToolSource,
+    MachineToolSource,
+)
+from design_of_mechanical_production.core.interfaces import IEquipment, IEquipmentFactory
 
 
 class EquipmentFactory(IEquipmentFactory):
@@ -49,6 +53,7 @@ class EquipmentFactory(IEquipmentFactory):
             except ValueError as e:
                 raise ValueError(f"Не удалось создать оборудование: {str(e)}")
 
+        equipment = None
         try:
             equipment = Equipment(
                 name=None,

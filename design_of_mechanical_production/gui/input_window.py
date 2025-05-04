@@ -70,19 +70,38 @@ class InputWindow(FloatLayout):
     def _create_header(self):
         """Создает заголовок окна."""
         # Создаем однострочный контейнер для иконок
-        self.header = BoxLayout(orientation='horizontal', size_hint=(None, None), width=40, height=40, padding=0, spacing=5, pos=(Window.width - 100, Window.height - 50))
+        self.header = BoxLayout(
+            orientation='horizontal',
+            size_hint=(None, None),
+            width=40,
+            height=40,
+            padding=0,
+            spacing=5,
+            pos=(Window.width - 100, Window.height - 50),
+        )
 
         # Добавляем иконки
-        self.theme_btn = MDIconButton(icon="theme-light-dark", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.toggle_theme)
+        self.theme_btn = MDIconButton(
+            icon="theme-light-dark", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.toggle_theme
+        )
         self.header.add_widget(self.theme_btn)
 
-        self.settings_btn = MDIconButton(icon="cog", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.open_settings)
+        self.settings_btn = MDIconButton(
+            icon="cog", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.open_settings
+        )
         self.header.add_widget(self.settings_btn)
 
         self.add_widget(self.header)
 
         # Добавляем заголовок
-        self.label = MDLabel(text='Ввод начальных условий', size_hint=(1.25, None), height=50, pos=(0, Window.height - 50), halign='center', font_style='H5')
+        self.label = MDLabel(
+            text='Ввод начальных условий',
+            size_hint=(1.25, None),
+            height=50,
+            pos=(0, Window.height - 50),
+            halign='center',
+            font_style='H5',
+        )
         self.add_widget(self.label)
 
         # Привязываем обновление позиции к изменению размера окна
@@ -126,7 +145,14 @@ class InputWindow(FloatLayout):
     def _create_buttons(self):
         """Создает кнопки управления."""
         # Контейнер для кнопок
-        buttons_box = BoxLayout(orientation='horizontal', size_hint=(0.5, None), height=50, spacing=5, padding=[0, 0, 0, 5], pos_hint={'center_x': 0.5, 'bottom': 0})  # Привязка к нижнему краю
+        buttons_box = BoxLayout(
+            orientation='horizontal',
+            size_hint=(0.5, None),
+            height=50,
+            spacing=5,
+            padding=[0, 0, 0, 5],
+            pos_hint={'center_x': 0.5, 'bottom': 0},
+        )  # Привязка к нижнему краю
 
         # Кнопки
         calc_btn = Button(text='Начать расчет', size_hint_x=0.5, height=40, on_release=self.save_data)
@@ -140,7 +166,14 @@ class InputWindow(FloatLayout):
         left_col = FloatLayout(size_hint_x=None, width=275)
 
         # Создаем контейнер для элементов
-        content = BoxLayout(orientation='vertical', size_hint=(None, None), width=275, height=200, pos_hint={'x': 0, 'top': 1}, spacing=0)  # Позиционируем контент сверху
+        content = BoxLayout(
+            orientation='vertical',
+            size_hint=(None, None),
+            width=275,
+            height=200,
+            pos_hint={'x': 0, 'top': 1},
+            spacing=0,
+        )  # Позиционируем контент сверху
 
         # Название цеха
         content.add_widget(MDLabel(text='Название цеха:', halign='left', size_hint_y=None, height=30))
@@ -148,7 +181,9 @@ class InputWindow(FloatLayout):
         content.add_widget(self.name_input)
 
         # Годовой объем производства
-        content.add_widget(MDLabel(text='Годовой объем производства (шт.):', halign='left', size_hint_y=None, height=30))
+        content.add_widget(
+            MDLabel(text='Годовой объем производства (шт.):', halign='left', size_hint_y=None, height=30)
+        )
         self.volume_input = TextInput(text='10000', size_hint_y=None, halign='center', height=30)
         content.add_widget(self.volume_input)
 
@@ -182,7 +217,13 @@ class InputWindow(FloatLayout):
 
         # Создаем таблицу (теперь она сама содержит прокрутку и рамку)
         self.table = EditableTable(
-            config=table_config, row_factory=row_factory, event_manager=None, pos_hint={'x': 0, 'top': 1}, size_hint=(1, 1), height=400, table_title='Технологический процесс изготовления детали'
+            config=table_config,
+            row_factory=row_factory,
+            event_manager=None,
+            pos_hint={'x': 0, 'top': 1},
+            size_hint=(1, 1),
+            height=400,
+            table_title='Технологический процесс изготовления детали',
         )
         self.table.event_manager = TableEventManagerImpl(self.table)
         right_col.add_widget(self.table)
@@ -193,14 +234,20 @@ class InputWindow(FloatLayout):
         """Сохраняет введенные данные."""
         try:
             # Получаем данные параметров
-            parameters_data = {'name': self.name_input.text, 'production_volume': int(self.volume_input.text), 'mass_detail': float(self.mass_input.text)}
+            parameters_data = {
+                'name': self.name_input.text,
+                'production_volume': int(self.volume_input.text),
+                'mass_detail': float(self.mass_input.text),
+            }
 
             # Получаем данные из таблицы и преобразуем их в нужный формат
             table_data = self.table.get_data()
             process_data = []
             for row in table_data:
                 if len(row) >= 4:  # Проверяем, что строка содержит все необходимые поля
-                    process_data.append({'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]})  # Номер операции  # Название операции  # Время операции  # Название станка
+                    process_data.append(
+                        {'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]}
+                    )  # Номер операции  # Название операции  # Время операции  # Название станка
 
             from pathlib import Path
 

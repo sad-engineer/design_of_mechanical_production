@@ -56,7 +56,9 @@ class MachineToolSuggestField(BoxLayout):
                     btn = Button(text=tool, size_hint_y=None, height=row_height)
                     btn.bind(on_release=lambda btn, name=tool: self.select_tool(name))
                     box.add_widget(btn)
-                scroll = ScrollView(size_hint=(None, None), size=(self.text_input.width, min(max_height, content_height)), bar_width=8)
+                scroll = ScrollView(
+                    size_hint=(None, None), size=(self.text_input.width, min(max_height, content_height)), bar_width=8
+                )
                 scroll.add_widget(box)
                 self.suggestions_layout = scroll
                 x_win, y_win = self.text_input.to_window(self.text_input.x, self.text_input.y)

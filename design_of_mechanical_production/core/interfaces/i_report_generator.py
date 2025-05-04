@@ -3,15 +3,13 @@
 # ---------------------------------------------------------------------------------------------------------------------
 from typing import Protocol
 
-from design_of_mechanical_production.core.entities.workshop import Workshop
-
 
 class IReportGenerator(Protocol):
     """
     Интерфейс для генерации отчетов.
     """
 
-    def generate_report(self, workshop: Workshop) -> str:
+    def generate_report(self, workshop: 'IWorkshop') -> str:
         """
         Генерирует отчет о цехе.
 

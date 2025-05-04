@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
+from __future__ import annotations
+
 from decimal import Decimal
 from typing import Dict, Protocol
-
-from design_of_mechanical_production.core.entities.machine_info import MachineInfo
 
 
 class IAreaCalculator(Protocol):
@@ -12,7 +12,7 @@ class IAreaCalculator(Protocol):
     Интерфейс для калькуляторов площади.
     """
 
-    def calculate_area(self, machines: Dict[str, MachineInfo]) -> Decimal:
+    def calculate_area(self, machines: Dict[str, 'IMachineInfo']) -> Decimal:
         """
         Рассчитывает площадь зоны.
 

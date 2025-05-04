@@ -6,7 +6,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Dict, Union
 
-from design_of_mechanical_production.core.entities.types import IAreaCalculator, IMachineInfo
+from design_of_mechanical_production.core.interfaces import IAreaCalculator, IMachineInfo
 
 
 class AreaCalculator(IAreaCalculator):

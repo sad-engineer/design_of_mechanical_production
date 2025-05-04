@@ -5,9 +5,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict, List
+from typing import Dict
 
-from design_of_mechanical_production.core.entities.types import IEquipment, IMachineInfo, IProcess, IWorkshop, IWorkshopZone
+from design_of_mechanical_production.core.entities.workshop_zone import WorkshopZone
+from design_of_mechanical_production.core.interfaces import (
+    IProcess,
+    IWorkshop,
+    IWorkshopZone,
+)
 from design_of_mechanical_production.settings import get_setting
 
 
@@ -15,17 +20,35 @@ from design_of_mechanical_production.settings import get_setting
 class Workshop(IWorkshop):
     """
     Класс, представляющий машиностроительный цех.
+
+    Создает цех на основе процесса и производственного объема.
+    В состав включена основная зона, в которую добавляются станки в соответствии с процессом.
     """
 
     name: str
     production_volume: float
     mass_detail: Decimal
     process: IProcess
-    equipment_list: List[IEquipment] = field(default_factory=list)
     zones: Dict[str, IWorkshopZone] = field(default_factory=dict)
-    total_area: Decimal = Decimal("0")
-    required_area: Decimal = Decimal("0")
-    length: Decimal = Decimal("0")
+
+    _total_area: Decimal = Decimal("0")
+    _required_area: Decimal = Decimal("0")
+    _length: Decimal = Decimal("0")
+
+    def __post_init__(self):
+        # Определяем количество станков
+        if self.process.machines is None:
+            self.process.calculate_required_machines(self.production_volume)
+        if self.process.machines == {}:
+            self.process.calculate_required_machines(self.production_volume)
+        machines = self.process.machines
+
+        # Создаем основную зону
+        main_zone = WorkshopZone(
+            name='Основная зона',
+            machines=machines,
+        )
+        self.add_zone('main_zone', main_zone)
 
     @property
     def total_machines_count(self) -> int:
@@ -38,7 +61,37 @@ class Workshop(IWorkshop):
                 total_count += zone.accepted_machines_count
         return total_count
 
-    def calculate_total_area(self) -> Decimal:
+    @property
+    def total_area(self) -> Decimal:
+        """
+        Общая площадь цеха.
+        """
+        self._calculate_total_area()
+        return self._total_area
+
+    @property
+    def required_area(self) -> Decimal:
+        """
+        Общая площадь цеха.
+        """
+        self._calculate_required_area()
+        return self._required_area
+
+    @property
+    def length(self) -> Decimal:
+        """
+        Длина цеха.
+        """
+        return self._length
+
+    @length.setter
+    def length(self, value: Decimal) -> None:
+        """
+        Устанавливает длину цеха.
+        """
+        self._length = value
+
+    def _calculate_total_area(self) -> None:
         """
         Рассчитывает общую площадь цеха.
         Итоговая площадь рассчитывается как (ширина пролета * количество пролетов) * длину пролета
@@ -48,22 +101,9 @@ class Workshop(IWorkshop):
         # Получаем настройки из конфигурации
         width_span = Decimal(str(get_setting('workshop_span')))
         number_spans = Decimal(str(get_setting('workshop_nam')))
+        self._total_area = (width_span * number_spans) * self._length
 
-        # Рассчитываем длину пролета
-        self.length = self.required_area / (width_span * number_spans)
-
-        # Рассчитываем общую площадь
-        total_area = width_span * number_spans * self.length
-
-        # Округляем до ближайшего большего числа, кратного 6
-        remainder = total_area % 6
-        if remainder != 0:
-            total_area = total_area + (6 - remainder)
-
-        self.total_area = total_area
-        return self.total_area
-
-    def calculate_required_area(self) -> Decimal:
+    def _calculate_required_area(self) -> None:
         """
         Рассчитывает общую площадь, занимаемую оборудованием.
         """
@@ -71,28 +111,7 @@ class Workshop(IWorkshop):
         for zone in self.zones.values():
             # Суммируем площади с учетом количества станков
             total_required_area += zone.area
-        self.required_area = total_required_area
-
-        return total_required_area
-
-    def add_equipment(self, equipment: IEquipment) -> None:
-        """
-        Добавляет оборудование в цех.
-        """
-        self.equipment_list.append(equipment)
-
-    def get_equipment_count(self) -> Dict[str, IMachineInfo]:
-        """
-        Возвращает количество оборудования.
-        """
-        return self.process.calculate_required_machines(self.production_volume)
-
-    def get_machines_count(self) -> Dict[str, int]:
-        """
-        Возвращает количество станков.
-        """
-        machines = self.get_equipment_count()
-        return {name: info.accepted_count for name, info in machines.items()}
+        self._required_area = total_required_area
 
     def add_zone(self, name: str, zone: IWorkshopZone) -> None:
         """
@@ -103,3 +122,18 @@ class Workshop(IWorkshop):
             zone: Объект зоны
         """
         self.zones[name] = zone
+
+    def default_calculate_length(self) -> None:
+        """
+        Рассчитывает длину цеха по умолчанию.
+        """
+        # Получаем настройки из конфигурации
+        width_span = Decimal(str(get_setting('workshop_span')))
+        number_spans = Decimal(str(get_setting('workshop_nam')))
+
+        remainder = self.required_area % 6
+        if remainder != 0:
+            total_area = self.required_area + (6 - remainder)
+
+        self._total_area = total_area
+        self.length = total_area / (width_span * number_spans)

@@ -48,7 +48,15 @@ class BaseTableRowFactory(TableRowFactory):
         row_widgets.append(num_input)
 
         # Операция
-        operation_spinner = Spinner(text=data[1], values=self.operations, size_hint_y=None, height=30, background_normal='', background_color=(0.9, 0.9, 0.9, 1), option_cls=MySpinnerOption)
+        operation_spinner = Spinner(
+            text=data[1],
+            values=self.operations,
+            size_hint_y=None,
+            height=30,
+            background_normal='',
+            background_color=(0.9, 0.9, 0.9, 1),
+            option_cls=MySpinnerOption,
+        )
         row_widgets.append(operation_spinner)
 
         # Время

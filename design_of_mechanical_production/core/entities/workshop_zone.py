@@ -8,8 +8,12 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Union
 
-from design_of_mechanical_production.core.entities.area_calculator import AreaCalculator, SpecificAreaCalculator
-from design_of_mechanical_production.core.entities.types import AreaCalculatorType, IAreaCalculator, IMachineInfo, IWorkshopZone
+from design_of_mechanical_production.core.entities import AreaCalculator, SpecificAreaCalculator
+from design_of_mechanical_production.core.interfaces import (
+    IAreaCalculator,
+    IMachineInfo,
+    IWorkshopZone,
+)
 from design_of_mechanical_production.settings import get_setting
 
 

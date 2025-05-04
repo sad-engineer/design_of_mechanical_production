@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, Optional
 
-from design_of_mechanical_production.core.entities.types import IEquipment
+from design_of_mechanical_production.core.interfaces import IEquipment
 
 
 @dataclass

@@ -72,14 +72,18 @@ class SettingsWindow(BaseWindow):
         main_layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
 
         # Заголовок
-        title = MDLabel(text="Настройки расчета", size_hint_y=None, height=50, font_size=24, halign='center', font_style='H5')
+        title = MDLabel(
+            text="Настройки расчета", size_hint_y=None, height=50, font_size=24, halign='center', font_style='H5'
+        )
         main_layout.add_widget(title)
 
         # Создаем ScrollView
         scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False, do_scroll_y=True)
 
         # Контейнер для прокручиваемого содержимого
-        content_layout = BoxLayout(orientation='vertical', spacing=10, padding=10, size_hint_y=None, size_hint_x=1, pos_hint={'center_x': 0.5})
+        content_layout = BoxLayout(
+            orientation='vertical', spacing=10, padding=10, size_hint_y=None, size_hint_x=1, pos_hint={'center_x': 0.5}
+        )
         content_layout.bind(minimum_height=content_layout.setter('height'))
 
         # Фонд рабочего времени
