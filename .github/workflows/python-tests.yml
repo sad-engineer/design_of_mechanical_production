@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.9, 3.10, 3.11]
+        python-version: [3.9, '3.10', 3.11]
 
     steps:
     - uses: actions/checkout@v3
@@ -30,5 +30,5 @@ jobs:
     - name: Run tests
       run: |
         echo "Start pytest at $(date)"
-        python -m pytest tests/ --cov=design_of_mechanical_production --cov-report=xml
+        python -m pytest tests/ --maxfail=1 -v
         echo "End pytest at $(date)"
