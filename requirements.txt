@@ -4,3 +4,5 @@ machine-tools @ git+https://github.com/sad-engineer/machine_tools.git@dbf0d5ee59
 kivy==2.3.1
 kivymd==1.2.0
 openpyxl==3.1.5
+pytest==7.4.3
+pytest-cov==4.1.0
