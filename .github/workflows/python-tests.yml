@@ -24,11 +24,13 @@ jobs:
 
     - name: Install dependencies
       run: |
+        echo "Start installing dependencies at $(date)"
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        echo "End installing dependencies at $(date)"
 
     - name: Run tests
       run: |
         echo "Start pytest at $(date)"
-        python -m pytest tests/ --maxfail=1 -v
+        python -m pytest --timeout=120 tests/ --cov=design_of_mechanical_production --cov-report=xml
         echo "End pytest at $(date)"
