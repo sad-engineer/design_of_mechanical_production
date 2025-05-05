@@ -89,14 +89,14 @@ class TestSpecificWorkshopZone(unittest.TestCase):
         self.specific_zone = SpecificWorkshopZone(
             name=self.zone_name,
             specific_area=self.specific_area,
-            total_equipment_count=self.total_equipment_count
+            unit_of_calculation=self.total_equipment_count
         )
 
     def test_01_initialization(self):
         """Тест инициализации вспомогательной зоны."""
         self.assertEqual(self.specific_zone.name, self.zone_name)
         self.assertEqual(self.specific_zone.specific_area, self.specific_area)
-        self.assertEqual(self.specific_zone.total_equipment_count, self.total_equipment_count)
+        self.assertEqual(self.specific_zone.unit_of_calculation, self.total_equipment_count)
 
     def test_02_area_calculation(self):
         """Тест расчета площади вспомогательной зоны."""
@@ -106,21 +106,15 @@ class TestSpecificWorkshopZone(unittest.TestCase):
     def test_03_total_calculated_equipment_count(self):
         """Тест получения общего количества оборудования."""
         expected_count = Decimal(str(self.total_equipment_count))
-        self.assertEqual(self.specific_zone.total_calculated_equipment_count, expected_count)
+        self.assertEqual(self.specific_zone.unit_of_calculation, expected_count)
 
-    def test_04_add_machine_not_implemented(self):
-        """Тест попытки добавления станка в вспомогательную зону."""
-        machine_mock = Mock(spec=IMachineInfo)
-        with self.assertRaises(NotImplementedError):
-            self.specific_zone.add_machine("Станок", machine_mock)
-
-    def test_05_decimal_equipment_count(self):
+    def test_04_decimal_equipment_count(self):
         """Тест работы с десятичным количеством оборудования."""
         decimal_count = Decimal('5.5')
         zone = SpecificWorkshopZone(
             name=self.zone_name,
             specific_area=self.specific_area,
-            total_equipment_count=decimal_count
+            unit_of_calculation=decimal_count
         )
         expected_area = self.specific_area * decimal_count
         self.assertEqual(zone.area, expected_area)

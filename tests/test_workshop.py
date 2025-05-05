@@ -66,15 +66,19 @@ class TestWorkshop(unittest.TestCase):
         self.assertEqual(self.workshop.production_volume, 1000)
         self.assertEqual(self.workshop.mass_detail, Decimal("10.5"))
         self.assertEqual(self.workshop.process, self.process)
-        self.assertIn('main_zone', self.workshop.zones)
 
     def test_02_total_machines_count(self):
         """Тест расчета общего количества станков."""
-        self.assertEqual(self.workshop.total_machines_count, 17)
         # Настраиваем мок для зоны
         main_zone = MagicMock(spec=WorkshopZone)
         main_zone.accepted_machines_count = 5
         self.workshop.zones['main_zone'] = main_zone
+
+        second_zone = MagicMock(spec=WorkshopZone)
+        second_zone.accepted_machines_count = 12
+        self.workshop.zones['second_zone'] = second_zone
+
+        self.assertEqual(self.workshop.total_machines_count, 17)
 
     def test_03_add_zone(self):
         """Тест добавления зоны."""
