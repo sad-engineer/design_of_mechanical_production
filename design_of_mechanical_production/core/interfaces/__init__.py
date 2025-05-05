@@ -11,7 +11,7 @@ from design_of_mechanical_production.core.interfaces.i_operation import IOperati
 from design_of_mechanical_production.core.interfaces.i_process import IProcess
 from design_of_mechanical_production.core.interfaces.i_report_generator import IReportGenerator
 from design_of_mechanical_production.core.interfaces.i_workshop import IWorkshop
-from design_of_mechanical_production.core.interfaces.i_workshop_zone import IWorkshopZone, ISpecificWorkshopZone
+from design_of_mechanical_production.core.interfaces.i_workshop_zone import ISpecificWorkshopZone, IWorkshopZone
 
 __all__ = [
     'IDataReader',
@@ -26,5 +26,5 @@ __all__ = [
     'IProcess',
     'IWorkshop',
     'IWorkshopZone',
-    'ISpecificWorkshopZone'
+    'ISpecificWorkshopZone',
 ]

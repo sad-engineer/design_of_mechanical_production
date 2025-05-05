@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from design_of_mechanical_production.core.interfaces import IEquipment
+
 
 class IEquipmentFactory(Protocol):
     """

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from design_of_mechanical_production.launch_manager import load_launch_config
-from design_of_mechanical_production.launcher import run_with_gui, run_without_gui
 from design_of_mechanical_production.data.utils.file_system import (
     check_initial_data_file,
     create_initial_data_file,
     ensure_directories_exist,
 )
+from design_of_mechanical_production.launch_manager import load_launch_config
+from design_of_mechanical_production.launcher import run_with_gui, run_without_gui
 
 
 def main():

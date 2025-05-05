@@ -12,8 +12,8 @@ from design_of_mechanical_production.core.entities import AreaCalculator, Specif
 from design_of_mechanical_production.core.interfaces import (
     IAreaCalculator,
     IMachineInfo,
-    IWorkshopZone,
     ISpecificWorkshopZone,
+    IWorkshopZone,
 )
 from design_of_mechanical_production.settings import get_setting
 

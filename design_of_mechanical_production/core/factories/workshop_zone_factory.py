@@ -5,20 +5,19 @@ from decimal import Decimal
 from typing import Dict
 
 from design_of_mechanical_production.core.entities import (
-    WorkshopZone,
     SpecificWorkshopZone,
-    MachineInfo,
+    WorkshopZone,
 )
 from design_of_mechanical_production.core.factories import EquipmentFactory
+from design_of_mechanical_production.core.interfaces import IMachineInfo, ISpecificWorkshopZone, IWorkshopZone
 from design_of_mechanical_production.settings import get_setting
-from design_of_mechanical_production.core.interfaces import IWorkshopZone, ISpecificWorkshopZone, IMachineInfo
 
 
 class WorkshopZoneFactory:
     """
     Фабрика для создания различных типов зон цеха.
     """
-    
+
     def __init__(self):
         """Инициализация фабрики."""
         self.equipment_factory = EquipmentFactory()
@@ -56,7 +55,7 @@ class WorkshopZoneFactory:
         for machine_name, machine_info in machines.items():
             workshop_zone.add_machine(machine_name, machine_info)
         return 'grinding_zone', workshop_zone
-    
+
     @staticmethod
     def create_repair_zone(machines: Dict[str, IMachineInfo]) -> tuple[str, IWorkshopZone]:
         """
@@ -94,7 +93,6 @@ class WorkshopZoneFactory:
         )
         return 'tool_storage_zone', workshop_zone
 
-
     @staticmethod
     def create_equipment_warehouse_zone(total_machines_count: int) -> tuple[str, ISpecificWorkshopZone]:
         """
@@ -120,7 +118,7 @@ class WorkshopZoneFactory:
         """
         Создает зону склада заготовок.
         Зона определяется по правилу: 30%* от общей площади основной зоны
-        * - если не указано иное в настройках расчета
+        * - если не указано иное, в настройках расчета
 
         Args:
             main_zone_area: Площадь основной зоны
@@ -147,7 +145,7 @@ class WorkshopZoneFactory:
 
         Returns:
             SpecificWorkshopZone: Созданная зона отделения контроля
-        """ 
+        """
         workshop_zone = SpecificWorkshopZone(
             name='Отделение контроля',
             specific_area=Decimal(str(get_setting('specific_areas.control_department'))),
@@ -164,7 +162,7 @@ class WorkshopZoneFactory:
 
         Returns:
             SpecificWorkshopZone: Созданная санитарная зона
-        """ 
+        """
         workshop_zone = SpecificWorkshopZone(
             name='Санитарная зона',
             specific_area=Decimal(str(get_setting('specific_areas.sanitary_zone'))),

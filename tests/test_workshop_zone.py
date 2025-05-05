@@ -8,7 +8,7 @@ import unittest
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from design_of_mechanical_production.core.entities.workshop_zone import WorkshopZone, SpecificWorkshopZone
+from design_of_mechanical_production.core.entities.workshop_zone import SpecificWorkshopZone, WorkshopZone
 from design_of_mechanical_production.core.interfaces import IMachineInfo
 
 
@@ -33,12 +33,12 @@ class TestWorkshopZone(unittest.TestCase):
         self.workshop_zone = WorkshopZone(name=self.zone_name)
         # Проверяем, что get_setting был вызван с правильным параметром
         self.mock_get_setting.assert_called_with('passage_area')
-        
+
         # Создаем мок для IMachineInfo
         self.machine_mock = Mock(spec=IMachineInfo)
         self.machine_mock.calculated_count = Decimal('2.5')
         self.machine_mock.accepted_count = 3
-        
+
         # Создаем мок для модели станка
         self.model_mock = Mock()
         self.model_mock.length = Decimal('2.0')
@@ -87,9 +87,7 @@ class TestSpecificWorkshopZone(unittest.TestCase):
         self.specific_area = Decimal('2.5')
         self.total_equipment_count = 5
         self.specific_zone = SpecificWorkshopZone(
-            name=self.zone_name,
-            specific_area=self.specific_area,
-            unit_of_calculation=self.total_equipment_count
+            name=self.zone_name, specific_area=self.specific_area, unit_of_calculation=self.total_equipment_count
         )
 
     def test_01_initialization(self):
@@ -112,9 +110,7 @@ class TestSpecificWorkshopZone(unittest.TestCase):
         """Тест работы с десятичным количеством оборудования."""
         decimal_count = Decimal('5.5')
         zone = SpecificWorkshopZone(
-            name=self.zone_name,
-            specific_area=self.specific_area,
-            unit_of_calculation=decimal_count
+            name=self.zone_name, specific_area=self.specific_area, unit_of_calculation=decimal_count
         )
         expected_area = self.specific_area * decimal_count
         self.assertEqual(zone.area, expected_area)

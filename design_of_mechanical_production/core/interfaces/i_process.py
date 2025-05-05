@@ -6,6 +6,8 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Dict, List, Protocol
 
+from design_of_mechanical_production.core.interfaces import IMachineInfo, IOperation
+
 
 class IProcess(Protocol):
     """

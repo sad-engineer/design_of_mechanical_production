@@ -7,12 +7,11 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict
 
-from design_of_mechanical_production.core.entities.workshop_zone import WorkshopZone
 from design_of_mechanical_production.core.interfaces import (
     IProcess,
+    ISpecificWorkshopZone,
     IWorkshop,
     IWorkshopZone,
-    ISpecificWorkshopZone,
 )
 from design_of_mechanical_production.settings import get_setting
 

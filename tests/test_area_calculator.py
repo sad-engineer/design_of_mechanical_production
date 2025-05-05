@@ -19,11 +19,11 @@ class TestAreaCalculator(unittest.TestCase):
         """Подготовка тестовых данных."""
         self.passage_area = Decimal('1.5')
         self.calculator = AreaCalculator(self.passage_area)
-        
+
         # Создаем мок для IMachineInfo
         self.machine_mock = Mock(spec=IMachineInfo)
         self.machine_mock.accepted_count = 2
-        
+
         # Создаем мок для модели станка
         self.model_mock = Mock()
         self.model_mock.length = Decimal('2.0')
@@ -41,24 +41,21 @@ class TestAreaCalculator(unittest.TestCase):
         # Создаем мок без атрибутов length и width
         machine_mock = Mock(spec=IMachineInfo)
         machine_mock.accepted_count = 1
-        
+
         # Создаем мок для модели станка без атрибутов length и width
         model_mock = Mock()
         # Удаляем атрибуты length и width
         delattr(model_mock, 'length')
         delattr(model_mock, 'width')
         machine_mock.model = model_mock
-        
+
         machines = {'machine1': machine_mock}
         expected_area = (Decimal('2.000') * Decimal('1.000') + self.passage_area) * 1
         self.assertEqual(self.calculator.calculate_area(machines), expected_area)
 
     def test_03_calculate_area_with_multiple_machines(self):
         """Тест расчета площади для нескольких станков."""
-        machines = {
-            'machine1': self.machine_mock,
-            'machine2': self.machine_mock
-        }
+        machines = {'machine1': self.machine_mock, 'machine2': self.machine_mock}
         expected_area = (Decimal('2.0') * Decimal('1.0') + self.passage_area) * 4  # 2 станка * 2 accepted_count
         self.assertEqual(self.calculator.calculate_area(machines), expected_area)
 
