@@ -39,7 +39,7 @@ jobs:
 
     - name: Initialize database
       run: |
-        python -c "from machine_tools import MachineToolsContainer; MachineToolsContainer().creator().initialize()"
+        python -c "from machine_tools import MachineToolsContainer; MachineToolsContainer().creator()"
 
     - name: Run tests
       run: |
