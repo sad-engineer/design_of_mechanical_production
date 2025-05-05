@@ -28,29 +28,45 @@ class TestDatabaseMachineToolSource(unittest.TestCase):
     """Тесты для класса DatabaseMachineToolSource."""
 
     def setUp(self):
-        """Подготовка тестовых данных."""
-        self.source = DatabaseMachineToolSource()
         self.test_model = "16К20"
+        self.source = DatabaseMachineToolSource()
 
-    def test_01_get_machine_tool_success(self):
-        """Тест успешного получения данных о станке из БД."""
-        # Вызываем тестируемый метод
+    @patch("design_of_mechanical_production.core.entities.machine_tool_source.Container")
+    def test_01_get_machine_tool_success(self, mock_container_class):
+        """Тест успешного получения данных о станке из БД (мокаем доступ)."""
+        fake_tool = MagicMock()
+        fake_tool.name = self.test_model
+        fake_tool.length = "2795"
+        fake_tool.width = "1500"
+        fake_tool.height = "1190"
+        fake_tool.automation = "Ручной"
+        fake_tool.weight = "3005.0"
+        fake_tool.power_lathe_passport_kvt = "11.0"
+
+        mock_creator = MagicMock()
+        mock_creator.by_name.return_value = fake_tool
+        mock_container_class.return_value.creator.return_value = mock_creator
+
         result = self.source.get_machine_tool(self.test_model)
 
-        # Проверяем результат
-        # self.assertIsInstance(result, MachineTool)
         self.assertEqual(result.name, self.test_model)
-        self.assertEqual(result.length, '2795')
-        self.assertEqual(result.width, '1500')
-        self.assertEqual(result.height, '1190')
-        self.assertEqual(result.automation, 'Ручной')
-        self.assertEqual(result.weight, '3005.0')
-        self.assertEqual(result.power_lathe_passport_kvt, '11.0')
+        self.assertEqual(result.length, "2795")
+        self.assertEqual(result.width, "1500")
+        self.assertEqual(result.height, "1190")
+        self.assertEqual(result.automation, "Ручной")
+        self.assertEqual(result.weight, "3005.0")
+        self.assertEqual(result.power_lathe_passport_kvt, "11.0")
 
-    def test_02_get_machine_tool_not_found(self):
-        """Тест обработки случая, когда станок не найден в БД."""
+    @patch("design_of_mechanical_production.core.entities.machine_tool_source.Container")
+    def test_02_get_machine_tool_not_found(self, mock_container_class):
+        """Тест обработки случая, когда станок не найден в БД (мокаем ошибку)."""
+        mock_creator = MagicMock()
+        mock_creator.by_name.return_value = None
+        mock_container_class.return_value.creator.return_value = mock_creator
+
         with self.assertRaises(TypeError) as context:
             self.source.get_machine_tool("non_existent_model")
+
         self.assertEqual(str(context.exception), "'NoneType' object is not subscriptable")
 
 
