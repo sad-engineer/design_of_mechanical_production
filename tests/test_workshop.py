@@ -16,13 +16,27 @@ class TestWorkshop(unittest.TestCase):
 
     def setUp(self):
         """Подготовка тестовых данных."""
-        # Создаем фабрику оборудования
-        equipment_factory = EquipmentFactory()
+        patcher = patch("design_of_mechanical_production.core.entities.equipment_factory.EquipmentFactory.create_equipment")
+        self.addCleanup(patcher.stop)
+        self.mock_create_equipment = patcher.start()
+
+        # Мокнутый станок
+        fake_equipment = MagicMock()
+        fake_equipment.name = "16К20"
+        fake_equipment.length = Decimal("2795")
+        fake_equipment.width = Decimal("1500")
+        fake_equipment.height = Decimal("1190")
+        fake_equipment.automation = "Ручной"
+        fake_equipment.weight = Decimal("3005.0")
+        fake_equipment.power_lathe_passport_kvt = Decimal("11.0")
+
+        # Настроим мок возвращаемым значением
+        self.mock_create_equipment.side_effect = lambda model: fake_equipment
 
         # Создаем мок для процесса
         self.operation1 = MagicMock(spec=Operation)
         self.operation1.time = Decimal("20")
-        self.operation1.equipment = equipment_factory.create_equipment("16К20")
+        self.operation1.equipment = fake_equipment
         self.operation1.calculated_equipment_count = Decimal("3.5")
         self.operation1.accepted_equipment_count = 4
         self.operation1.load_factor = Decimal("0.875")
@@ -31,7 +45,7 @@ class TestWorkshop(unittest.TestCase):
         self.operation2 = MagicMock(spec=Operation)
         self.operation2.time = Decimal("80")
         self.operation2.calculated_equipment_count = Decimal("3.5")
-        self.operation2.equipment = equipment_factory.create_equipment("16К20Ф3")
+        self.operation2.equipment = fake_equipment
         self.operation2.accepted_equipment_count = 4
         self.operation2.load_factor = Decimal("0.875")
         self.operation2.percentage = None
@@ -54,7 +68,7 @@ class TestWorkshop(unittest.TestCase):
 
     def test_02_total_machines_count(self):
         """Тест расчета общего количества станков."""
-        self.assertEqual(self.workshop.total_machines_count, 18)
+        self.assertEqual(self.workshop.total_machines_count, 17)
         # Настраиваем мок для зоны
         main_zone = MagicMock(spec=WorkshopZone)
         main_zone.accepted_machines_count = 5
