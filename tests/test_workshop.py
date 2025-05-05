@@ -16,7 +16,9 @@ class TestWorkshop(unittest.TestCase):
 
     def setUp(self):
         """Подготовка тестовых данных."""
-        patcher = patch("design_of_mechanical_production.core.entities.equipment_factory.EquipmentFactory.create_equipment")
+        patcher = patch(
+            "design_of_mechanical_production.core.entities.equipment_factory.EquipmentFactory.create_equipment"
+        )
         self.addCleanup(patcher.stop)
         self.mock_create_equipment = patcher.start()
 

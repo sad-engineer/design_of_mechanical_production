@@ -5,9 +5,8 @@
 Тесты для классов MachineToolSource.
 """
 import unittest
-from unittest.mock import patch, MagicMock
-
 from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
 from design_of_mechanical_production.core.entities.machine_tool_source import (
     DatabaseMachineToolSource,
