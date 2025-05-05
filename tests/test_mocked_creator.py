@@ -1,14 +1,21 @@
 from unittest.mock import patch, MagicMock
 
-# Мок до импорта DatabaseMachineToolSource
-with patch("machine_tools.MachineToolsContainer.creator") as mocked_creator:
+
+def test_mocked_creator(monkeypatch):
+    from design_of_mechanical_production.core.entities import machine_tool_source
+
     fake_tool = MagicMock()
     fake_tool.model = "DMG CTX beta 2000"
-    mocked_creator.return_value.by_name.return_value = fake_tool
 
-    # Импортировать после установки мока!
-    from design_of_mechanical_production.core.entities.machine_tool_source import DatabaseMachineToolSource
+    class FakeCreator:
+        def by_name(self, name):
+            return fake_tool
 
-    def test_mocked_creator():
-        result = DatabaseMachineToolSource.get_machine_tool("DMG CTX beta 2000")
-        assert result.model == "DMG CTX beta 2000"
+    class FakeContainer:
+        def creator(self):
+            return FakeCreator()
+
+    monkeypatch.setattr(machine_tool_source, "Container", lambda: FakeContainer())
+
+    result = machine_tool_source.DatabaseMachineToolSource.get_machine_tool("DMG CTX beta 2000")
+    assert result.model == "DMG CTX beta 2000"
