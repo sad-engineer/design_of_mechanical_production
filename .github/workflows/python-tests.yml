@@ -32,6 +32,11 @@ jobs:
     - name: Install SQLite dependencies
       run: sudo apt-get install sqlite3
 
+    - name: Check for machine_tools.db
+      run: |
+        python -c "import os, machine_tools; print(os.path.join(os.path.dirname(machine_tools.__file__), 'data', 'machine_tools.db'))"
+        test -f $(python -c "import os, machine_tools; print(os.path.join(os.path.dirname(machine_tools.__file__), 'data', 'machine_tools.db'))")
+
     - name: Initialize database
       run: |
         python -c "from machine_tools import MachineToolsContainer; MachineToolsContainer().creator().initialize()"
