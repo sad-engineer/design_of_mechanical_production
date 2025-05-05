@@ -5,6 +5,8 @@
 Тесты для классов MachineToolSource.
 """
 import unittest
+from unittest.mock import patch, MagicMock
+
 from decimal import Decimal
 
 from design_of_mechanical_production.core.entities.machine_tool_source import (
@@ -64,10 +66,7 @@ class TestDatabaseMachineToolSource(unittest.TestCase):
         mock_creator.by_name.return_value = None
         mock_container_class.return_value.creator.return_value = mock_creator
 
-        with self.assertRaises(TypeError) as context:
-            self.source.get_machine_tool("non_existent_model")
-
-        self.assertEqual(str(context.exception), "'NoneType' object is not subscriptable")
+        self.assertIsNone(self.source.get_machine_tool("non_existent_model"))
 
 
 class TestDefaultMachineToolSource(unittest.TestCase):
