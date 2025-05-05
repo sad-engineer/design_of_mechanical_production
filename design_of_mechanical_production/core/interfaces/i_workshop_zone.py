@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Dict, Protocol
+from typing import Dict, Protocol, Union
+
+from design_of_mechanical_production.core.interfaces import IAreaCalculator, IMachineInfo
 
 
 class IWorkshopZone(Protocol):
@@ -44,6 +46,24 @@ class IWorkshopZone(Protocol):
         Принятое количество станков.
         """
         return ...
+
+    @property
+    def area(self) -> Decimal:
+        """
+        Площадь зоны.
+        """
+        return ...
+
+
+class ISpecificWorkshopZone(Protocol):
+    """
+        Класс, представляющий вспомогательную зону цеха.
+        Площадь определяется по удельной площади в пересчете на количество элементов.
+        """
+    name: str                                           # Название зоны
+    specific_area: Decimal                              # удельная площадь зоны в м²
+    unit_of_calculation: Union[int, Decimal, float]   # количество элементов в зоне для расчета площади
+    _area_calculator: 'IAreaCalculator'                 # Калькулятор площади
 
     @property
     def area(self) -> Decimal:

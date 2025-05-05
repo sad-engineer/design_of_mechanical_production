@@ -13,6 +13,7 @@ from design_of_mechanical_production.core.interfaces import (
     IAreaCalculator,
     IMachineInfo,
     IWorkshopZone,
+    ISpecificWorkshopZone,
 )
 from design_of_mechanical_production.settings import get_setting
 
@@ -50,9 +51,10 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
         if self._area_calculator is None:
             self._area_calculator = AreaCalculator(Decimal(get_setting("passage_area")))
 
-    def calculate_area(self) -> Decimal:
+    @property
+    def area(self) -> Decimal:
         """
-        Рассчитывает площадь зоны.
+        Возвращает площадь зоны.
         """
         return self._area_calculator.calculate_area(self.machines)
 
@@ -80,16 +82,9 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
         """
         return sum(machine.accepted_count for machine in self.machines.values())
 
-    @property
-    def area(self) -> Decimal:
-        """
-        Возвращает площадь зоны.
-        """
-        return self._area_calculator.calculate_area(self.machines)
-
 
 @dataclass
-class SpecificWorkshopZone(BaseWorkshopZone):
+class SpecificWorkshopZone(ISpecificWorkshopZone, BaseWorkshopZone):
     """
     Класс, представляющий вспомогательную зону цеха.
     Площадь определяется по удельной площади в пересчете на количество элементов.
@@ -97,7 +92,7 @@ class SpecificWorkshopZone(BaseWorkshopZone):
 
     name: str  # Название зоны
     specific_area: Decimal  # удельная площадь зоны в м²
-    total_equipment_count: Union[int, Decimal, float] = 0  # количество элементов в зоне для расчета площади
+    unit_of_calculation: Union[int, Decimal, float] = 0  # количество элементов в зоне для расчета площади
     _area_calculator: IAreaCalculator = None  # Калькулятор площади
 
     def __post_init__(self) -> None:
@@ -105,7 +100,7 @@ class SpecificWorkshopZone(BaseWorkshopZone):
         Инициализирует калькулятор площади после создания объекта.
         """
         if self._area_calculator is None:
-            self._area_calculator = SpecificAreaCalculator(self.specific_area, self.total_equipment_count)
+            self._area_calculator = SpecificAreaCalculator(self.specific_area, self.unit_of_calculation)
 
     @property
     def area(self) -> Decimal:
@@ -113,20 +108,3 @@ class SpecificWorkshopZone(BaseWorkshopZone):
         Возвращает площадь зоны.
         """
         return self._area_calculator.calculate_area({})
-
-    @property
-    def total_calculated_equipment_count(self) -> Decimal:
-        """
-        Возвращает расчетное количество оборудования в зоне.
-        """
-        return Decimal(str(self.total_equipment_count))
-
-    def add_machine(self, name: str, machine: IMachineInfo) -> None:
-        """
-        Добавляет станок в зону.
-
-        Args:
-            name: Название станка
-            machine: Информация о станке
-        """
-        raise NotImplementedError("SpecificWorkshopZone не поддерживает добавление станков")

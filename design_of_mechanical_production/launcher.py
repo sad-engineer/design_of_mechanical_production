@@ -34,24 +34,15 @@ def load_launch_config() -> Dict[str, Any]:
         return json.load(f)
 
 
-def run_with_gui() -> None:
+def run_with_gui(theme: str) -> None:
     """
     Запускает приложение в режиме GUI.
     """
-    # Загружаем конфигурацию запуска
-    config = load_launch_config()
-
-    # Проверяем наличие необходимых директорий
-    ensure_directories_exist()
-    # Проверяем наличие файла с начальными данными
-    if not check_initial_data_file():
-        create_initial_data_file()
-
     # Импортируем и запускаем приложение
     from design_of_mechanical_production.gui.app import WorkshopDesignApp
 
     # Запускаем приложение с конфигурацией
-    WorkshopDesignApp(config=config).run()
+    WorkshopDesignApp(theme=theme).run()
 
 
 def run_without_gui() -> None:

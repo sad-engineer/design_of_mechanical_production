@@ -19,7 +19,7 @@ class IWorkshop(Protocol):
     zones: Dict[str, 'IWorkshopZone']
     _total_area: Decimal
     _required_area: Decimal
-    length: Decimal
+    _length: Decimal
 
     @property
     def total_machines_count(self) -> int:
@@ -41,6 +41,20 @@ class IWorkshop(Protocol):
         Общая площадь цеха.
         """
         return ...
+
+    @property
+    def length(self) -> Decimal:
+        """
+        Длина цеха.
+        """
+        return ...
+
+    @length.setter
+    def length(self, value: Decimal) -> None:
+        """
+        Устанавливает длину цеха.
+        """
+        ...
 
     def _calculate_total_area(self) -> None:
         """

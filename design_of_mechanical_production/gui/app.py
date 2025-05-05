@@ -34,7 +34,7 @@ class WorkshopDesignApp(MDApp):
         theme_cls: Класс для управления темой приложения
     """
 
-    def __init__(self, config: Dict[str, Any] = None, **kwargs):
+    def __init__(self, theme: str = "Light", **kwargs):
         """
         Инициализирует приложение.
 
@@ -44,11 +44,8 @@ class WorkshopDesignApp(MDApp):
         """
         super().__init__(**kwargs)
 
-        # Сохраняем конфигурацию
-        self.config = config or {'theme': 'Light'}
-
         # Устанавливаем тему
-        self.theme_cls.theme_style = self.config['theme']
+        self.theme_cls.theme_style = theme
 
         # Устанавливаем размер окна
         Window.minimum_width = 910

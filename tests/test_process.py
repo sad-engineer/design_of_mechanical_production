@@ -6,7 +6,7 @@
 """
 import unittest
 from decimal import Decimal
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from design_of_mechanical_production.core.entities import Process
 from design_of_mechanical_production.core.interfaces import IOperation

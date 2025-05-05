@@ -7,7 +7,6 @@
 import unittest
 from decimal import Decimal
 from math import ceil
-from unittest.mock import MagicMock
 
 from design_of_mechanical_production.core.entities import Equipment, MachineInfo
 

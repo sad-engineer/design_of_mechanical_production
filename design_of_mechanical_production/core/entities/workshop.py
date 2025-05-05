@@ -12,6 +12,7 @@ from design_of_mechanical_production.core.interfaces import (
     IProcess,
     IWorkshop,
     IWorkshopZone,
+    ISpecificWorkshopZone,
 )
 from design_of_mechanical_production.settings import get_setting
 
@@ -34,21 +35,6 @@ class Workshop(IWorkshop):
     _total_area: Decimal = Decimal("0")
     _required_area: Decimal = Decimal("0")
     _length: Decimal = Decimal("0")
-
-    def __post_init__(self):
-        # Определяем количество станков
-        if self.process.machines is None:
-            self.process.calculate_required_machines(self.production_volume)
-        if self.process.machines == {}:
-            self.process.calculate_required_machines(self.production_volume)
-        machines = self.process.machines
-
-        # Создаем основную зону
-        main_zone = WorkshopZone(
-            name='Основная зона',
-            machines=machines,
-        )
-        self.add_zone('main_zone', main_zone)
 
     @property
     def total_machines_count(self) -> int:
@@ -113,7 +99,7 @@ class Workshop(IWorkshop):
             total_required_area += zone.area
         self._required_area = total_required_area
 
-    def add_zone(self, name: str, zone: IWorkshopZone) -> None:
+    def add_zone(self, name: str, zone: IWorkshopZone | ISpecificWorkshopZone) -> None:
         """
         Добавляет зону в цех.
 
@@ -127,6 +113,7 @@ class Workshop(IWorkshop):
         """
         Рассчитывает длину цеха по умолчанию.
         """
+        total_area = 0
         # Получаем настройки из конфигурации
         width_span = Decimal(str(get_setting('workshop_span')))
         number_spans = Decimal(str(get_setting('workshop_nam')))

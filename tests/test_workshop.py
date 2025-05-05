@@ -8,7 +8,7 @@ import unittest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
-from design_of_mechanical_production.core.entities import EquipmentFactory, Operation, Process, Workshop, WorkshopZone
+from design_of_mechanical_production.core.entities import Operation, Process, Workshop, WorkshopZone
 
 
 class TestWorkshop(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestWorkshop(unittest.TestCase):
     def setUp(self):
         """Подготовка тестовых данных."""
         patcher = patch(
-            "design_of_mechanical_production.core.entities.equipment_factory.EquipmentFactory.create_equipment"
+            "design_of_mechanical_production.core.factories.equipment_factory.EquipmentFactory.create_equipment"
         )
         self.addCleanup(patcher.stop)
         self.mock_create_equipment = patcher.start()
