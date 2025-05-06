@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import unittest
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from design_of_mechanical_production.core.entities import Workshop
 from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
@@ -19,6 +19,11 @@ class TestWorkshopCreator(unittest.TestCase):
         )
         self.addCleanup(patcher.stop)
         self.mock_create_equipment = patcher.start()
+
+        # Настраиваем мок для create_equipment
+        mock_equipment = MagicMock()
+        mock_equipment.model = "DMG CTX beta 2000"
+        self.mock_create_equipment.return_value = mock_equipment
 
         self.valid_parameters_data = {'name': "Цех №1", 'production_volume': 1000.0, 'mass_detail': 10.5}
         self.valid_process_data = [
@@ -51,6 +56,10 @@ class TestWorkshopCreator(unittest.TestCase):
         self.assertEqual(len(workshop.process.operations), 2)
         self.assertEqual(workshop.process.operations[0].number, "005")
         self.assertEqual(workshop.process.operations[1].number, "010")
+
+        # Проверка вызовов create_equipment
+        self.assertEqual(self.mock_create_equipment.call_count, 2)
+        self.mock_create_equipment.assert_any_call("DMG CTX beta 2000")
 
     def test_02_create_workshop_with_empty_process_data(self) -> None:
         """Тест создания цеха с пустым списком операций."""
@@ -91,6 +100,9 @@ class TestWorkshopCreator(unittest.TestCase):
         invalid_process_data = [
             {'number': "005", 'name': "Операция 1", 'time': 10.5, 'machine': "Несуществующий станок"}
         ]
+
+        # Настраиваем мок для выброса исключения
+        self.mock_create_equipment.side_effect = ValueError("Станок не найден")
 
         # Проверка
         with self.assertRaises(ValueError):
