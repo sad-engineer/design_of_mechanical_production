@@ -5,8 +5,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from design_of_mechanical_production.core.entities.workshop import Workshop
-from design_of_mechanical_production.core.interfaces.i_formatters import INumberFormatter, ITableFormatter
-from design_of_mechanical_production.core.interfaces.i_report_generator import IReportGenerator
+from design_of_mechanical_production.core.interfaces import INumberFormatter, IReportGenerator, ITableFormatter
 from design_of_mechanical_production.data.output.formatters import NumberFormatter, TableFormatter
 from design_of_mechanical_production.settings import get_setting
 
@@ -18,7 +17,9 @@ class TextReportGenerator(IReportGenerator):
 
     def __init__(self, number_formatter: INumberFormatter = None, table_formatter: ITableFormatter = None):
         self.number_formatter = number_formatter or NumberFormatter()
+        self.fn = self.number_formatter.format
         self.table_formatter = table_formatter or TableFormatter()
+        self.ft = self.table_formatter.format
 
     def generate_report(self, workshop: Workshop) -> str:
         """
@@ -29,7 +30,7 @@ class TextReportGenerator(IReportGenerator):
 
         report.append(f"1. Исходные данные:")
         report.append("")
-        report_total_time = self.number_formatter.format(workshop.process.total_time)
+        report_total_time = self.fn(workshop.process.total_time)
         report.append(f"Трудоемкость изготовления 1го изделия − {report_total_time} нормо-часа.")
         report.append(f"Годовой объем выпуска продукции – {workshop.production_volume} шт.")
         report.append(f"Трудоемкость производственной программы по операциям определяется по формуле:")
@@ -48,17 +49,15 @@ class TextReportGenerator(IReportGenerator):
         headers = ["№ операции", "Наименование операции", "Доля от общей трудоемкости", "T_штi,н-ч"]
         table_data = []
         for operation in workshop.process.operations:
-            percentage = f"{self.number_formatter.format(operation.percentage)}%"
-            time = self.number_formatter.format(operation.time * Decimal(str(workshop.production_volume)))
-            number = f"{operation.number}"
+            number = str(operation.number)
+            percentage = f"{self.fn(operation.percentage)}%"
+            time = str(self.fn(operation.time * Decimal(str(workshop.production_volume))))
             table_data.append((number, operation.name, percentage, time))
         # Строка итога
-        workshop_total_time = self.number_formatter.format(
-            workshop.process.total_time * Decimal(str(workshop.production_volume))
-        )
+        workshop_total_time = self.fn(workshop.process.total_time * Decimal(str(workshop.production_volume)))
         total_row = ('-', '-', 'Итого', workshop_total_time)
         # Форматируем таблицу
-        report.extend(self.table_formatter.format(headers, table_data, total_row))
+        report.extend(self.ft(headers, table_data, total_row))
 
         report.append("")
 
@@ -80,11 +79,11 @@ class TextReportGenerator(IReportGenerator):
         report.append("Расчётное количество оборудования округляем до целого.")
         for operation in workshop.process.operations:
             operation_name = f"С_(Р {operation.number} {operation.name})"
-            report_time = self.number_formatter.format(operation.time * Decimal(str(workshop.production_volume)))
+            report_time = self.fn(operation.time * Decimal(str(workshop.production_volume)))
 
             report.append(
                 f"{operation_name} = {report_time} / ({get_setting('fund_of_working')} ∙ {get_setting('kv')} "
-                f"∙ {get_setting('kp')}) = {self.number_formatter.format(operation.calculated_equipment_count)}"
+                f"∙ {get_setting('kp')}) = {self.fn(operation.calculated_equipment_count)}"
             )
             operation_name = f"С_(ПР {operation.number} {operation.name})"
             report.append(f"принимаем {operation_name} = {operation.accepted_equipment_count}")
@@ -98,31 +97,28 @@ class TextReportGenerator(IReportGenerator):
         for operation in workshop.process.operations:
             report.append(
                 f"К_(З {operation.number} {operation.name}) = "
-                f"{self.number_formatter.format(operation.calculated_equipment_count)}/{operation.accepted_equipment_count} = "
-                f"{self.number_formatter.format(operation.calculated_equipment_count / operation.accepted_equipment_count)}"
+                f"{self.fn(operation.calculated_equipment_count)}/{operation.accepted_equipment_count} = "
+                f"{self.fn(operation.calculated_equipment_count / operation.accepted_equipment_count)}"
             )
         report.append("")
 
         report.append("Средний коэффициент загрузки для всего станочного парка:")
         report.append("К_(З СР) = (∑С_Р)/(∑С_ПР )")
-        report_list_load_factor = f"({self.number_formatter.format(workshop.process.operations[0].load_factor)}"
-        for operation in workshop.process.operations[1:]:
-            report_list_load_factor += f" + {self.number_formatter.format(operation.load_factor)}"
-        report_list_load_factor += f")"
+        report_list_load_factor = f"({self.fn(workshop.process.operations[0].load_factor)}"
         report_list_count = f"({workshop.process.operations[0].accepted_equipment_count}"
         for operation in workshop.process.operations[1:]:
+            report_list_load_factor += f" + {self.fn(operation.load_factor)}"
             report_list_count += f" + {operation.accepted_equipment_count}"
+        report_list_load_factor += f")"
         report_list_count += f")"
 
+        average_load_factor = self.fn(workshop.process.average_load_factor)
         report.append(
-            f"К_(З СР) = ({report_list_load_factor})/({report_list_count}) = "
-            f"{self.number_formatter.format(workshop.process.average_load_factor)}"
+            f"К_(З СР) = ({report_list_load_factor})/({report_list_count}) = {average_load_factor}"
         )
         report.append("")
-        report.append(
-            "Значения коэффициентов загрузки каждого станка, а также средний коэффициент загрузки заносим в"
-            " таблицу 2."
-        )
+        report.append("Значения коэффициентов загрузки каждого станка, а также средний коэффициент загрузки заносим в"
+            " таблицу 2.")
 
         report.append("")
         report.append("Таблица 2 - Необходимое количество станков и их загрузка")
@@ -135,13 +131,12 @@ class TextReportGenerator(IReportGenerator):
         table_data = []
         for operation in workshop.process.operations:
             number = f"{operation.number} {operation.name}"
-            calculated_machines_count = self.number_formatter.format(operation.calculated_equipment_count)
+            calculated_machines_count = self.fn(operation.calculated_equipment_count)
             accepted_machines_count = operation.accepted_equipment_count
-            load_factor = self.number_formatter.format(operation.load_factor)
+            load_factor = self.fn(operation.load_factor)
             table_data.append((number, calculated_machines_count, accepted_machines_count, load_factor))
-        # Строка итога
-        calculated_machines_count = self.number_formatter.format(workshop.process.calculated_machines_count)
-        average_load_factor = self.number_formatter.format(workshop.process.average_load_factor)
+        calculated_machines_count = self.fn(workshop.process.calculated_machines_count)
+        average_load_factor = self.fn(workshop.process.average_load_factor)
         total_row = (
             'Итого',
             f'{calculated_machines_count}',
@@ -151,18 +146,16 @@ class TextReportGenerator(IReportGenerator):
         # Форматируем таблицу
         report.extend(self.table_formatter.format(headers, table_data, total_row))
 
-        report.append(
-            "Для централизованной переточки режущего инструмента в цехе организовывается заточное отделение. "
-            "Основным оборудованием являются заточные станки:"
-        )
-        rep_zone_percent = self.number_formatter.format(Decimal(get_setting('grinding_zone_percent')) * 100)
+        report.append("Для централизованной переточки режущего инструмента в цехе организовывается заточное отделение. "
+                      "Основным оборудованием являются заточные станки:")
+        rep_zone_percent = self.fn(Decimal(get_setting('grinding_zone_percent')) * 100)
         rep_machines_count = workshop.process.accepted_machines_count
         rep_calc_count = workshop.zones["grinding_zone"].calculated_machines_count
         rep_ac_count_1 = workshop.zones["grinding_zone"].accepted_machines_count
         report.append(f"С_зат= {rep_zone_percent}% ∙ С_О	(5)")
         report.append("где С_О − число станков основного производства.")
         report.append(
-            f"С_ЗАТ = {rep_zone_percent}% ∙ {rep_machines_count} = {self.number_formatter.format(rep_calc_count)}"
+            f"С_ЗАТ = {rep_zone_percent}% ∙ {rep_machines_count} = {self.fn(rep_calc_count)}"
         )
         report.append(f"принимаем С_(ПР ЗАТ) = {rep_ac_count_1}")
         report.append("")
@@ -171,12 +164,13 @@ class TextReportGenerator(IReportGenerator):
             "В состав цеха кроме заточного отделения может входить и ремонтное отделение. Количество станков "
             "ремонтного отделения можно принимать от числа обслуживаемых станков:"
         )
-        rep_repair_zone_percent = self.number_formatter.format(Decimal(get_setting('repair_zone_percent')) * 100)
+        rep_repair_zone_percent = self.fn(Decimal(get_setting('repair_zone_percent')) * 100)
         rep_calc_count = workshop.zones["repair_zone"].calculated_machines_count
         rep_ac_count_2 = workshop.zones["repair_zone"].accepted_machines_count
         report.append("где С_О − число станков основного производства.")
         report.append(
-            f"С_рем = {rep_repair_zone_percent}% ∙ {rep_machines_count} = {self.number_formatter.format(rep_calc_count)}"
+            f"С_рем = {rep_repair_zone_percent}% ∙ {rep_machines_count} = "
+            f"{self.fn(rep_calc_count)}"
         )
         report.append(f"принимаем С_(ПР РЕМ) = {rep_ac_count_2}")
         report.append("")
@@ -194,9 +188,9 @@ class TextReportGenerator(IReportGenerator):
         table_data = []
         for operation in workshop.process.operations:
             number = f"{operation.number} {operation.name}"
-            length = self.number_formatter.format(operation.equipment.length * 1000)
-            width = self.number_formatter.format(operation.equipment.width * 1000)
-            height = self.number_formatter.format(operation.equipment.height * 1000)
+            length = self.fn(operation.equipment.length * 1000)
+            width = self.fn(operation.equipment.width * 1000)
+            height = self.fn(operation.equipment.height * 1000)
             dimensions = f"{length} x {width} x {height}"
             table_data.append((number, operation.equipment.model, operation.accepted_equipment_count, dimensions))
         # Строка итога
@@ -217,9 +211,9 @@ class TextReportGenerator(IReportGenerator):
         str_area_sum = ""
         for operation in workshop.process.operations:
             number = f"{operation.number} {operation.name}"
-            length = self.number_formatter.format(operation.equipment.length)
-            width = self.number_formatter.format(operation.equipment.width)
-            area = self.number_formatter.format(
+            length = self.fn(operation.equipment.length)
+            width = self.fn(operation.equipment.width)
+            area = self.fn(
                 operation.equipment.length * operation.equipment.width * operation.accepted_equipment_count
                 + passage_area
             )
@@ -231,10 +225,10 @@ class TextReportGenerator(IReportGenerator):
 
         report.append("Суммарную площадь станочного отделения рассчитываем по формуле:")
         report.append("S_(СП) = ∑S_(СПi) + S_(ЗАТ) + S_(РЕМ)")
-        str_area_sum += f"{self.number_formatter.format(workshop.zones['grinding_zone'].area)} + "
-        str_area_sum += f"{self.number_formatter.format(workshop.zones['repair_zone'].area)}"
+        str_area_sum += f"{self.fn(workshop.zones['grinding_zone'].area)} + "
+        str_area_sum += f"{self.fn(workshop.zones['repair_zone'].area)}"
         report.append(
-            f"S_(СП) = {str_area_sum} = {self.number_formatter.format(workshop.zones['main_zone'].area)} м^2;"
+            f"S_(СП) = {str_area_sum} = {self.fn(workshop.zones['main_zone'].area)} м^2;"
         )
 
         report.append("")
@@ -250,12 +244,12 @@ class TextReportGenerator(IReportGenerator):
             "где S_УД – удельная площадь склада инструмента на 1 станок, в зависимости от вида производства"
             " при работе в 2 смены, ;"
         )
-        rep_tool_storage = self.number_formatter.format(Decimal(get_setting('specific_areas.tool_storage')))
+        rep_tool_storage = self.fn(Decimal(get_setting('specific_areas.tool_storage')))
         report.append(f"S_УД = {rep_tool_storage} м^2;")
         report.append("C_ОБЩ – общее количество оборудования проектируемого участка.")
         report.append(
             f"S_(С.И.) = {rep_tool_storage} ∙ {workshop.total_machines_count} = "
-            f"{self.number_formatter.format(workshop.zones['tool_storage_zone'].area)}  м^2"
+            f"{self.fn(workshop.zones['tool_storage_zone'].area)}  м^2"
         )
         report.append("")
 
@@ -263,19 +257,19 @@ class TextReportGenerator(IReportGenerator):
         report.append("Площадь склада приспособлений:")
         report.append("S_(С.П.) = S_УД∙ C_ОБЩ,")
         report.append("где S_УД – удельная площадь склада приспособлений на 1 станок;")
-        rep_equipment_warehouse = self.number_formatter.format(
+        rep_equipment_warehouse = self.fn(
             Decimal(get_setting('specific_areas.equipment_warehouse'))
         )
         report.append(f"S_УД = {rep_equipment_warehouse} м^2;")
         report.append(
             f"S_(С.П.) = {rep_equipment_warehouse} ∙ {workshop.total_machines_count} = "
-            f"{self.number_formatter.format(workshop.zones['equipment_warehouse_zone'].area)}  м^2"
+            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)}  м^2"
         )
         report.append("")
 
         report.append("в) склада материалов и заготовок, межоперационных, готовых деталей")
         report.append("Площадь склада материалов и заготовок, межоперационных, готовых деталей:")
-        work_piece_storage_percent = self.number_formatter.format(
+        work_piece_storage_percent = self.fn(
             Decimal(get_setting('specific_areas.work_piece_storage')) * 100
         )
         report.append(
@@ -284,18 +278,19 @@ class TextReportGenerator(IReportGenerator):
         )
         report.append(f"S_(С.К.П.) = {work_piece_storage_percent}% ∙ S_(УД СТ),")
         report.append(
-            f"S_(С.К.П.) = {work_piece_storage_percent}% ∙ {self.number_formatter.format(workshop.zones['main_zone'].area)} "
-            f"= {self.number_formatter.format(workshop.zones['work_piece_storage_zone'].area)}  м^2"
+            f"S_(С.К.П.) = {work_piece_storage_percent}% ∙ "
+            f"{self.fn(workshop.zones['main_zone'].area)} "
+            f"= {self.fn(workshop.zones['work_piece_storage_zone'].area)}  м^2"
         )
         report.append("")
 
         report.append("г) контрольного отделения")
         report.append("Площадь контрольного отделения:")
-        rep_control_department = self.number_formatter.format(Decimal(get_setting('specific_areas.control_department')))
+        rep_control_department = self.fn(Decimal(get_setting('specific_areas.control_department')))
         report.append(f"S_КОНТР = {rep_control_department} ∙ S_(УД СТ),")
         report.append(
-            f"S_КОНТР = {rep_control_department} ∙ {self.number_formatter.format(workshop.zones['main_zone'].area)} "
-            f"= {self.number_formatter.format(workshop.zones['control_department_zone'].area)}  м^2"
+            f"S_КОНТР = {rep_control_department} ∙ {self.fn(workshop.zones['main_zone'].area)} "
+            f"= {self.fn(workshop.zones['control_department_zone'].area)}  м^2"
         )
         report.append("")
 
@@ -303,20 +298,21 @@ class TextReportGenerator(IReportGenerator):
         report.append(
             "На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по " "8 м^2 каждый."
         )
-        rep_sanitary_zone = self.number_formatter.format(Decimal(get_setting('specific_areas.sanitary_zone')))
+        rep_sanitary_zone = self.fn(Decimal(get_setting('specific_areas.sanitary_zone')))
         report.append(
-            f"S_САН = 2 ∙ {rep_sanitary_zone} = {self.number_formatter.format(workshop.zones['sanitary_zone'].area)} м^2"
+            f"S_САН = 2 ∙ {rep_sanitary_zone} = {self.fn(workshop.zones['sanitary_zone'].area)} "
+            f"м^2"
         )
 
         report.append("Размер дополнительной площади цеха составляет:")
         report.append("S_ДОП = S_(С.И.) + S_(С.П.) + S_(С.К.П.) + S_КОНТР + S_САН,")
         report.append(
-            f"S_ДОП = {self.number_formatter.format(workshop.zones['tool_storage_zone'].area)} + "
-            f"{self.number_formatter.format(workshop.zones['equipment_warehouse_zone'].area)} + "
-            f"{self.number_formatter.format(workshop.zones['work_piece_storage_zone'].area)} + "
-            f"{self.number_formatter.format(workshop.zones['control_department_zone'].area)} + "
-            f"{self.number_formatter.format(workshop.zones['sanitary_zone'].area)} = "
-            f"{self.number_formatter.format(workshop.required_area)} m^2"
+            f"S_ДОП = {self.fn(workshop.zones['tool_storage_zone'].area)} + "
+            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)} + "
+            f"{self.fn(workshop.zones['work_piece_storage_zone'].area)} + "
+            f"{self.fn(workshop.zones['control_department_zone'].area)} + "
+            f"{self.fn(workshop.zones['sanitary_zone'].area)} = "
+            f"{self.fn(workshop.required_area)} m^2"
         )
 
         report.append("")
@@ -340,20 +336,20 @@ class TextReportGenerator(IReportGenerator):
         report.append("S_Ц – общая площадь участка;")
         report.append("l – суммарная ширина пролетов")
         report.append(
-            f"L = {self.number_formatter.format(workshop.required_area)}/({workshop_span} ∙ {workshop_nam}) = "
-            f"{self.number_formatter.format(workshop.length)} м,"
+            f"L = {self.fn(workshop.required_area)}/({workshop_span} ∙ {workshop_nam}) = "
+            f"{self.fn(workshop.length)} м,"
         )
         report.append("")
 
         report.append("Таким образом, размеры цеха составляют:")
         report.append(f"ширина пролета l = {workshop_span} м,")
         report.append(f"число пролетов n = {workshop_nam},")
-        report.append(f"длина пролета L = {self.number_formatter.format(workshop.length)} м.")
+        report.append(f"длина пролета L = {self.fn(workshop.length)} м.")
         report.append("Общая площадь цеха:")
         report.append(f"S_Ц = l ∙ n ∙ L,")
         report.append(
-            f"S_Ц = {workshop_span} ∙ {workshop_nam} ∙ {self.number_formatter.format(workshop.length)} = "
-            f"{self.number_formatter.format(workshop.total_area)} м^2"
+            f"S_Ц = {workshop_span} ∙ {workshop_nam} ∙ {self.fn(workshop.length)} = "
+            f"{self.fn(workshop.total_area)} м^2"
         )
 
         return "\n".join(report)

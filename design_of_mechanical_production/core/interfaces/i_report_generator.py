@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
+from pathlib import Path
 from typing import Protocol
 
 
@@ -21,7 +22,7 @@ class IReportGenerator(Protocol):
         """
         ...
 
-    def save_report(self, report: str, filepath: str) -> bool:
+    def save_report(self, report: str, filepath: Path) -> bool:
         """
         Сохраняет отчет в файл.
 

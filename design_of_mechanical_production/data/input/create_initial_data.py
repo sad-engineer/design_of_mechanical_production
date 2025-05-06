@@ -3,12 +3,14 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import pandas as pd
 
-from design_of_mechanical_production.settings import DEFAULT_CONFIG
+from design_of_mechanical_production.settings import get_setting
+
+INPUT_DATA_PATH = str(get_setting('input_data_path'))
 
 
 def create_initial_data():
     # Данные о цехе
-    parameters_data = {'name': ['Механический цех №1'], 'production_volume': [10000], 'mass_detail': [112.8]}  # Годовой объем производства в штуках
+    parameters_data = {'name': ['Механический цех №1'], 'production_volume': [10000], 'mass_detail': [112.8]}
 
     # Данные о нормировании
     process_data = {
@@ -23,7 +25,7 @@ def create_initial_data():
     df_process = pd.DataFrame(process_data)
 
     # Создаем Excel файл
-    with pd.ExcelWriter(DEFAULT_CONFIG['input_data_path'], engine='openpyxl') as writer:
+    with pd.ExcelWriter(INPUT_DATA_PATH, engine='openpyxl') as writer:
         df_parameters.to_excel(writer, sheet_name='Parameters', index=False)
         df_process.to_excel(writer, sheet_name='Process', index=False)
 

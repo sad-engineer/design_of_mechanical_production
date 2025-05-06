@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from design_of_mechanical_production.core.interfaces.i_data_reader import IDataReader
+from design_of_mechanical_production.core.interfaces import IDataReader
 
 
 class ExcelReader(IDataReader):

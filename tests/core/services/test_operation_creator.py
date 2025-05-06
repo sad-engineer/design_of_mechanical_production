@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import unittest
 from decimal import Decimal
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from design_of_mechanical_production.core.entities import Operation
 from design_of_mechanical_production.core.services.operation_creator import create_operations_from_data

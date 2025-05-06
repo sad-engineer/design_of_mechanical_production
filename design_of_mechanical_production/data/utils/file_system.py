@@ -7,6 +7,9 @@ from pathlib import Path
 from design_of_mechanical_production.data.input import create_initial_data
 from design_of_mechanical_production.settings import get_setting
 
+INPUT_DATA_PATH = Path(get_setting('input_data_path'))
+REPORT_PATH = Path(get_setting('report_path'))
+
 
 def ensure_directories_exist() -> None:
     """
@@ -17,24 +20,21 @@ def ensure_directories_exist() -> None:
     - Директория для выходных данных (из настроек report_path)
     """
     # Создаем директории для входных и выходных данных
-    input_dir = Path(get_setting('input_data_path')).parent
-    output_dir = Path(get_setting('report_path')).parent
+    input_dir = INPUT_DATA_PATH.parent
+    output_dir = REPORT_PATH.parent
 
     input_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
-def check_initial_data_file() -> tuple[bool, Path]:
+def check_initial_data_file() -> bool:
     """
     Проверяет существование файла с начальными данными.
 
     Returns:
-        tuple[bool, Path]:
-            - bool: True если файл существует, False если нет
-            - Path: путь к файлу с начальными данными
+        - bool: True если файл существует, False если нет
     """
-    initial_data_file = Path(get_setting('input_data_path'))
-    return os.path.exists(initial_data_file), initial_data_file
+    return os.path.exists(INPUT_DATA_PATH)
 
 
 def create_initial_data_file() -> Path:
@@ -46,11 +46,11 @@ def create_initial_data_file() -> Path:
     2. Если файл не существует, создает его
     3. Выводит сообщение о результате операции
     """
-    file_exists, initial_data_file = check_initial_data_file()
+    file_exists = check_initial_data_file()
     if not file_exists:
         print("Файл с начальными данными не найден. Создаем новый файл...")
         create_initial_data()
         print("Файл с начальными данными успешно создан.")
     else:
-        print(f"Файл с начальными данными уже существует: {initial_data_file}")
-    return initial_data_file
+        print(f"Файл с начальными данными уже существует: {INPUT_DATA_PATH}")
+    return INPUT_DATA_PATH
