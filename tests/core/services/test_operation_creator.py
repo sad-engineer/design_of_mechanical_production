@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import unittest
 from decimal import Decimal
+from unittest.mock import patch
 
 from design_of_mechanical_production.core.entities import Operation
 from design_of_mechanical_production.core.services.operation_creator import create_operations_from_data
@@ -13,6 +14,12 @@ class TestOperationCreator(unittest.TestCase):
 
     def setUp(self) -> None:
         """Подготовка тестовых данных."""
+        patcher = patch(
+            "design_of_mechanical_production.core.factories.equipment_factory.EquipmentFactory.create_equipment"
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_create_equipment = patcher.start()
+
         self.valid_process_data = [
             {'number': "005", 'name': "Операция 1", 'time': 10.5, 'machine': "DMG CTX beta 2000"},
             {'number': "010", 'name': "Операция 2", 'time': 15.3, 'machine': "DMG CTX beta 2000"},

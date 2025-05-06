@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------
 import unittest
 from decimal import Decimal
+from unittest.mock import patch
 
 from design_of_mechanical_production.core.entities import Workshop
 from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
@@ -13,6 +14,12 @@ class TestWorkshopCreator(unittest.TestCase):
 
     def setUp(self) -> None:
         """Подготовка тестовых данных."""
+        patcher = patch(
+            "design_of_mechanical_production.core.factories.equipment_factory.EquipmentFactory.create_equipment"
+        )
+        self.addCleanup(patcher.stop)
+        self.mock_create_equipment = patcher.start()
+
         self.valid_parameters_data = {'name': "Цех №1", 'production_volume': 1000.0, 'mass_detail': 10.5}
         self.valid_process_data = [
             {'number': "005", 'name': "Операция 1", 'time': 10.5, 'machine': "DMG CTX beta 2000"},
