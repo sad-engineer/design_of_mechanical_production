@@ -8,11 +8,10 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
+from design_of_mechanical_production.core import create_workshop_from_data
 from design_of_mechanical_production.data.input import ExcelReader
 from design_of_mechanical_production.data.output import TextReportGenerator
 from design_of_mechanical_production.data.utils.file_system import (
-    check_initial_data_file,
     create_initial_data_file,
     ensure_directories_exist,
 )
@@ -60,13 +59,10 @@ def run_without_gui() -> None:
     """
     # Создаем необходимые директории
     ensure_directories_exist()
-
     # Проверяем и создаем файл с начальными данными
     initial_data_file = create_initial_data_file()
-    print(f"Используемый файл с начальными данными: {initial_data_file}")
 
     # Даем пользователю время для корректировки начальных данных
-    print("\nФайл с начальными данными создан/обновлен.")
     print(f"Пожалуйста, проверьте и при необходимости отредактируйте данные в файле {initial_data_file}.")
     input("После завершения редактирования нажмите Enter для продолжения...")
 

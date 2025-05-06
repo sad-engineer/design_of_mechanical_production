@@ -4,14 +4,12 @@
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from design_of_mechanical_production.core.entities import MachineInfo, Operation, Process, Workshop
-from design_of_mechanical_production.core.factories import EquipmentFactory, WorkshopZoneFactory
+from design_of_mechanical_production.core.entities import MachineInfo, Workshop
+from design_of_mechanical_production.core.factories import WorkshopZoneFactory
 from design_of_mechanical_production.core.services import create_operations_from_data, create_process_from_data
 from design_of_mechanical_production.core.services.validation import (
-    validate_operations,
     validate_parameters_data,
     validate_process_data,
-    validate_production_volume,
 )
 from design_of_mechanical_production.settings import get_setting
 
@@ -20,6 +18,8 @@ GRINDING_ZONE_PERCENT = Decimal(str(get_setting('grinding_zone_percent')))  # 5%
 REPAIR_ZONE_PERCENT = Decimal(str(get_setting('repair_zone_percent')))  # 2.5% от общего числа станков
 
 
+@validate_parameters_data
+@validate_process_data
 def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: List[Dict[str, Any]]) -> Workshop:
     """
     Создает объект цеха из входных данных.
@@ -41,22 +41,6 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     Raises:
         ValueError: Если входные данные некорректны
     """
-    validate_parameters_data(parameters_data)
-    validate_process_data(process_data)
-    # Валидация входных данных
-    if not parameters_data or not process_data:
-        raise ValueError("Входные данные не могут быть пустыми")
-
-    required_params = ['name', 'production_volume', 'mass_detail']
-    if not all(param in parameters_data for param in required_params):
-        raise ValueError(f"Отсутствуют обязательные параметры: {required_params}")
-
-    if float(parameters_data['production_volume']) <= 0:
-        raise ValueError("Объем производства должен быть положительным числом")
-
-    if float(parameters_data['mass_detail']) <= 0:
-        raise ValueError("Масса детали должна быть положительным числом")
-
     production_volume = float(parameters_data['production_volume'])
 
     # Создаем технологический процесс

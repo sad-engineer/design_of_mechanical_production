@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "design_of_mechanical_production"
-version = "0.0.36"
+version = "0.0.37"
 description = "Расчет площади цеха"
 authors = ["Andrey Nikolaevich Korenyuk <korenyuk.a.n@mail.ru>"]
 readme = "README.md"

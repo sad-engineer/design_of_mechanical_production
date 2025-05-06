@@ -16,16 +16,7 @@ def create_process_from_data(production_volume: float, operations: List[Operatio
 
     Returns:
         Process: Созданный объект технологического процесса
-
-    Raises:
-        ValueError: Если входные данные некорректны
     """
-    if production_volume <= 0:
-        raise ValueError("Объем производства должен быть положительным числом")
-
-    if not operations:
-        raise ValueError("Список операций не может быть пустым")
-
     # Создаем технологический процесс
     process = Process()
     for operation in operations:
