@@ -151,7 +151,11 @@ class EditableTable(FloatLayout):
                 else:
                     row_data.append('')
             data.append(row_data)
-        return data
+        process_data = []
+        for row in data:
+            if len(row) >= 4:
+                process_data.append({'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]})
+        return process_data
 
     def set_data(self, new_data: List[List[str]]):
         # Очищаем существующие строки

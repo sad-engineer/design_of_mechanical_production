@@ -4,20 +4,14 @@
 """
 Модуль с основным классом приложения.
 """
-from typing import Any, Dict
 
-from kivy.app import App
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 
-from design_of_mechanical_production.gui.input_window import InputWindow
-from design_of_mechanical_production.gui.settings_window import SettingsWindow
+from design_of_mechanical_production.gui.windows import InputWindow, ResultWindow, SettingsWindow
 
 
 class MainScreen(Screen):
@@ -86,8 +80,10 @@ class WorkshopDesignApp(MDApp):
 
         # Добавляем окно настроек
         settings_window = SettingsWindow(name='settings')
+        result_window = ResultWindow(name='result', screen_manager=self.screen_manager)
         self.screen_manager.add_widget(main_screen)
         self.screen_manager.add_widget(settings_window)
+        self.screen_manager.add_widget(result_window)
 
         # Устанавливаем размер окна
         Window.size = (800, 600)

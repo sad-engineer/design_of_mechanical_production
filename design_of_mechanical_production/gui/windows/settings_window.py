@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
@@ -9,7 +9,7 @@ from kivy.uix.textinput import TextInput
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
 
-from design_of_mechanical_production.gui.base_window import BaseWindow
+from design_of_mechanical_production.gui.windows.base_window import BaseWindow
 from design_of_mechanical_production.settings import get_setting, set_setting
 
 

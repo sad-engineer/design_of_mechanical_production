@@ -231,7 +231,7 @@ class InputWindow(FloatLayout):
         return right_col
 
     def save_data(self, instance):
-        """Сохраняет введенные данные."""
+        """Сохраняет введенные данные и переходит к результатам расчета."""
         try:
             # Получаем данные параметров
             parameters_data = {
@@ -239,33 +239,25 @@ class InputWindow(FloatLayout):
                 'production_volume': int(self.volume_input.text),
                 'mass_detail': float(self.mass_input.text),
             }
-
             # Получаем данные из таблицы и преобразуем их в нужный формат
-            table_data = self.table.get_data()
-            process_data = []
-            for row in table_data:
-                if len(row) >= 4:  # Проверяем, что строка содержит все необходимые поля
-                    process_data.append(
-                        {'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]}
-                    )  # Номер операции  # Название операции  # Время операции  # Название станка
-
-            from pathlib import Path
-
-            from design_of_mechanical_production.data.input import ExcelReader
-            from design_of_mechanical_production.settings import get_setting
-
-            initial_data_file = Path(get_setting('input_data_path'))
-            reader = ExcelReader(initial_data_file)
-            parameters_data1 = reader.read_parameters_data()
-            process_data1 = reader.read_process_data()
-
+            process_data = self.table.get_data()
+            # Делаем расчет
             workshop = create_workshop_from_data(parameters_data, process_data)
-            print("Площадь цеха:", workshop.total_area)
+
+            # Переходим к окну результатов
+            if self.screen_manager:
+                # Передаем workshop в окно результатов
+                result_screen = self.screen_manager.get_screen('result')
+                result_screen.set_workshop(workshop)
+                self.screen_manager.current = 'result'
+            else:
+                print("Ошибка: screen_manager не передан!")
 
         except ValueError as e:
             print("Ошибка ввода данных:", e)
 
-    def cancel(self, instance):
+    @staticmethod
+    def cancel(instance):
         """
         Отменяет ввод данных и завершает работу приложения.
 
