@@ -71,8 +71,6 @@ class WorkshopDesignApp(MDApp):
 
         # Создаем и добавляем окно ввода
         input_window = InputWindow(screen_manager=self.screen_manager)
-        input_window.size_hint = (0.8, 0.8)
-        input_window.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         main_layout.add_widget(input_window)
 
         # Добавляем контейнер на главный экран
@@ -86,7 +84,7 @@ class WorkshopDesignApp(MDApp):
         self.screen_manager.add_widget(result_window)
 
         # Устанавливаем размер окна
-        Window.size = (800, 600)
+        Window.size = (910, 600)
 
         return self.screen_manager
 

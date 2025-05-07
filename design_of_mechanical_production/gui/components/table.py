@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import Any, List
+from typing import Any, List, Dict, Union
 
 from kivy.graphics import Color, Line
 from kivy.uix.boxlayout import BoxLayout
@@ -127,6 +127,22 @@ class EditableTable(FloatLayout):
             for w in row
         ]
         self.event_manager.on_row_changed(row_index, row_data)
+        self.clean_empty_rows()
+
+    def clean_empty_rows(self):
+        """Оставляет только одну пустую строку в конце таблицы."""
+        # Считаем пустые строки (все поля пустые)
+        empty_rows = []
+        for idx, row in enumerate(self.table_rows):
+            if all((getattr(w, 'text', '') == '' if not isinstance(w, MachineToolSuggestField) else w.text == '') for w in row):
+                empty_rows.append(idx)
+        # Если пустых строк больше одной, удаляем все кроме последней
+        if len(empty_rows) > 1:
+            # Удаляем с конца, чтобы индексы не сбивались
+            for idx in reversed(empty_rows[:-1]):
+                for widget in self.table_rows[idx]:
+                    self.grid.remove_widget(widget)
+                del self.table_rows[idx]
 
     def _add_widgets_to_layout(self, row_widgets: List[Any]):
         for idx, widget in enumerate(row_widgets):
@@ -139,7 +155,7 @@ class EditableTable(FloatLayout):
     def add_empty_row(self):
         self._add_row()
 
-    def get_data(self) -> List[List[str]]:
+    def get_data(self) -> list[dict[str, Union[Union[str, float], Any]]]:
         data = []
         for row in self.table_rows[:-1]:  # Пропускаем последнюю пустую строку
             row_data = []

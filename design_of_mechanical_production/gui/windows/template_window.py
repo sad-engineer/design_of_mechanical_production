@@ -12,6 +12,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivymd.app import MDApp
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
+from kivy.clock import Clock
 
 
 class TemplateWindow(FloatLayout):
@@ -28,51 +29,36 @@ class TemplateWindow(FloatLayout):
         self.screen_manager = screen_manager
         self.debug_mode = debug_mode
         self._init_ui()
+        # Window.bind(size=self._update_content_geometry)
+        # Clock.schedule_once(lambda dt: self._update_content_geometry(Window, Window.size), 0.1)
+        # self.header.bind(size=self._update_header_debug, pos=self._update_content_geometry)
+        # self.buttons_box.bind(size=self._update_content_geometry, pos=self._update_content_geometry)
+        # Clock.schedule_once(lambda dt: self._update_content_geometry(Window, Window.size), 0.5)
 
     def _init_ui(self):
         """Инициализирует пользовательский интерфейс."""
-        if self.debug_mode:
-            with self.canvas.before:
-                Color(1, 0, 0, 0.3)  # Красный с прозрачностью
-                self.rect = Rectangle(pos=self.pos, size=self.size)
-            self.bind(pos=self._update_rect, size=self._update_rect)
-
+        # Создаем корневой контейнер
+        self.root_box = BoxLayout(orientation='vertical')
+        self.add_widget(self.root_box)
         self._create_header()
         self._create_content()
         self._create_buttons()
 
-    def _update_rect(self, instance, value):
-        """Обновляет размер и позицию отладочного прямоугольника."""
-        if self.debug_mode:
-            self.rect.pos = instance.pos
-            self.rect.size = instance.size
-
     def _create_header(self):
         """Создает заголовок окна."""
-        # Создаем контейнер для иконок и заголовка
         self.header = BoxLayout(
             orientation='horizontal',
             size_hint=(1, None),
             height=50,
             padding=[10, 5, 10, 5],
             spacing=5,
-            pos_hint={'top': 1},
         )
-        if self.debug_mode:
-            with self.header.canvas.before:
-                self._header_color = Color(0, 1, 0, 0.3)  # Зеленый с прозрачностью
-                self._header_rect = Rectangle(pos=self.header.pos, size=self.header.size)
-            self.header.bind(pos=self._update_header_debug, size=self._update_header_debug)
-
-        # Добавляем иконки
         self.theme_btn = MDIconButton(
             icon="theme-light-dark", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.toggle_theme
         )
         self.settings_btn = MDIconButton(
             icon="cog", size_hint=(None, None), size=(40, 40), padding=0, on_release=self.open_settings
         )
-
-        # Добавляем заголовок
         self.label = MDLabel(
             text='Заголовок окна',
             size_hint=(1, 1),
@@ -80,87 +66,74 @@ class TemplateWindow(FloatLayout):
             font_style='H5',
             valign='middle',
         )
-
         self.header.add_widget(self.label)
-        self.header.add_widget(self.settings_btn)
         self.header.add_widget(self.theme_btn)
-
-        self.add_widget(self.header)
-
-    def _update_header_debug(self, instance, value):
-        """Обновляет размер и позицию отладочного прямоугольника заголовка."""
-        if self.debug_mode:
-            self._header_rect.pos = instance.pos
-            self._header_rect.size = instance.size
-
-    def _update_header_position(self, instance, size):
-        """Обновляет позицию header при изменении размера окна."""
-        # header теперь с size_hint, позиция обновляется автоматически
-        self.label.pos = (0, size[1] - 50)
+        self.header.add_widget(self.settings_btn)
+        self.root_box.add_widget(self.header)
+        self.header.bind(pos=self._update_header_debug, size=self._update_header_debug)
 
     def _create_content(self):
         """Создает основной контент окна."""
-        # Создаем контейнер для содержимого
         self.content = BoxLayout(
             orientation='vertical',
-            size_hint=(1, 1),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            padding=10,
-            spacing=10,
+            padding=[5, 5, 5, 5],
+            spacing=5,
         )
-
-        if self.debug_mode:
-            with self.content.canvas.before:
-                Color(0, 0, 1, 0.3)  # Синий с прозрачностью
-                Rectangle(pos=self.content.pos, size=self.content.size)
-            self.content.bind(pos=self._update_content_debug, size=self._update_content_debug)
-
-        self.add_widget(self.content)
-
-    def _update_content_debug(self, instance, value):
-        """Обновляет размер и позицию отладочного прямоугольника контента."""
-        if self.debug_mode:
-            instance.canvas.before.clear()
-            with instance.canvas.before:
-                Color(0, 0, 1, 0.3)
-                Rectangle(pos=instance.pos, size=instance.size)
+        self.content.bind(pos=self._update_content_debug, size=self._update_content_debug)
+        self.root_box.add_widget(self.content)
 
     def _create_buttons(self):
         """Создает кнопки управления."""
-        # Контейнер для кнопок
         self.buttons_box = BoxLayout(
             orientation='horizontal',
             size_hint=(1, None),
             height=50,
             spacing=5,
             padding=[0, 0, 0, 5],
-            pos_hint={'x': 0, 'y': 0},
         )
-
-        if self.debug_mode:
-            with self.buttons_box.canvas.before:
-                Color(1, 1, 0, 0.3)  # Желтый с прозрачностью
-                Rectangle(pos=self.buttons_box.pos, size=self.buttons_box.size)
-            self.buttons_box.bind(pos=self._update_buttons_debug, size=self._update_buttons_debug)
-
-        # Кнопки с ограничением максимальной ширины
         self.max_button_width = 200
         self.button1 = Button(text='Кнопка 1', size_hint=(None, 1), width=self.max_button_width)
         self.button2 = Button(text='Кнопка 2', size_hint=(None, 1), width=self.max_button_width)
         self.buttons_box.add_widget(self.button1)
         self.buttons_box.add_widget(self.button2)
-        self.add_widget(self.buttons_box)
+        self.root_box.add_widget(self.buttons_box)
+
+        self.buttons_box.bind(pos=self._update_buttons_debug, size=self._update_buttons_debug)
 
         # Центрирование кнопок и ограничение ширины при изменении размера контейнера
         self.buttons_box.bind(size=self._update_buttons_width)
 
-    def _update_buttons_debug(self, instance, value):
-        """Обновляет размер и позицию отладочного прямоугольника кнопок."""
+    def _update_header_debug(self, instance, value):
+        """Обновляет размер и позицию отладочного прямоугольника заголовка."""
         if self.debug_mode:
             instance.canvas.before.clear()
             with instance.canvas.before:
+                Color(0, 1, 0, 0.3)         # Зеленый с прозрачностью
+                Rectangle(pos=instance.pos, size=instance.size)
+
+    def _update_content_debug(self, instance, value):
+        """Обновляет размер и позицию отладочного прямоугольника контента."""
+        if self.debug_mode:
+            instance.canvas.before.clear()
+            with instance.canvas.before:
+                Color(0, 0, 1, 0.3)         # Синий с прозрачностью
+                Rectangle(pos=instance.pos, size=instance.size)
+
+    def _update_buttons_debug(self, instance, value):
+        """Обновляет размер и позицию отладочного прямоугольника кнопок."""
+        if self.debug_mode:
+            with instance.canvas.before:
                 Color(1, 1, 0, 0.3)
                 Rectangle(pos=instance.pos, size=instance.size)
+
+    # def _update_content_geometry(self, instance, size):
+    #     width, height = size
+        # header_height = self.header.height if hasattr(self, 'header') else 0
+        # buttons_height = self.buttons_box.height if hasattr(self, 'buttons_box') else 0
+        # y = buttons_height
+        # content_height = max(0, height - header_height - buttons_height)
+        # self.content.size = (width, content_height)
+        # self.content.pos = (0, y)
 
     def _update_buttons_width(self, instance, value):
         """Ограничивает максимальную ширину кнопок и центрирует их в контейнере для любого количества кнопок."""
