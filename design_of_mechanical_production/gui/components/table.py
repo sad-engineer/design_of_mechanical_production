@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import Any, List, Dict, Union
+from typing import Any, Dict, List, Union
 
 from kivy.graphics import Color, Line
 from kivy.uix.boxlayout import BoxLayout
@@ -134,7 +134,10 @@ class EditableTable(FloatLayout):
         # Считаем пустые строки (все поля пустые)
         empty_rows = []
         for idx, row in enumerate(self.table_rows):
-            if all((getattr(w, 'text', '') == '' if not isinstance(w, MachineToolSuggestField) else w.text == '') for w in row):
+            if all(
+                (getattr(w, 'text', '') == '' if not isinstance(w, MachineToolSuggestField) else w.text == '')
+                for w in row
+            ):
                 empty_rows.append(idx)
         # Если пустых строк больше одной, удаляем все кроме последней
         if len(empty_rows) > 1:

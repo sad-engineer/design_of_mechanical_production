@@ -4,16 +4,15 @@
 """
 Модуль содержит класс окна ввода данных, наследующий от шаблонного окна.
 """
-from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
-from kivymd.uix.label import MDLabel
-from kivymd.app import MDApp
-from kivy.graphics import Color, Rectangle
 from kivy.uix.widget import Widget
+from kivymd.app import MDApp
+from kivymd.uix.label import MDLabel
 
 from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
 from design_of_mechanical_production.gui.components.config import TableConfig
@@ -21,7 +20,6 @@ from design_of_mechanical_production.gui.components.event_manager import TableEv
 from design_of_mechanical_production.gui.components.row_factory import BaseTableRowFactory
 from design_of_mechanical_production.gui.components.table import EditableTable
 from design_of_mechanical_production.gui.windows.template_window import TemplateWindow
-
 
 OPERATIONS = [
     "Токарная",
@@ -37,7 +35,7 @@ OPERATIONS = [
 ]
 
 
-class InputWindow(TemplateWindow):
+class TemplateInputWindow(TemplateWindow):
     """
     Окно ввода данных, наследующее от шаблонного окна.
 
@@ -66,22 +64,13 @@ class InputWindow(TemplateWindow):
         columns.add_widget(right_col)
         self.content.add_widget(columns)
 
-        # Программно изменяем размер окна для пересчета позиций
-        def trigger_resize(dt):
-            current_width = Window.width
-            current_height = Window.height
-            Window.size = (current_width + 1, current_height + 1)
-            Clock.schedule_once(lambda dt: setattr(Window, 'size', (current_width, current_height)), 0.1)
-
-        Clock.schedule_once(trigger_resize, 0)
-
     def _create_left_column(self):
         """Создает левую колонку с настройками."""
         left_col = BoxLayout(
             orientation='vertical',
             width=275,
             size_hint_x=None,
-            )
+        )
 
         # Название цеха
         left_col.add_widget(MDLabel(text='Название цеха:', halign='left', size_hint_y=None, height=30))
@@ -145,7 +134,7 @@ class InputWindow(TemplateWindow):
         if self.debug_mode:
             instance.canvas.before.clear()
             with instance.canvas.before:
-                Color(0, 0, 0, 0.3)     # Черный с прозрачностью
+                Color(0, 0, 0, 0.3)  # Черный с прозрачностью
                 Rectangle(pos=instance.pos, size=instance.size)
 
     def _update_right_col_debug(self, instance, value):
@@ -159,21 +148,13 @@ class InputWindow(TemplateWindow):
         """Инициализирует кнопки управления."""
         # Очищаем существующие кнопки
         self.buttons_box.clear_widgets()
-        
+
         # Создаем новые кнопки
         calc_btn = Button(
-            text='Начать расчет',
-            size_hint=(None, 1),
-            width=self.max_button_width,
-            on_release=self.save_data
+            text='Начать расчет', size_hint=(None, 1), width=self.max_button_width, on_release=self.save_data
         )
-        cancel_btn = Button(
-            text='Отмена',
-            size_hint=(None, 1),
-            width=self.max_button_width,
-            on_release=self.cancel
-        )
-        
+        cancel_btn = Button(text='Отмена', size_hint=(None, 1), width=self.max_button_width, on_release=self.cancel)
+
         # Добавляем кнопки в контейнер
         self.buttons_box.add_widget(calc_btn)
         self.buttons_box.add_widget(cancel_btn)
@@ -195,9 +176,9 @@ class InputWindow(TemplateWindow):
             # Переходим к окну результатов
             if self.screen_manager:
                 # Передаем workshop в окно результатов
-                result_screen = self.screen_manager.get_screen('result')
+                result_screen = self.screen_manager.get_screen('result_window')
                 result_screen.set_workshop(workshop)
-                self.screen_manager.current = 'result'
+                self.screen_manager.current = 'result_window'
             else:
                 print("Ошибка: screen_manager не передан!")
 
@@ -213,7 +194,27 @@ class InputWindow(TemplateWindow):
         self.table.set_data(new_data)
 
 
+class InputWindow(Screen):
+    """Окно ввода данных, обертка для TemplateInputWindow."""
+
+    def __init__(self, screen_manager=None, **kwargs):
+        super().__init__(**kwargs)
+        self.name = 'input_window'
+        # Создаем и добавляем TemplateInputWindow
+        self.template_window = TemplateInputWindow(screen_manager=screen_manager)
+        self.add_widget(self.template_window)
+
+    def get_table_data(self):
+        """Возвращает данные из таблицы."""
+        return self.template_window.get_table_data()
+
+    def set_table_data(self, new_data):
+        """Устанавливает новые данные в таблицу."""
+        self.template_window.set_table_data(new_data)
+
+
 if __name__ == '__main__':
+
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 
@@ -221,7 +222,7 @@ if __name__ == '__main__':
             """Создает и возвращает главное окно приложения."""
             Window.minimum_width = 910
             Window.minimum_height = 500
-            window = InputWindow(debug_mode=True)
+            window = InputWindow()
             return window
 
     TestApp().run()

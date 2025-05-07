@@ -62,24 +62,14 @@ class WorkshopDesignApp(MDApp):
 
         # Создаем менеджер экранов
         self.screen_manager = ScreenManager()
-
-        # Создаем главный экран
-        main_screen = MainScreen(name='main')
-
-        # Создаем контейнер для основного контента
-        main_layout = FloatLayout()
-
         # Создаем и добавляем окно ввода
         input_window = InputWindow(screen_manager=self.screen_manager)
-        main_layout.add_widget(input_window)
-
-        # Добавляем контейнер на главный экран
-        main_screen.add_widget(main_layout)
-
         # Добавляем окно настроек
         settings_window = SettingsWindow(name='settings')
-        result_window = ResultWindow(name='result', screen_manager=self.screen_manager)
-        self.screen_manager.add_widget(main_screen)
+
+        result_window = ResultWindow(screen_manager=self.screen_manager)
+
+        self.screen_manager.add_widget(input_window)
         self.screen_manager.add_widget(settings_window)
         self.screen_manager.add_widget(result_window)
 

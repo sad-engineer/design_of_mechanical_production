@@ -220,7 +220,7 @@ class TextReportGenerator(IReportGenerator):
             str_area_sum += f"{area} + "
             report.append(
                 f"S_({number}) = ({length} ∙ {width} + {passage_area}) ∙ {operation.accepted_equipment_count} "
-                f"= {area}  м^2;"
+                f"= {area}  м²;"
             )
 
         report.append("Суммарную площадь станочного отделения рассчитываем по формуле:")
@@ -228,7 +228,7 @@ class TextReportGenerator(IReportGenerator):
         str_area_sum += f"{self.fn(workshop.zones['grinding_zone'].area)} + "
         str_area_sum += f"{self.fn(workshop.zones['repair_zone'].area)}"
         report.append(
-            f"S_(СП) = {str_area_sum} = {self.fn(workshop.zones['main_zone'].area)} м^2;"
+            f"S_(СП) = {str_area_sum} = {self.fn(workshop.zones['main_zone'].area)} м²;"
         )
 
         report.append("")
@@ -245,11 +245,11 @@ class TextReportGenerator(IReportGenerator):
             " при работе в 2 смены, ;"
         )
         rep_tool_storage = self.fn(Decimal(get_setting('specific_areas.tool_storage')))
-        report.append(f"S_УД = {rep_tool_storage} м^2;")
+        report.append(f"S_УД = {rep_tool_storage} м²;")
         report.append("C_ОБЩ – общее количество оборудования проектируемого участка.")
         report.append(
             f"S_(С.И.) = {rep_tool_storage} ∙ {workshop.total_machines_count} = "
-            f"{self.fn(workshop.zones['tool_storage_zone'].area)}  м^2"
+            f"{self.fn(workshop.zones['tool_storage_zone'].area)}  м²"
         )
         report.append("")
 
@@ -260,10 +260,10 @@ class TextReportGenerator(IReportGenerator):
         rep_equipment_warehouse = self.fn(
             Decimal(get_setting('specific_areas.equipment_warehouse'))
         )
-        report.append(f"S_УД = {rep_equipment_warehouse} м^2;")
+        report.append(f"S_УД = {rep_equipment_warehouse} м²;")
         report.append(
             f"S_(С.П.) = {rep_equipment_warehouse} ∙ {workshop.total_machines_count} = "
-            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)}  м^2"
+            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)}  м²"
         )
         report.append("")
 
@@ -280,7 +280,7 @@ class TextReportGenerator(IReportGenerator):
         report.append(
             f"S_(С.К.П.) = {work_piece_storage_percent}% ∙ "
             f"{self.fn(workshop.zones['main_zone'].area)} "
-            f"= {self.fn(workshop.zones['work_piece_storage_zone'].area)}  м^2"
+            f"= {self.fn(workshop.zones['work_piece_storage_zone'].area)}  м²"
         )
         report.append("")
 
@@ -290,18 +290,18 @@ class TextReportGenerator(IReportGenerator):
         report.append(f"S_КОНТР = {rep_control_department} ∙ S_(УД СТ),")
         report.append(
             f"S_КОНТР = {rep_control_department} ∙ {self.fn(workshop.zones['main_zone'].area)} "
-            f"= {self.fn(workshop.zones['control_department_zone'].area)}  м^2"
+            f"= {self.fn(workshop.zones['control_department_zone'].area)}  м²"
         )
         report.append("")
 
         report.append("д) санитарно-бытовых помещений")
         report.append(
-            "На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по " "8 м^2 каждый."
+            "На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по " "8 м² каждый."
         )
         rep_sanitary_zone = self.fn(Decimal(get_setting('specific_areas.sanitary_zone')))
         report.append(
             f"S_САН = 2 ∙ {rep_sanitary_zone} = {self.fn(workshop.zones['sanitary_zone'].area)} "
-            f"м^2"
+            f"м²"
         )
 
         report.append("Размер дополнительной площади цеха составляет:")
@@ -349,7 +349,7 @@ class TextReportGenerator(IReportGenerator):
         report.append(f"S_Ц = l ∙ n ∙ L,")
         report.append(
             f"S_Ц = {workshop_span} ∙ {workshop_nam} ∙ {self.fn(workshop.length)} = "
-            f"{self.fn(workshop.total_area)} м^2"
+            f"{self.fn(workshop.total_area)} м²"
         )
 
         return "\n".join(report)

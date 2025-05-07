@@ -19,7 +19,7 @@ class BaseWindow(Screen):
     def hide(self) -> None:
         """Скрывает окно."""
         if self.manager and self.manager.current == self.name:
-            self.manager.current = 'main'
+            self.manager.current = 'input_window'
 
     def close(self) -> None:
         """Закрывает окно."""

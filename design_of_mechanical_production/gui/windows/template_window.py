@@ -4,6 +4,7 @@
 """
 Модуль содержит шаблонный класс окна с базовой структурой.
 """
+from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
@@ -12,7 +13,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivymd.app import MDApp
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
-from kivy.clock import Clock
 
 
 class TemplateWindow(FloatLayout):
@@ -28,23 +28,27 @@ class TemplateWindow(FloatLayout):
         super().__init__(**kwargs)
         self.screen_manager = screen_manager
         self.debug_mode = debug_mode
-        self._init_ui()
-        # Window.bind(size=self._update_content_geometry)
-        # Clock.schedule_once(lambda dt: self._update_content_geometry(Window, Window.size), 0.1)
-        # self.header.bind(size=self._update_header_debug, pos=self._update_content_geometry)
-        # self.buttons_box.bind(size=self._update_content_geometry, pos=self._update_content_geometry)
-        # Clock.schedule_once(lambda dt: self._update_content_geometry(Window, Window.size), 0.5)
+        self._init_template_ui()
 
-    def _init_ui(self):
+    def _init_template_ui(self):
         """Инициализирует пользовательский интерфейс."""
         # Создаем корневой контейнер
         self.root_box = BoxLayout(orientation='vertical')
         self.add_widget(self.root_box)
-        self._create_header()
-        self._create_content()
-        self._create_buttons()
+        self._create_template_header()
+        self._create_template_content()
+        self._create_template_buttons()
 
-    def _create_header(self):
+        # Программно изменяем размер окна для пересчета позиций
+        def trigger_resize(dt):
+            current_width = Window.width
+            current_height = Window.height
+            Window.size = (current_width + 1, current_height + 1)
+            Clock.schedule_once(lambda dt: setattr(Window, 'size', (current_width, current_height)), 0.1)
+
+        Clock.schedule_once(trigger_resize, 0)
+
+    def _create_template_header(self):
         """Создает заголовок окна."""
         self.header = BoxLayout(
             orientation='horizontal',
@@ -70,19 +74,19 @@ class TemplateWindow(FloatLayout):
         self.header.add_widget(self.theme_btn)
         self.header.add_widget(self.settings_btn)
         self.root_box.add_widget(self.header)
-        self.header.bind(pos=self._update_header_debug, size=self._update_header_debug)
+        self.header.bind(pos=self._update_template_header_debug, size=self._update_template_header_debug)
 
-    def _create_content(self):
+    def _create_template_content(self):
         """Создает основной контент окна."""
         self.content = BoxLayout(
             orientation='vertical',
             padding=[5, 5, 5, 5],
             spacing=5,
         )
-        self.content.bind(pos=self._update_content_debug, size=self._update_content_debug)
+        self.content.bind(pos=self._update_template_content_debug, size=self._update_template_content_debug)
         self.root_box.add_widget(self.content)
 
-    def _create_buttons(self):
+    def _create_template_buttons(self):
         """Создает кнопки управления."""
         self.buttons_box = BoxLayout(
             orientation='horizontal',
@@ -98,44 +102,35 @@ class TemplateWindow(FloatLayout):
         self.buttons_box.add_widget(self.button2)
         self.root_box.add_widget(self.buttons_box)
 
-        self.buttons_box.bind(pos=self._update_buttons_debug, size=self._update_buttons_debug)
+        self.buttons_box.bind(pos=self._update_template_buttons_debug, size=self._update_template_buttons_debug)
 
         # Центрирование кнопок и ограничение ширины при изменении размера контейнера
-        self.buttons_box.bind(size=self._update_buttons_width)
+        self.buttons_box.bind(size=self._update_template_buttons_width)
 
-    def _update_header_debug(self, instance, value):
+    def _update_template_header_debug(self, instance, value):
         """Обновляет размер и позицию отладочного прямоугольника заголовка."""
         if self.debug_mode:
             instance.canvas.before.clear()
             with instance.canvas.before:
-                Color(0, 1, 0, 0.3)         # Зеленый с прозрачностью
+                Color(0, 1, 0, 0.3)  # Зеленый с прозрачностью
                 Rectangle(pos=instance.pos, size=instance.size)
 
-    def _update_content_debug(self, instance, value):
+    def _update_template_content_debug(self, instance, value):
         """Обновляет размер и позицию отладочного прямоугольника контента."""
         if self.debug_mode:
             instance.canvas.before.clear()
             with instance.canvas.before:
-                Color(0, 0, 1, 0.3)         # Синий с прозрачностью
+                Color(0, 0, 1, 0.3)  # Синий с прозрачностью
                 Rectangle(pos=instance.pos, size=instance.size)
 
-    def _update_buttons_debug(self, instance, value):
+    def _update_template_buttons_debug(self, instance, value):
         """Обновляет размер и позицию отладочного прямоугольника кнопок."""
         if self.debug_mode:
             with instance.canvas.before:
                 Color(1, 1, 0, 0.3)
                 Rectangle(pos=instance.pos, size=instance.size)
 
-    # def _update_content_geometry(self, instance, size):
-    #     width, height = size
-        # header_height = self.header.height if hasattr(self, 'header') else 0
-        # buttons_height = self.buttons_box.height if hasattr(self, 'buttons_box') else 0
-        # y = buttons_height
-        # content_height = max(0, height - header_height - buttons_height)
-        # self.content.size = (width, content_height)
-        # self.content.pos = (0, y)
-
-    def _update_buttons_width(self, instance, value):
+    def _update_template_buttons_width(self, instance, value):
         """Ограничивает максимальную ширину кнопок и центрирует их в контейнере для любого количества кнопок."""
         buttons = [w for w in self.buttons_box.children if isinstance(w, Button)]
         num_buttons = len(buttons)
@@ -191,7 +186,8 @@ if __name__ == '__main__':
 
         def build(self):
             """Создает и возвращает главное окно приложения."""
-            Window.size = (800, 600)
+            Window.minimum_width = 910
+            Window.minimum_height = 500
             window = TemplateWindow(debug_mode=True)
 
             # Переопределяем имя и функцию button1
