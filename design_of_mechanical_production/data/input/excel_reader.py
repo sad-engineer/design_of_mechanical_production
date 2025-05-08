@@ -23,7 +23,11 @@ class ExcelReader(IDataReader):
         """
         try:
             df = pd.read_excel(self.filepath, sheet_name='Parameters')
-            return {'name': df['name'].iloc[0], 'production_volume': int(df['production_volume'].iloc[0]), 'mass_detail': float(df['mass_detail'].iloc[0])}
+            return {
+                'name': df['name'].iloc[0],
+                'production_volume': int(df['production_volume'].iloc[0]),
+                'mass_detail': float(df['mass_detail'].iloc[0])
+            }
         except Exception as e:
             raise Exception(f"Ошибка при чтении данных о параметрах: {str(e)}")
 

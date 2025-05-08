@@ -13,7 +13,6 @@ class TestProcessCreator(unittest.TestCase):
 
     def setUp(self) -> None:
         """Подготовка тестовых данных."""
-        self.production_volume = 1000.0
         self.operations = [
             Operation(
                 number="005",
@@ -67,7 +66,7 @@ class TestProcessCreator(unittest.TestCase):
     def test_01_create_process_with_valid_data(self) -> None:
         """Тест создания процесса с корректными данными."""
         # Выполнение
-        process = create_process_from_data(self.production_volume, self.operations)
+        process = create_process_from_data(self.operations)
 
         # Проверка
         self.assertIsInstance(process, Process)
@@ -84,7 +83,7 @@ class TestProcessCreator(unittest.TestCase):
     def test_02_create_process_with_empty_operations(self) -> None:
         """Тест создания процесса с пустым списком операций."""
         # Выполнение
-        process = create_process_from_data(self.production_volume, [])
+        process = create_process_from_data([])
 
         # Проверка
         self.assertIsInstance(process, Process)
@@ -93,20 +92,7 @@ class TestProcessCreator(unittest.TestCase):
     def test_03_create_process_with_single_operation(self) -> None:
         """Тест создания процесса с одной операцией."""
         # Выполнение
-        process = create_process_from_data(self.production_volume, self.single_operation)
-
-        # Проверка
-        self.assertIsInstance(process, Process)
-        self.assertEqual(len(process.operations), 1)
-        self.assertEqual(process.operations[0].number, "015")
-        self.assertEqual(process.operations[0].name, "Операция 1")
-        self.assertEqual(process.operations[0].time, Decimal("10.5"))
-        self.assertEqual(process.operations[0].equipment.model, "Станок 1")
-
-    def test_04_create_process_with_zero_production_volume(self) -> None:
-        """Тест создания процесса с нулевым объемом производства."""
-        # Выполнение
-        process = create_process_from_data(0.0, self.single_operation)
+        process = create_process_from_data(self.single_operation)
 
         # Проверка
         self.assertIsInstance(process, Process)

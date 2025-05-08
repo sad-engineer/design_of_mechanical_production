@@ -6,7 +6,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 from design_of_mechanical_production.core.entities import AreaCalculator, SpecificAreaCalculator
 from design_of_mechanical_production.core.interfaces import (
@@ -24,12 +24,29 @@ class BaseWorkshopZone(ABC):
     """
 
     name: str  # Название зоны
+    # __tokens - Признаки сортировки, поле задается фабрикой
+    __tokens: Dict[str, str] = field(default_factory=lambda: {"group": "main"})
 
     @property
     @abstractmethod
     def area(self) -> Decimal:
         """
         Возвращает площадь зоны.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def tokens(self) -> Dict[str, str]:
+        """
+        Возвращает признаки сортировки.
+        """
+        pass
+
+    @abstractmethod
+    def set_tokens(self, tokens: Dict[str, str]) -> None:
+        """
+        Устанавливает признаки сортировки.
         """
         pass
 
@@ -42,7 +59,9 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
 
     name: str
     machines: Dict[str, IMachineInfo] = field(default_factory=dict)
-    _area_calculator: IAreaCalculator = None
+    _area_calculator: Optional[IAreaCalculator] = None
+    # __tokens - Признаки сортировки, поле задается фабрикой
+    __tokens: Dict[str, str] = field(default_factory=lambda: {"group": "main"})
 
     def __post_init__(self) -> None:
         """
@@ -82,6 +101,19 @@ class WorkshopZone(IWorkshopZone, BaseWorkshopZone):
         """
         return sum(machine.accepted_count for machine in self.machines.values())
 
+    def set_tokens(self, tokens: Dict[str, str]) -> None:
+        """
+        Устанавливает признаки сортировки.
+        """
+        self.__tokens = tokens
+
+    @property
+    def tokens(self) -> Dict[str, str]:
+        """
+        Возвращает признаки сортировки.
+        """
+        return self.__tokens
+
 
 @dataclass
 class SpecificWorkshopZone(ISpecificWorkshopZone, BaseWorkshopZone):
@@ -94,6 +126,8 @@ class SpecificWorkshopZone(ISpecificWorkshopZone, BaseWorkshopZone):
     specific_area: Decimal  # удельная площадь зоны в м²
     unit_of_calculation: Union[int, Decimal, float] = 0  # количество элементов в зоне для расчета площади
     _area_calculator: IAreaCalculator = None  # Калькулятор площади
+    # __tokens - Признаки сортировки, поле задается фабрикой
+    __tokens: Dict[str, str] = field(default_factory=lambda: {"group": "additional"})
 
     def __post_init__(self) -> None:
         """
@@ -108,3 +142,16 @@ class SpecificWorkshopZone(ISpecificWorkshopZone, BaseWorkshopZone):
         Возвращает площадь зоны.
         """
         return self._area_calculator.calculate_area({})
+
+    def set_tokens(self, tokens: Dict[str, str]) -> None:
+        """
+        Устанавливает признаки сортировки.
+        """
+        self.__tokens = tokens
+
+    @property
+    def tokens(self) -> Dict[str, str]:
+        """
+        Возвращает признаки сортировки.
+        """
+        return self.__tokens

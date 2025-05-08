@@ -41,24 +41,22 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     Raises:
         ValueError: Если входные данные некорректны
     """
-    production_volume = float(parameters_data['production_volume'])
-
     # Создаем технологический процесс
-    process = create_process_from_data(production_volume, create_operations_from_data(process_data))
+    process = create_process_from_data(create_operations_from_data(process_data))
 
     # Создаем цех с основной зоной
     workshop = Workshop(
         name=parameters_data['name'],
-        production_volume=production_volume,
+        production_volume=float(parameters_data['production_volume']),
         mass_detail=Decimal(str(parameters_data['mass_detail'])),
-        process=process,
+        process_for_one_detail=process,
     )
 
     # Создаем фабрику зон
     zone_factory = WorkshopZoneFactory()
 
     # Создаем и добавляем основную зону
-    workshop.add_zone(*zone_factory.create_main_zone(process.machines))
+    workshop.add_zone(*zone_factory.create_main_zone(workshop.process.machines))
 
     # Создаем и добавляем дополнительные зоны
     grinding_zone_machines_count = {

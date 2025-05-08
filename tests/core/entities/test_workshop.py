@@ -4,6 +4,7 @@
 """
 Тесты для класса Workshop.
 """
+import copy
 import unittest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
@@ -53,19 +54,25 @@ class TestWorkshop(unittest.TestCase):
         self.operation2.percentage = None
 
         self.process = Process(operations=[self.operation1, self.operation2])
-        self.process.calculate_required_machines(production_volume=1000)
+        self.process.calculate_required_machines()
 
         # Создаем тестовый цех
         self.workshop = Workshop(
-            name="Тестовый цех", production_volume=1000, mass_detail=Decimal("10.5"), process=self.process
+            name="Тестовый цех",
+            production_volume=1000,
+            mass_detail=Decimal("10.5"),
+            process_for_one_detail=self.process,
         )
+        self.workshop.process.calculate_required_machines()
 
     def test_01_workshop_initialization(self):
         """Тест инициализации цеха."""
         self.assertEqual(self.workshop.name, "Тестовый цех")
         self.assertEqual(self.workshop.production_volume, 1000)
         self.assertEqual(self.workshop.mass_detail, Decimal("10.5"))
-        self.assertEqual(self.workshop.process, self.process)
+        self.assertEqual(self.workshop.process_for_one_detail, self.process)
+        self.assertIsNotNone(self.workshop.process_for_program)
+        self.assertIsNot(self.workshop.process_for_one_detail, self.workshop.process_for_program)
 
     def test_02_total_machines_count(self):
         """Тест расчета общего количества станков."""
@@ -136,7 +143,7 @@ class TestWorkshop(unittest.TestCase):
         self.workshop.default_calculate_length()
 
         # Проверяем, что длина рассчитана корректно
-        self.assertEqual(self.workshop.length, Decimal("62.625"))
+        self.assertEqual(self.workshop.length, Decimal("66.0"))
 
 
 if __name__ == '__main__':

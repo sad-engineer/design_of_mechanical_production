@@ -54,6 +54,19 @@ class IWorkshopZone(Protocol):
         """
         return ...
 
+    def set_tokens(self, tokens: Dict[str, str]) -> None:
+        """
+        Устанавливает признаки сортировки.
+        """
+        ...
+
+    @property
+    def tokens(self) -> Dict[str, str]:
+        """
+        Возвращает признаки сортировки.
+        """
+        return ...
+
 
 class ISpecificWorkshopZone(Protocol):
     """
@@ -70,5 +83,18 @@ class ISpecificWorkshopZone(Protocol):
     def area(self) -> Decimal:
         """
         Площадь зоны.
+        """
+        return ...
+
+    def set_tokens(self, tokens: Dict[str, str]) -> None:
+        """
+        Устанавливает признаки сортировки.
+        """
+        ...
+
+    @property
+    def tokens(self) -> Dict[str, str]:
+        """
+        Возвращает признаки сортировки.
         """
         return ...

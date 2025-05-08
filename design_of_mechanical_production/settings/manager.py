@@ -19,7 +19,7 @@ class DecimalConstructor(yaml.constructor.Constructor):
         value = self.construct_scalar(node)
         try:
             return Decimal(value)
-        except:
+        except Exception:
             return value
 
 

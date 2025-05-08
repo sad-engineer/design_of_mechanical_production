@@ -11,6 +11,10 @@ from design_of_mechanical_production.core.entities import MachineInfo
 from design_of_mechanical_production.core.interfaces import IMachineInfo, IOperation, IProcess
 from design_of_mechanical_production.settings import get_setting
 
+FUND_OF_WORKING = float(get_setting('fund_of_working'))
+KV = Decimal(str(get_setting('kv')))
+KP = Decimal(str(get_setting('kp')))
+
 
 @dataclass
 class Process(IProcess):
@@ -23,17 +27,15 @@ class Process(IProcess):
 
     def calculate_required_machines(
         self,
-        production_volume: float,
-        fund_of_working: int = int(get_setting('fund_of_working')),
-        kv: Decimal = Decimal(str(get_setting('kv'))),
-        kp: Decimal = Decimal(str(get_setting('kp'))),
+        fund_of_working: float = FUND_OF_WORKING,
+        kv: Decimal = KV,
+        kp: Decimal = KP,
     ) -> None:
         """
         Рассчитывает необходимое количество станков по формуле:
-        num_mach = complexity_norm/(fund_of_working * kv * kp)
+        num_mach = operation.time/(fund_of_working * kv * kp)
 
         Args:
-            production_volume: Годовой объем производства
             fund_of_working: Действительный фонд времени работы одного станка, ч
             kv: Коэффициент выполнения норм
             kp: Коэффициент прогрессивности технологии
@@ -43,8 +45,8 @@ class Process(IProcess):
         """
         machines: Dict[str, IMachineInfo] = {}
         for operation in self.operations:
-            complexity_norm = Decimal(production_volume) * operation.time
-            num_mach = complexity_norm / (Decimal(fund_of_working) * kv * kp)
+            time = Decimal(str(operation.time))
+            num_mach = time / (Decimal(fund_of_working) * kv * kp)
             operation.calculated_equipment_count = num_mach
             operation.accept_count(num_mach)
             if operation.equipment.model not in machines:

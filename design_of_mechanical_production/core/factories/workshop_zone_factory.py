@@ -52,6 +52,7 @@ class WorkshopZoneFactory:
             WorkshopZone: Созданная зона заточного отделения
         """
         workshop_zone = WorkshopZone(name='Заточное отделение')
+        workshop_zone.set_tokens({"group": "additional"})
         for machine_name, machine_info in machines.items():
             workshop_zone.add_machine(machine_name, machine_info)
         return 'grinding_zone', workshop_zone
@@ -69,6 +70,7 @@ class WorkshopZoneFactory:
             WorkshopZone: Созданная зона ремонтного отделения
         """
         workshop_zone = WorkshopZone(name='Ремонтное отделение')
+        workshop_zone.set_tokens({"group": "additional"})
         for machine_name, machine_info in machines.items():
             workshop_zone.add_machine(machine_name, machine_info)
         return 'repair_zone', workshop_zone
@@ -91,6 +93,7 @@ class WorkshopZoneFactory:
             specific_area=Decimal(str(get_setting('specific_areas.tool_storage'))),
             unit_of_calculation=total_machines_count,
         )
+        workshop_zone.set_tokens({"group": "additional"})
         return 'tool_storage_zone', workshop_zone
 
     @staticmethod
@@ -111,6 +114,7 @@ class WorkshopZoneFactory:
             specific_area=Decimal(str(get_setting('specific_areas.equipment_warehouse'))),
             unit_of_calculation=total_machines_count,
         )
+        workshop_zone.set_tokens({"group": "additional"})
         return 'equipment_warehouse_zone', workshop_zone
 
     @staticmethod
@@ -131,6 +135,7 @@ class WorkshopZoneFactory:
             specific_area=Decimal(str(get_setting('specific_areas.work_piece_storage'))),
             unit_of_calculation=main_zone_area,
         )
+        workshop_zone.set_tokens({"group": "additional"})
         return 'work_piece_storage_zone', workshop_zone
 
     @staticmethod
@@ -151,6 +156,7 @@ class WorkshopZoneFactory:
             specific_area=Decimal(str(get_setting('specific_areas.control_department'))),
             unit_of_calculation=main_zone_area,
         )
+        workshop_zone.set_tokens({"group": "additional"})
         return 'control_department_zone', workshop_zone
 
     @staticmethod
@@ -168,4 +174,5 @@ class WorkshopZoneFactory:
             specific_area=Decimal(str(get_setting('specific_areas.sanitary_zone'))),
             unit_of_calculation=2,
         )
+        workshop_zone.set_tokens({"group": "additional"})
         return 'sanitary_zone', workshop_zone
