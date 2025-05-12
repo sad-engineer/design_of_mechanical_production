@@ -10,6 +10,7 @@ from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
@@ -44,7 +45,7 @@ class TemplateResultWindow(TemplateWindow):
 
         self.screen_manager = screen_manager
         self._workshop = None
-        # создаем  контент
+        # создаем контент
         self._create_content()
         # Инициализируем кнопки
         self._init_buttons()
@@ -81,7 +82,6 @@ class TemplateResultWindow(TemplateWindow):
         export_results = Button(
             text='Экспорт', size_hint=(None, 1), width=self.max_button_width, on_release=self.export_results
         )
-
         # Добавляем кнопки в контейнер
         self.buttons_box.add_widget(back_to_input)
         self.buttons_box.add_widget(export_results)
@@ -91,7 +91,7 @@ class TemplateResultWindow(TemplateWindow):
         Возвращает к окну ввода данных.
         """
         if self.screen_manager:
-            self.workshop = None
+            self._workshop = None
             self.content.clear_widgets()
             self.screen_manager.current = 'input_window'
 
@@ -138,18 +138,19 @@ class TemplateResultWindow(TemplateWindow):
         """
         self._workshop = workshop
         if self._workshop:
+            self.content.clear_widgets()
+            self._create_content()
             self._update_content()
 
     def _update_content(self):
         """Обновляет отображение результатов расчета."""
-
-        # Очищаем предыдущий контент
-        self.content_layout.clear_widgets()
-
-        # Создаем карточки с результатами
         self._add_general_info_card()
         self._add_process_info_card()
+        self._add_operations_stats_card()
+        self._add_equipment_stats_card()
+        self._add_special_zones_equipment_card()
         self._add_zones_info_card()
+        self._add_summary_card()
 
     def _add_general_info_card(self):
         """Добавляет карточку с общей информацией о цехе."""
@@ -174,7 +175,7 @@ class TemplateResultWindow(TemplateWindow):
         # Информация
         info_layout = BoxLayout(orientation='vertical', spacing=5)
         info_layout.add_widget(MDLabel(text=f'Название цеха: {self.workshop.name}'))
-        info_layout.add_widget(MDLabel(text=f'Годовой объем производства: {self.workshop.production_volume} шт.'))
+        info_layout.add_widget(MDLabel(text=f'Годовой объем производства: {fn(self.workshop.production_volume)} шт.'))
         info_layout.add_widget(MDLabel(text=f'Масса детали: {fn(self.workshop.mass_detail)} кг'))
         info_layout.add_widget(MDLabel(text=f'Общая площадь цеха: {fn(self.workshop.total_area)} м²'))
 
@@ -182,11 +183,10 @@ class TemplateResultWindow(TemplateWindow):
         self.content_layout.add_widget(card)
 
     def _add_process_info_card(self):
-        """Добавляет карточку с информацией о технологическом процессе."""
+        """Добавляет карточку с информацией о технологическом процессе в виде таблицы."""
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
-            height=200,
             padding=15,
             spacing=10,
         )
@@ -194,25 +194,195 @@ class TemplateResultWindow(TemplateWindow):
         # Заголовок
         card.add_widget(
             MDLabel(
-                text='Технологический процесс',
+                text='Технологический процесс\n(в пересчете на годовой объем)\n',
                 font_style='H6',
                 size_hint_y=None,
+                size_hint_x=None,
                 height=30,
+                width=450,
+                halign='center',
             )
         )
 
-        # Информация о процессе
-        process_layout = BoxLayout(orientation='vertical', spacing=5)
-        for operation in self.workshop.process.operations:
-            process_layout.add_widget(
-                MDLabel(
-                    text=f'Операция {operation.number}: {operation.name} - {operation.time} мин.',
-                    size_hint_y=None,
-                    height=25,
-                )
-            )
+        # Таблица
+        table = GridLayout(
+            cols=3, size_hint_x=None, size_hint_y=None, row_default_height=30, spacing=5, padding=[0, 0, 0, 0]
+        )
+        table.bind(minimum_height=table.setter('height'))
+        table.width = 450
 
-        card.add_widget(process_layout)
+        # Заголовки таблицы
+        headers = ['№/Название', 'Время, мин.', 'Станок']
+        for header in headers:
+            table.add_widget(MDLabel(text=header, bold=True, halign='center'))
+
+        # Данные по операциям
+        for operation in self.workshop.process.operations:
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=str(fn(operation.time)), halign='center'))
+            table.add_widget(MDLabel(text=operation.equipment.model, halign='center'))
+
+        # Добавляем строку с общей трудоемкостью
+        table.add_widget(MDLabel(text="Итого", halign='center', bold=True))
+        table.add_widget(MDLabel(text=str(fn(self.workshop.process.total_time)), halign='center', bold=True))
+        table.add_widget(MDLabel(text="-", halign='center'))
+
+        card.add_widget(table)
+        card.height = table.height + 200
+
+        self.content_layout.add_widget(card)
+
+    def _add_operations_stats_card(self):
+        """Добавляет карточку с таблицей по операциям: номер, название, доля от общей трудоемкости, коэффициенты."""
+        card = MDCard(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=325,
+            padding=15,
+            spacing=10,
+        )
+
+        # Заголовок
+        card.add_widget(
+            MDLabel(
+                text='Анализ операций',
+                font_style='H6',
+                size_hint_y=None,
+                size_hint_x=None,
+                height=30,
+                width=450,
+                halign='center',
+            )
+        )
+
+        # Таблица
+        table = GridLayout(
+            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=45, spacing=5, padding=[0, 0, 0, 0]
+        )
+        table.bind(minimum_height=table.setter('height'))
+        table.width = 450
+
+        headers = ['№/Название', 'Доля, %', 'Kv', 'Kp']
+        for header in headers:
+            table.add_widget(MDLabel(text=header, font_style='Subtitle2', halign='center'))
+
+        for operation in self.workshop.process.operations:
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=str(fn(operation.percentage)), halign='center'))
+            table.add_widget(MDLabel(text=str(fn(operation.compliance_coefficient)), halign='center'))
+            table.add_widget(MDLabel(text=str(fn(operation.progressivity_coefficient)), halign='center'))
+
+        card.add_widget(table)
+        self.content_layout.add_widget(card)
+
+    def _add_equipment_stats_card(self):
+        """Добавляет карточку с таблицей по операциям: номер, название, расчетное и принятое количество станков,
+        коэффициент загрузки."""
+        print("Добавляю карточку с таблицей по операциям")
+        card = MDCard(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=375,
+            padding=15,
+            spacing=10,
+        )
+
+        # Заголовок
+        card.add_widget(
+            MDLabel(
+                text='Необходимое количество станков\nи их загрузка',
+                font_style='H6',
+                size_hint_y=None,
+                size_hint_x=None,
+                height=30,
+                width=450,
+                halign='center',
+            )
+        )
+
+        # Таблица
+        table = GridLayout(
+            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=45, spacing=5, padding=[0, 0, 0, 0]
+        )
+        table.bind(minimum_height=table.setter('height'))
+        table.width = 450
+
+        headers = ['№/Название', 'Nрасч', 'Nприн', 'Kзагр']
+        for header in headers:
+            table.add_widget(MDLabel(text=header, font_style='Subtitle2', halign='center'))
+
+        for operation in self.workshop.process.operations:
+            n_calc = getattr(operation, 'calculated_equipment_count', 0)
+            n_accepted = getattr(operation, 'accepted_equipment_count', 0)
+            load_coeff = getattr(operation, '_load_factor', 0)
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=str(fn(n_calc)), halign='center'))
+            table.add_widget(MDLabel(text=str(n_accepted), halign='center'))
+            table.add_widget(MDLabel(text=str(fn(load_coeff)), halign='center'))
+
+        # Добавляем строку итоговых значений
+        table.add_widget(MDLabel(text="Итого", halign='center', bold=True))
+        table.add_widget(
+            MDLabel(text=str(fn(self.workshop.process.calculated_machines_count)), halign='center', bold=True)
+        )
+        table.add_widget(MDLabel(text=str(self.workshop.process.accepted_machines_count), halign='center', bold=True))
+        table.add_widget(MDLabel(text=str(fn(self.workshop.process.average_load_factor)), halign='center', bold=True))
+
+        card.add_widget(table)
+        self.content_layout.add_widget(card)
+
+    def _add_special_zones_equipment_card(self):
+        """Добавляет карточку с расчетным и принятым количеством станков по зонам: заточная, ремонтная,
+        общее количество (каждое значение в отдельном лейбле)."""
+        card = MDCard(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=400,
+            padding=15,
+            spacing=10,
+        )
+
+        card.add_widget(
+            MDLabel(
+                text='Общее количество станков\nпо зонам',
+                font_style='H6',
+                size_hint_y=None,
+                size_hint_x=None,
+                height=30,
+                width=450,
+            )
+        )
+
+        grinding = self.workshop.zones.get('grinding_zone')
+        repair = self.workshop.zones.get('repair_zone')
+        main = self.workshop.zones.get('main_zone')
+        total = self.workshop.total_machines_count
+
+        # Информация
+        card_layout = BoxLayout(orientation='vertical', spacing=5)
+
+        card_layout.add_widget(MDLabel(text="Производственная зона:", halign='left'))
+        card_layout.add_widget(
+            MDLabel(text=f"    расчетное - {str(fn(main.calculated_machines_count))}", halign='left')
+        )
+        card_layout.add_widget(MDLabel(text=f"    принятое - {str(main.accepted_machines_count)}", halign='left'))
+
+        card_layout.add_widget(MDLabel(text="Заточная зона:", halign='left'))
+        card_layout.add_widget(
+            MDLabel(text=f"    расчетное - {str(fn(grinding.calculated_machines_count))}", halign='left')
+        )
+        card_layout.add_widget(MDLabel(text=f"    принятое - {str(grinding.accepted_machines_count)}", halign='left'))
+
+        card_layout.add_widget(MDLabel(text="Ремонтная зона:", halign='left'))
+        card_layout.add_widget(
+            MDLabel(text=f"    расчетное - {str(fn(repair.calculated_machines_count))}", halign='left')
+        )
+        card_layout.add_widget(MDLabel(text=f"    принятое - {str(repair.accepted_machines_count)}", halign='left'))
+
+        card_layout.add_widget(MDLabel(text=f'Общее количество станков: {str(total)}', halign='left'))
+
+        card.add_widget(card_layout)
+
         self.content_layout.add_widget(card)
 
     def _add_zones_info_card(self):
@@ -220,7 +390,7 @@ class TemplateResultWindow(TemplateWindow):
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
-            height=300,
+            height=350,
             padding=15,
             spacing=10,
         )
@@ -240,24 +410,61 @@ class TemplateResultWindow(TemplateWindow):
         for zone_name, zone in self.workshop.zones.items():
             zones_layout.add_widget(
                 MDLabel(
-                    text=f'{zone_name}: {zone.area:.2f} м²',
+                    text=f'{zone.name}: {zone.area:.2f} м²',
                     size_hint_y=None,
                     height=25,
                 )
             )
 
+        zones_layout.add_widget(
+            MDLabel(
+                text=f"Расчетная площадь цеха: {fn(self.workshop.required_area)} м²",
+                halign='left',
+                height=25,
+                bold=True,
+            )
+        )
+
         card.add_widget(zones_layout)
+        self.content_layout.add_widget(card)
+
+    def _add_summary_card(self):
+        """Добавляет карточку с итоговыми значениями: ширина пролета, число пролетов, длина пролета, площадь."""
+        card = MDCard(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=180,
+            padding=15,
+            spacing=10,
+        )
+        card.add_widget(
+            MDLabel(
+                text='Итоговые значения',
+                font_style='H6',
+                size_hint_y=None,
+                size_hint_x=None,
+                height=30,
+                width=450,
+            )
+        )
+
+        # Добавляем строки
+        card.add_widget(MDLabel(text=f"Ширина пролета: {fn(self.workshop.span_width)} м", halign='left'))
+        card.add_widget(MDLabel(text=f"Число пролетов: {self.workshop.span_number}", halign='left'))
+        card.add_widget(MDLabel(text=f"Длина пролета: {fn(self.workshop.length)} м", halign='left'))
+        card.add_widget(MDLabel(text=f"Площадь цеха: {fn(self.workshop.total_area)} м²", halign='left', bold=True))
         self.content_layout.add_widget(card)
 
 
 class ResultWindow(Screen):
     """Окно ввода данных, обертка для TemplateInputWindow."""
 
-    def __init__(self, screen_manager=None, **kwargs):
+    def __init__(self, screen_manager=None, workshop=None, debug_mode=False, **kwargs):
         super().__init__(**kwargs)
         self.name = 'result_window'
         # Создаем и добавляем TemplateInputWindow
-        self.template_window = TemplateResultWindow(screen_manager=screen_manager)
+        self.template_window = TemplateResultWindow(screen_manager=screen_manager, debug_mode=debug_mode)
+        self.template_window.workshop = workshop
         self.add_widget(self.template_window)
 
     @property
@@ -289,8 +496,7 @@ if __name__ == '__main__':
 
             Window.minimum_width = 910
             Window.minimum_height = 500
-            window = ResultWindow(debug_mode=True)
-            window.workshop = workshop
+            window = ResultWindow(workshop=workshop, debug_mode=True)
             return window
 
     TestApp().run()

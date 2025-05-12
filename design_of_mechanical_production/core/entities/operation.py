@@ -22,6 +22,9 @@ class Operation(IOperation):
     time: Decimal
     equipment: IEquipment
     calculated_equipment_count: Decimal = Decimal('0')  # Расчетное количество оборудования
+    fund_of_working: Decimal = Decimal('4080')  # Действительный фонд времени работы одного станка, ч
+    compliance_coefficient: Decimal = Decimal('1')  # Коэффициент выполнения норм
+    progressivity_coefficient: Decimal = Decimal('1')  # Коэффициент прогрессивности технологии
     _accepted_equipment_count: int = 0  # Принятое количество станков (округленное вверх)
     _load_factor: Decimal = Decimal('0')  # Коэффициент загрузки станков
     _percentage: Optional[Decimal] = None  # Процентное соотношение операции

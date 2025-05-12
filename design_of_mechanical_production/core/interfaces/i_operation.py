@@ -19,6 +19,9 @@ class IOperation(Protocol):
     time: Decimal
     equipment: 'IEquipment'
     calculated_equipment_count: Decimal  # Расчетное количество оборудования
+    fund_of_working: Decimal  # Действительный фонд времени работы одного станка, ч
+    compliance_coefficient: Decimal  # Коэффициент выполнения норм
+    progressivity_coefficient: Decimal  # Коэффициент прогрессивности технологии
 
     @property
     def accepted_equipment_count(self) -> int:

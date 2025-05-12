@@ -47,7 +47,7 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     # Создаем цех с основной зоной
     workshop = Workshop(
         name=parameters_data['name'],
-        production_volume=float(parameters_data['production_volume']),
+        production_volume=Decimal(str((parameters_data['production_volume']))),
         mass_detail=Decimal(str(parameters_data['mass_detail'])),
         process_for_one_detail=process,
     )

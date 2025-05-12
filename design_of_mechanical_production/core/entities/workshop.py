@@ -27,12 +27,14 @@ class Workshop(IWorkshop):
     """
 
     name: str
-    production_volume: float
+    production_volume: Decimal
     mass_detail: Decimal
     process_for_one_detail: IProcess  # процесс на одну деталь
     process_for_program: Optional[IProcess] = None  # процесс на производственную программу
     zones: Dict[str, IWorkshopZone] = field(default_factory=dict)
-    length: Decimal = Decimal("0")
+    span_width: Decimal = Decimal(str(get_setting('workshop_span')))  # ширина пролетов
+    span_number: Decimal = Decimal(str(get_setting('workshop_nam')))  # количество пролетов
+    length: Decimal = Decimal("0")  # длина пролетов
 
     _total_area: Decimal = Decimal("0")
     _required_area: Decimal = Decimal("0")

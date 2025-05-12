@@ -197,11 +197,11 @@ class TemplateInputWindow(TemplateWindow):
 class InputWindow(Screen):
     """Окно ввода данных, обертка для TemplateInputWindow."""
 
-    def __init__(self, screen_manager=None, **kwargs):
+    def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(**kwargs)
         self.name = 'input_window'
         # Создаем и добавляем TemplateInputWindow
-        self.template_window = TemplateInputWindow(screen_manager=screen_manager)
+        self.template_window = TemplateInputWindow(screen_manager=screen_manager, debug_mode=debug_mode)
         self.add_widget(self.template_window)
 
     def get_table_data(self):
@@ -222,7 +222,7 @@ if __name__ == '__main__':
             """Создает и возвращает главное окно приложения."""
             Window.minimum_width = 910
             Window.minimum_height = 500
-            window = InputWindow()
+            window = InputWindow(debug_mode=True)
             return window
 
     TestApp().run()

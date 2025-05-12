@@ -23,30 +23,25 @@ class Process(IProcess):
     """
 
     operations: List[IOperation] = field(default_factory=list)
+    compliance_coefficient: Decimal = KV
+    progressivity_coefficient: Decimal = KP
+    _fund_of_working: Decimal = FUND_OF_WORKING
     _machines: Dict[str, IMachineInfo] = field(default_factory=dict)
 
-    def calculate_required_machines(
-        self,
-        fund_of_working: float = FUND_OF_WORKING,
-        kv: Decimal = KV,
-        kp: Decimal = KP,
-    ) -> None:
+    def calculate_required_machines(self) -> None:
         """
         Рассчитывает необходимое количество станков по формуле:
-        num_mach = operation.time/(fund_of_working * kv * kp)
-
-        Args:
-            fund_of_working: Действительный фонд времени работы одного станка, ч
-            kv: Коэффициент выполнения норм
-            kp: Коэффициент прогрессивности технологии
-
-        Returns:
-            Словарь, где ключ - модель станка, значение - необходимое количество
+        num_mach = operation.time/(fund_of_working * compliance_coefficient * progressivity_coefficient)
         """
         machines: Dict[str, IMachineInfo] = {}
         for operation in self.operations:
+            operation.fund_of_working = self.fund_of_working
+            operation.compliance_coefficient = self.compliance_coefficient
+            operation.progressivity_coefficient = self.progressivity_coefficient
             time = Decimal(str(operation.time))
-            num_mach = time / (Decimal(fund_of_working) * kv * kp)
+            num_mach = time / (
+                Decimal(self.fund_of_working) * self.compliance_coefficient * self.progressivity_coefficient
+            )
             operation.calculated_equipment_count = num_mach
             operation.accept_count(num_mach)
             if operation.equipment.model not in machines:
@@ -107,3 +102,18 @@ class Process(IProcess):
         """
         self.operations.append(operation)
         self.calculate_percentage()
+
+    @property
+    def fund_of_working(self) -> Decimal:
+        """
+        Действительный фонд времени работы одного станка, ч
+        """
+        return self._fund_of_working
+
+    @fund_of_working.setter
+    def fund_of_working(self, value: Decimal) -> None:
+        """
+        Устанавливает действительный фонд времени работы одного станка, ч
+        """
+        self._fund_of_working = value
+        self.calculate_required_machines()

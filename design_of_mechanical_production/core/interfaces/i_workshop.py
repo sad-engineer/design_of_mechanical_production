@@ -13,7 +13,7 @@ class IWorkshop(Protocol):
     """
 
     name: str
-    production_volume: float
+    production_volume: Decimal
     mass_detail: Decimal
     process: 'IProcess'
     zones: Dict[str, 'IWorkshopZone']

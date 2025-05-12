@@ -105,7 +105,9 @@ class TestProcess(unittest.TestCase):
         operation.accepted_equipment_count = 0
 
         process = Process(operations=[operation])
-        process.calculate_required_machines(fund_of_working=2000, kv=Decimal("1.1"), kp=Decimal("1.2"))
+        process.fund_of_working = 200
+        process.compliance_coefficient = Decimal("1.1")
+        process.progressivity_coefficient = Decimal("1.2")
         machines = process.machines
 
         # Проверяем результаты
