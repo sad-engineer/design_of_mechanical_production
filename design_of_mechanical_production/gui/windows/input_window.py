@@ -112,6 +112,21 @@ class TemplateInputWindow(TemplateWindow):
         """Создает правую колонку с таблицей."""
         right_col = BoxLayout(height=400, width=275, orientation='vertical')
 
+        # Делаем новый заголовок с кнопкой
+        header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, padding=[0, 0, 0, 0])
+        header_box.add_widget(
+            MDLabel(
+                text='Технологический процесс изготовления детали',
+                font_style='H6',
+                halign='center',
+                valign='middle',
+                size_hint_x=1,
+            )
+        )
+        header_box.add_widget(MDIconButton(icon='folder-open', on_release=self.load_table_data))
+        header_box.add_widget(MDIconButton(icon='delete', on_release=self.clear_table_data))
+        right_col.add_widget(header_box)
+
         # Создаем конфигурацию таблицы
         table_config = TableConfig(
             headers=["№", "Операция", "Время", "Станок"],
@@ -121,10 +136,8 @@ class TemplateInputWindow(TemplateWindow):
             ],
             operations=OPERATIONS,
         )
-
         # Создаем фабрику строк
         row_factory = BaseTableRowFactory(OPERATIONS)
-
         # Создаем таблицу (теперь она сама содержит прокрутку и рамку)
         self.table = EditableTable(
             config=table_config,
@@ -136,23 +149,8 @@ class TemplateInputWindow(TemplateWindow):
             table_title='',
         )
         self.table.event_manager = TableEventManagerImpl(self.table)
-
-        # --- Новый заголовок с кнопкой ---
-        header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, padding=[0, 0, 0, 0])
-        header_box.add_widget(
-            MDLabel(
-                text='Технологический процесс изготовления детали',
-                font_style='H6',
-                halign='left',
-                valign='middle',
-                size_hint_x=1,
-            )
-        )
-        header_box.add_widget(MDIconButton(icon='folder-open', on_release=self.load_table_data))
-        right_col.add_widget(header_box)
-        # --- конец нового заголовка ---
-
         right_col.add_widget(self.table)
+
         right_col.bind(pos=self._update_right_col_debug, size=self._update_right_col_debug)
         return right_col
 
@@ -222,7 +220,6 @@ class TemplateInputWindow(TemplateWindow):
     def load_table_data(self, instance):
         file_path = open_native_file_dialog()
         if file_path:
-            print("Выбран файл:", file_path)
             reader = ExcelReader(file_path)
             process_data = reader.read_process_data()
             process = [[str(d['number']), d['name'], str(d['time']), str(d['machine'])] for d in process_data]
@@ -230,6 +227,10 @@ class TemplateInputWindow(TemplateWindow):
 
     def exit_manager(self, *args):
         self.file_manager.close()
+
+    def clear_table_data(self, instance):
+        """Очищает данные таблицы."""
+        self.table.set_data([["005", "Токарная с ЧПУ", "", ""]])
 
 
 class InputWindow(Screen):
