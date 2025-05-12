@@ -4,6 +4,10 @@
 """
 Модуль содержит класс окна ввода данных, наследующий от шаблонного окна.
 """
+import tkinter as tk
+from pathlib import Path
+from tkinter import filedialog
+
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
@@ -12,15 +16,20 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
+from kivymd.uix.button import MDIconButton
+from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
 
 from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
+from design_of_mechanical_production.data.input import ExcelReader
 from design_of_mechanical_production.gui.components.config import TableConfig
 from design_of_mechanical_production.gui.components.event_manager import TableEventManagerImpl
 from design_of_mechanical_production.gui.components.row_factory import BaseTableRowFactory
 from design_of_mechanical_production.gui.components.table import EditableTable
 from design_of_mechanical_production.gui.windows.template_window import TemplateWindow
+from design_of_mechanical_production.settings import get_setting
 
+INPUT_DATA_PATH = Path(get_setting('input_data_path'))
 OPERATIONS = [
     "Токарная",
     "Токарная с ЧПУ",
@@ -46,6 +55,11 @@ class TemplateInputWindow(TemplateWindow):
 
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(screen_manager=screen_manager, debug_mode=debug_mode, **kwargs)
+        self.file_manager = MDFileManager(
+            exit_manager=self.exit_manager,
+            select_path=self.load_table_data,
+            preview=True,
+        )
         # Инициализируем наш контент
         self._init_content()
         # Инициализируем кнопки
@@ -103,10 +117,7 @@ class TemplateInputWindow(TemplateWindow):
             headers=["№", "Операция", "Время", "Станок"],
             column_widths=[40, 175, 80, None],
             initial_data=[
-                ["005", "Токарная с ЧПУ", "11.67", "DMG CTX beta 2000"],
-                ["010", "Расточная с ЧПУ", "20.82", "2431СФ10"],
-                ["015", "Токарная с ЧПУ", "5.65", "DMG CTX beta 2000"],
-                ["020", "Фрезерная с ЧПУ", "1.86", "DMU 50"],
+                ["005", "Токарная с ЧПУ", "", ""],
             ],
             operations=OPERATIONS,
         )
@@ -122,11 +133,26 @@ class TemplateInputWindow(TemplateWindow):
             pos_hint={'x': 0, 'top': 1},
             size_hint=(1, 1),
             height=400,
-            table_title='Технологический процесс изготовления детали',
+            table_title='',
         )
         self.table.event_manager = TableEventManagerImpl(self.table)
-        right_col.add_widget(self.table)
 
+        # --- Новый заголовок с кнопкой ---
+        header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, padding=[0, 0, 0, 0])
+        header_box.add_widget(
+            MDLabel(
+                text='Технологический процесс изготовления детали',
+                font_style='H6',
+                halign='left',
+                valign='middle',
+                size_hint_x=1,
+            )
+        )
+        header_box.add_widget(MDIconButton(icon='folder-open', on_release=self.load_table_data))
+        right_col.add_widget(header_box)
+        # --- конец нового заголовка ---
+
+        right_col.add_widget(self.table)
         right_col.bind(pos=self._update_right_col_debug, size=self._update_right_col_debug)
         return right_col
 
@@ -193,6 +219,18 @@ class TemplateInputWindow(TemplateWindow):
         """Устанавливает новые данные в таблицу."""
         self.table.set_data(new_data)
 
+    def load_table_data(self, instance):
+        file_path = open_native_file_dialog()
+        if file_path:
+            print("Выбран файл:", file_path)
+            reader = ExcelReader(file_path)
+            process_data = reader.read_process_data()
+            process = [[str(d['number']), d['name'], str(d['time']), str(d['machine'])] for d in process_data]
+            self.set_table_data(process)
+
+    def exit_manager(self, *args):
+        self.file_manager.close()
+
 
 class InputWindow(Screen):
     """Окно ввода данных, обертка для TemplateInputWindow."""
@@ -211,6 +249,18 @@ class InputWindow(Screen):
     def set_table_data(self, new_data):
         """Устанавливает новые данные в таблицу."""
         self.template_window.set_table_data(new_data)
+
+
+def open_native_file_dialog():
+    root = tk.Tk()
+    root.withdraw()  # Не показывать главное окно
+    file_path = filedialog.askopenfilename(
+        title="Выберите файл",
+        initialdir=INPUT_DATA_PATH.parent,
+        filetypes=[("Excel files", "*.xlsx *.xls"), ("All files", "*.*")],
+    )
+    root.destroy()
+    return file_path
 
 
 if __name__ == '__main__':
