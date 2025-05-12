@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from math import ceil
 from typing import Optional
 
 from design_of_mechanical_production.core.interfaces import IEquipment, IOperation
@@ -56,7 +57,7 @@ class Operation(IOperation):
         if count < self.calculated_equipment_count:
             raise ValueError("Принятое количество оборудования не может быть меньше расчетного")
 
-        self._accepted_equipment_count = int(count)
+        self._accepted_equipment_count = ceil(count)
         self.calculate_load_factor()
 
     def calculate_load_factor(self) -> None:

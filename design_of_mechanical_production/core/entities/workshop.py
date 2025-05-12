@@ -3,9 +3,10 @@
 # ---------------------------------------------------------------------------------------------------------------------
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict
+from typing import Dict, Optional
 
 from design_of_mechanical_production.core.interfaces import (
     IProcess,
@@ -28,12 +29,29 @@ class Workshop(IWorkshop):
     name: str
     production_volume: float
     mass_detail: Decimal
-    process: IProcess
+    process_for_one_detail: IProcess  # процесс на одну деталь
+    process_for_program: Optional[IProcess] = None  # процесс на производственную программу
     zones: Dict[str, IWorkshopZone] = field(default_factory=dict)
+    length: Decimal = Decimal("0")
 
     _total_area: Decimal = Decimal("0")
     _required_area: Decimal = Decimal("0")
-    _length: Decimal = Decimal("0")
+    _calculated_length: Decimal = Decimal("0")
+
+    def __post_init__(self) -> None:
+        """
+        После инициализации цеха, расчитывается технологический процесс на производственную программу.
+        """
+        self.recalculate_process_for_program()
+
+    def recalculate_process_for_program(self) -> None:
+        """
+        Пересчитывает технологический процесс на производственную программу.
+        """
+        self.process_for_program = copy.deepcopy(self.process_for_one_detail)
+        for operation in self.process_for_program.operations:
+            operation.time = operation.time * Decimal(str(self.production_volume))
+        self.process.calculate_required_machines()
 
     @property
     def total_machines_count(self) -> int:
@@ -63,18 +81,40 @@ class Workshop(IWorkshop):
         return self._required_area
 
     @property
-    def length(self) -> Decimal:
+    def required_area_main_zone(self) -> Decimal:
+        """
+        Общая площадь основных зон цеха.
+        """
+        total_area = Decimal("0")
+        for zone in self.zones.values():
+            if zone.tokens["group"] == "main":
+                total_area += zone.area
+        return total_area
+
+    @property
+    def required_area_additional_zones(self) -> Decimal:
+        """
+        Общая площадь дополнительных зон цеха.
+        """
+        total_area = Decimal("0")
+        for zone in self.zones.values():
+            if zone.tokens["group"] == "additional":
+                total_area += zone.area
+        return total_area
+
+    @property
+    def calculated_length(self) -> Decimal:
         """
         Длина цеха.
         """
-        return self._length
+        return self._calculated_length
 
-    @length.setter
-    def length(self, value: Decimal) -> None:
+    @calculated_length.setter
+    def calculated_length(self, value: Decimal) -> None:
         """
         Устанавливает длину цеха.
         """
-        self._length = value
+        self._calculated_length = value
 
     def _calculate_total_area(self) -> None:
         """
@@ -86,7 +126,7 @@ class Workshop(IWorkshop):
         # Получаем настройки из конфигурации
         width_span = Decimal(str(get_setting('workshop_span')))
         number_spans = Decimal(str(get_setting('workshop_nam')))
-        self._total_area = (width_span * number_spans) * self._length
+        self._total_area = (width_span * number_spans) * self.length
 
     def _calculate_required_area(self) -> None:
         """
@@ -112,14 +152,18 @@ class Workshop(IWorkshop):
         """
         Рассчитывает длину цеха по умолчанию.
         """
-        total_area = 0
         # Получаем настройки из конфигурации
         width_span = Decimal(str(get_setting('workshop_span')))
         number_spans = Decimal(str(get_setting('workshop_nam')))
 
-        remainder = self.required_area % 6
-        if remainder != 0:
-            total_area = self.required_area + (6 - remainder)
+        self.calculated_length = self.required_area / (width_span * number_spans)
+        remainder = self.calculated_length % 6
+        if self.calculated_length != 0:
+            self.length = self.calculated_length + (6 - remainder)
 
-        self._total_area = total_area
-        self.length = total_area / (width_span * number_spans)
+    @property
+    def process(self) -> IProcess:
+        """
+        Возвращает технологический процесс (на производственную программу).
+        """
+        return self.process_for_program

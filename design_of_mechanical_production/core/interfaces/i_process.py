@@ -16,7 +16,7 @@ class IProcess(Protocol):
 
     operations: List['IOperation']
 
-    def calculate_required_machines(self, production_volume: float) -> None:
+    def calculate_required_machines(self) -> None:
         """
         Рассчитывает необходимое количество станков.
 

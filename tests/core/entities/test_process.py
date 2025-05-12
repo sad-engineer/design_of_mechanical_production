@@ -99,15 +99,13 @@ class TestProcess(unittest.TestCase):
 
         # Настраиваем мок для операции
         operation = MagicMock(spec=IOperation)
-        operation.time = Decimal("120")
+        operation.time = Decimal("120000")
         operation.equipment = equipment_mock
         operation.calculated_equipment_count = Decimal("0")
         operation.accepted_equipment_count = 0
 
         process = Process(operations=[operation])
-        process.calculate_required_machines(
-            production_volume=1000, fund_of_working=2000, kv=Decimal("1.1"), kp=Decimal("1.2")
-        )
+        process.calculate_required_machines(fund_of_working=2000, kv=Decimal("1.1"), kp=Decimal("1.2"))
         machines = process.machines
 
         # Проверяем результаты

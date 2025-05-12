@@ -20,12 +20,10 @@ def create_operations_from_data(
             - name: str - название операции
             - time: float - время операции
             - machine: str - модель станка
+        factory: Callable - фабрика для создания оборудования
 
     Returns:
         List[Operation]: Список созданных операций
-
-    Raises:
-        ValueError: Если входные данные некорректны
     """
     # Создаем фабрику оборудования
     equipment_factory = factory()

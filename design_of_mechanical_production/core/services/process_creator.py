@@ -6,12 +6,11 @@ from typing import List
 from design_of_mechanical_production.core.entities import Operation, Process
 
 
-def create_process_from_data(production_volume: float, operations: List[Operation]) -> Process:
+def create_process_from_data(operations: List[Operation]) -> Process:
     """
     Создает объект технологического процесса из входных данных.
 
     Args:
-        production_volume: Годовой объем производства (должен быть положительным числом)
         operations: Список операций
 
     Returns:
@@ -21,5 +20,5 @@ def create_process_from_data(production_volume: float, operations: List[Operatio
     process = Process()
     for operation in operations:
         process.add_operation(operation)
-    process.calculate_required_machines(production_volume)
+    process.calculate_required_machines()
     return process

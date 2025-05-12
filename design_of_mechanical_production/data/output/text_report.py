@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
+import textwrap
 from decimal import Decimal
 from pathlib import Path
 
@@ -51,10 +52,10 @@ class TextReportGenerator(IReportGenerator):
         for operation in workshop.process.operations:
             number = str(operation.number)
             percentage = f"{self.fn(operation.percentage)}%"
-            time = str(self.fn(operation.time * Decimal(str(workshop.production_volume))))
+            time = str(self.fn(operation.time))
             table_data.append((number, operation.name, percentage, time))
         # Строка итога
-        workshop_total_time = self.fn(workshop.process.total_time * Decimal(str(workshop.production_volume)))
+        workshop_total_time = self.fn(workshop.process.total_time)
         total_row = ('-', '-', 'Итого', workshop_total_time)
         # Форматируем таблицу
         report.extend(self.ft(headers, table_data, total_row))
@@ -79,8 +80,7 @@ class TextReportGenerator(IReportGenerator):
         report.append("Расчётное количество оборудования округляем до целого.")
         for operation in workshop.process.operations:
             operation_name = f"С_(Р {operation.number} {operation.name})"
-            report_time = self.fn(operation.time * Decimal(str(workshop.production_volume)))
-
+            report_time = self.fn(operation.time)
             report.append(
                 f"{operation_name} = {report_time} / ({get_setting('fund_of_working')} ∙ {get_setting('kv')} "
                 f"∙ {get_setting('kp')}) = {self.fn(operation.calculated_equipment_count)}"
@@ -98,7 +98,7 @@ class TextReportGenerator(IReportGenerator):
             report.append(
                 f"К_(З {operation.number} {operation.name}) = "
                 f"{self.fn(operation.calculated_equipment_count)}/{operation.accepted_equipment_count} = "
-                f"{self.fn(operation.calculated_equipment_count / operation.accepted_equipment_count)}"
+                f"{self.fn(operation.load_factor)}"
             )
         report.append("")
 
@@ -117,8 +117,8 @@ class TextReportGenerator(IReportGenerator):
             f"К_(З СР) = ({report_list_load_factor})/({report_list_count}) = {average_load_factor}"
         )
         report.append("")
-        report.append("Значения коэффициентов загрузки каждого станка, а также средний коэффициент загрузки заносим в"
-            " таблицу 2.")
+        report.append("Значения коэффициентов загрузки каждого станка, а также средний коэффициент загрузки заносим в "
+                      "таблицу 2.")
 
         report.append("")
         report.append("Таблица 2 - Необходимое количество станков и их загрузка")
@@ -145,6 +145,26 @@ class TextReportGenerator(IReportGenerator):
         )
         # Форматируем таблицу
         report.extend(self.table_formatter.format(headers, table_data, total_row))
+
+        report.append("")
+        report.append("Данные по принятому оборудованию производится в таблице 3.")
+        report.append("")
+
+        report.append("Таблица 3 - Необходимое количество станков")
+        headers = ["№ и наименование операции", "Наименование станков", "Количество, шт.", "Габаритные размеры, мм"]
+        table_data = []
+        for operation in workshop.process.operations:
+            number = f"{operation.number} {operation.name}"
+            length = self.fn(operation.equipment.length * 1000)
+            width = self.fn(operation.equipment.width * 1000)
+            height = self.fn(operation.equipment.height * 1000)
+            dimensions = f"{length} x {width} x {height}"
+            table_data.append((number, operation.equipment.model, operation.accepted_equipment_count, dimensions))
+        # Строка итога
+        total_row = ('-', 'Итого', f'{workshop.zones["main_zone"].accepted_machines_count}', '-')
+        # Форматируем таблицу
+        report.extend(self.table_formatter.format(headers, table_data, total_row))
+        report.append("")
 
         report.append("Для централизованной переточки режущего инструмента в цехе организовывается заточное отделение. "
                       "Основным оборудованием являются заточные станки:")
@@ -176,27 +196,10 @@ class TextReportGenerator(IReportGenerator):
         report.append("")
 
         report.append("Общее количество станков цеха:")
-        report.append("С_ОБЩ = С_О+ С_(ПР ЗАТ)+ С_(ПР РЕМ)")
+        report.append("С_ОБЩ = С_О + С_(ПР ЗАТ) + С_(ПР РЕМ)")
         report.append(
             f"С_ОБЩ = {rep_machines_count} + {rep_ac_count_1} + {rep_ac_count_2} = " f"{workshop.total_machines_count}"
         )
-        report.append("")
-
-        report.append("Данные по принятому оборудованию производится в таблице 3.")
-        report.append("Таблица 3 - Необходимое количество станков")
-        headers = ["№ и наименование операции", "Наименование станков", "Количество, шт.", "Габаритные размеры, мм"]
-        table_data = []
-        for operation in workshop.process.operations:
-            number = f"{operation.number} {operation.name}"
-            length = self.fn(operation.equipment.length * 1000)
-            width = self.fn(operation.equipment.width * 1000)
-            height = self.fn(operation.equipment.height * 1000)
-            dimensions = f"{length} x {width} x {height}"
-            table_data.append((number, operation.equipment.model, operation.accepted_equipment_count, dimensions))
-        # Строка итога
-        total_row = ('-', 'Итого', f'{workshop.zones["main_zone"].accepted_machines_count}', '-')
-        # Форматируем таблицу
-        report.extend(self.table_formatter.format(headers, table_data, total_row))
         report.append("")
 
         report.append("3. Расчёт площади участка")
@@ -220,15 +223,15 @@ class TextReportGenerator(IReportGenerator):
             str_area_sum += f"{area} + "
             report.append(
                 f"S_({number}) = ({length} ∙ {width} + {passage_area}) ∙ {operation.accepted_equipment_count} "
-                f"= {area}  м²;"
+                f"= {area} м²;"
             )
 
         report.append("Суммарную площадь станочного отделения рассчитываем по формуле:")
-        report.append("S_(СП) = ∑S_(СПi) + S_(ЗАТ) + S_(РЕМ)")
+        report.append("S_СП = ∑S_СПi + S_ЗАТ + S_РЕМ")
         str_area_sum += f"{self.fn(workshop.zones['grinding_zone'].area)} + "
         str_area_sum += f"{self.fn(workshop.zones['repair_zone'].area)}"
         report.append(
-            f"S_(СП) = {str_area_sum} = {self.fn(workshop.zones['main_zone'].area)} м²;"
+            f"S_СП = {str_area_sum} = {self.fn(workshop.zones['main_zone'].area)} м²;"
         )
 
         report.append("")
@@ -242,14 +245,14 @@ class TextReportGenerator(IReportGenerator):
         report.append("S_(С.И.) = S_УД∙ C_ОБЩ,")
         report.append(
             "где S_УД – удельная площадь склада инструмента на 1 станок, в зависимости от вида производства"
-            " при работе в 2 смены, ;"
+            " при работе в 2 смены;"
         )
         rep_tool_storage = self.fn(Decimal(get_setting('specific_areas.tool_storage')))
         report.append(f"S_УД = {rep_tool_storage} м²;")
         report.append("C_ОБЩ – общее количество оборудования проектируемого участка.")
         report.append(
             f"S_(С.И.) = {rep_tool_storage} ∙ {workshop.total_machines_count} = "
-            f"{self.fn(workshop.zones['tool_storage_zone'].area)}  м²"
+            f"{self.fn(workshop.zones['tool_storage_zone'].area)} м²"
         )
         report.append("")
 
@@ -263,7 +266,7 @@ class TextReportGenerator(IReportGenerator):
         report.append(f"S_УД = {rep_equipment_warehouse} м²;")
         report.append(
             f"S_(С.П.) = {rep_equipment_warehouse} ∙ {workshop.total_machines_count} = "
-            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)}  м²"
+            f"{self.fn(workshop.zones['equipment_warehouse_zone'].area)} м²"
         )
         report.append("")
 
@@ -280,7 +283,7 @@ class TextReportGenerator(IReportGenerator):
         report.append(
             f"S_(С.К.П.) = {work_piece_storage_percent}% ∙ "
             f"{self.fn(workshop.zones['main_zone'].area)} "
-            f"= {self.fn(workshop.zones['work_piece_storage_zone'].area)}  м²"
+            f"= {self.fn(workshop.zones['work_piece_storage_zone'].area)} м²"
         )
         report.append("")
 
@@ -290,19 +293,19 @@ class TextReportGenerator(IReportGenerator):
         report.append(f"S_КОНТР = {rep_control_department} ∙ S_(УД СТ),")
         report.append(
             f"S_КОНТР = {rep_control_department} ∙ {self.fn(workshop.zones['main_zone'].area)} "
-            f"= {self.fn(workshop.zones['control_department_zone'].area)}  м²"
+            f"= {self.fn(workshop.zones['control_department_zone'].area)} м²"
         )
         report.append("")
 
         report.append("д) санитарно-бытовых помещений")
         report.append(
-            "На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по " "8 м² каждый."
+            "На проектируемом цехе предусматривается площадь, занимаемая двумя санитарными узлами по 8 м² каждый."
         )
         rep_sanitary_zone = self.fn(Decimal(get_setting('specific_areas.sanitary_zone')))
         report.append(
-            f"S_САН = 2 ∙ {rep_sanitary_zone} = {self.fn(workshop.zones['sanitary_zone'].area)} "
-            f"м²"
+            f"S_САН = 2 ∙ {rep_sanitary_zone} = {self.fn(workshop.zones['sanitary_zone'].area)} м²"
         )
+        report.append("")
 
         report.append("Размер дополнительной площади цеха составляет:")
         report.append("S_ДОП = S_(С.И.) + S_(С.П.) + S_(С.К.П.) + S_КОНТР + S_САН,")
@@ -312,17 +315,25 @@ class TextReportGenerator(IReportGenerator):
             f"{self.fn(workshop.zones['work_piece_storage_zone'].area)} + "
             f"{self.fn(workshop.zones['control_department_zone'].area)} + "
             f"{self.fn(workshop.zones['sanitary_zone'].area)} = "
-            f"{self.fn(workshop.required_area)} m^2"
+            f"{self.fn(workshop.required_area_additional_zones)} м²"
         )
-
         report.append("")
+
+        report.append("Общий размер площади цеха составляет:")
+        report.append("S = S_СП + S_ДОП,")
         report.append(
-            "Общие размеры и площади цеха определяют на основе планирования оборудования и всех помещений " "участка."
+            f"S = {self.fn(workshop.required_area_main_zone)} + "
+            f"{self.fn(workshop.required_area_additional_zones)} = "
+            f"{self.fn(workshop.required_area)} м²"
         )
+        report.append("")
+
+        report.append("5. Окончательная компоновка цеха. ")
+        report.append("Общие размеры и площади цеха определяют на основе планирования оборудования и всех помещений.")
         report.append("Размеры пролета принимают в зависимости от рода машиностроения и характера выполняемых работ.")
         workshop_nam = get_setting('workshop_nam')
         workshop_span = get_setting('workshop_span')
-        report.append(f"Принимаем ширину пролета цеха l = {workshop_span} м, число пролетов − {workshop_nam}.")
+        report.append(f"Принимаем ширину пролета цеха l = {workshop_span} м, число пролетов = {workshop_nam}.")
         report.append(
             "Длина пролета участка определяется суммой размеров производственных и вспомогательных "
             "отделений, последовательно расположенных вдоль пролета, проходов и других цехов участка. "
@@ -331,20 +342,26 @@ class TextReportGenerator(IReportGenerator):
         )
 
         report.append("Длина пролёта:")
-        report.append("L = S_Ц/l,")
-        report.append("где L – длина пролета;")
-        report.append("S_Ц – общая площадь участка;")
-        report.append("l – суммарная ширина пролетов")
+        report.append("L_(РАСЧ) = S_Ц/l,")
+        report.append("где S_Ц – общая площадь участка;")
+        report.append("l – суммарная ширина пролетов, которая определяется по формуле:")
+        report.append("l = l_1 ∙ n,")
+        report.append(f"где l_1 = {workshop_span} – ширина одного пролета;")
+        report.append(f"где n = {workshop_nam} – количество пролетов.")
+        report.append("Таким образом, длина пролёта определяется по формуле:")
+        report.append("L_(РАСЧ) = S_Ц/(l_1 ∙ n),")
         report.append(
-            f"L = {self.fn(workshop.required_area)}/({workshop_span} ∙ {workshop_nam}) = "
-            f"{self.fn(workshop.length)} м,"
+            f"L_(РАСЧ) = {self.fn(workshop.required_area)}/({workshop_span} ∙ {workshop_nam}) = "
+            f"{self.fn(workshop.calculated_length)} м,"
         )
+        report.append("Расчетную длину пролетов округляем до большего целого числа, кратного 6.")
+        report.append(f"Принимаем: L = {self.fn(workshop.length)}")
         report.append("")
 
         report.append("Таким образом, размеры цеха составляют:")
-        report.append(f"ширина пролета l = {workshop_span} м,")
-        report.append(f"число пролетов n = {workshop_nam},")
-        report.append(f"длина пролета L = {self.fn(workshop.length)} м.")
+        report.append(f"    - ширина одного пролета l_1 = {workshop_span} м,")
+        report.append(f"    - число пролетов n = {workshop_nam},")
+        report.append(f"    - принятая длина пролета L = {self.fn(workshop.length)} м.")
         report.append("Общая площадь цеха:")
         report.append(f"S_Ц = l ∙ n ∙ L,")
         report.append(
@@ -359,8 +376,20 @@ class TextReportGenerator(IReportGenerator):
         Сохраняет отчет в текстовый файл.
         """
         try:
+            # Разбиваем текст на строки и обрабатываем каждую отдельно
+            wrapped_lines = []
+            for line in report.splitlines():
+                if line.strip() == "":  # Если строка пустая
+                    wrapped_lines.append("")  # Добавляем пустую строку как есть
+                else:
+                    # Оборачиваем непустую строку с максимальной шириной 120 символов
+                    wrapped_lines.extend(textwrap.wrap(line, width=120))
+            
+            # Собираем обратно в текст, сохраняя переносы строк
+            wrapped_report = '\n'.join(wrapped_lines)
+            
             with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(report)
+                f.write(wrapped_report)
             return True
         except Exception as e:
             print(f"Ошибка при сохранении отчета: {str(e)}")
