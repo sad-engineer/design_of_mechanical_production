@@ -206,10 +206,20 @@ class TemplateResultWindow(TemplateWindow):
 
         # Таблица
         table = GridLayout(
-            cols=3, size_hint_x=None, size_hint_y=None, row_default_height=30, spacing=5, padding=[0, 0, 0, 0]
+            cols=3, 
+            size_hint_x=None, 
+            size_hint_y=None, 
+            row_default_height=25,
+            spacing=5, 
+            padding=[0, 0, 0, 0],
         )
-        table.bind(minimum_height=table.setter('height'))
         table.width = 450
+        table.cols_minimum = {
+            0: table.width * 0.4,
+            1: table.width * 0.2,
+            2: table.width * 0.4
+        }
+        table.bind(minimum_height=table.setter('height'))
 
         # Заголовки таблицы
         headers = ['№/Название', 'Время, мин.', 'Станок']
@@ -217,18 +227,20 @@ class TemplateResultWindow(TemplateWindow):
             table.add_widget(MDLabel(text=header, bold=True, halign='center'))
 
         # Данные по операциям
+        height = 150
         for operation in self.workshop.process.operations:
-            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='left'))
             table.add_widget(MDLabel(text=str(fn(operation.time)), halign='center'))
             table.add_widget(MDLabel(text=operation.equipment.model, halign='center'))
+            height += (table.row_default_height + table.spacing[1])
 
         # Добавляем строку с общей трудоемкостью
-        table.add_widget(MDLabel(text="Итого", halign='center', bold=True))
+        table.add_widget(MDLabel(text="Итого:  ", halign='right', bold=True))
         table.add_widget(MDLabel(text=str(fn(self.workshop.process.total_time)), halign='center', bold=True))
         table.add_widget(MDLabel(text="-", halign='center'))
 
         card.add_widget(table)
-        card.height = table.height + 200
+        card.height = height
 
         self.content_layout.add_widget(card)
 
@@ -257,22 +269,32 @@ class TemplateResultWindow(TemplateWindow):
 
         # Таблица
         table = GridLayout(
-            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=45, spacing=5, padding=[0, 0, 0, 0]
+            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=25, spacing=5, padding=[0, 0, 0, 0]
         )
-        table.bind(minimum_height=table.setter('height'))
         table.width = 450
+        table.cols_minimum = {
+            0: table.width * 0.55,
+            1: table.width * 0.15,
+            2: table.width * 0.15,
+            3: table.width * 0.15
+        }
+        table.bind(minimum_height=table.setter('height'))
 
         headers = ['№/Название', 'Доля, %', 'Kv', 'Kp']
         for header in headers:
             table.add_widget(MDLabel(text=header, font_style='Subtitle2', halign='center'))
 
+        height = 110
         for operation in self.workshop.process.operations:
-            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='left'))
             table.add_widget(MDLabel(text=str(fn(operation.percentage)), halign='center'))
             table.add_widget(MDLabel(text=str(fn(operation.compliance_coefficient)), halign='center'))
             table.add_widget(MDLabel(text=str(fn(operation.progressivity_coefficient)), halign='center'))
+            height += (table.row_default_height + table.spacing[1])
 
         card.add_widget(table)
+        card.height = height
+
         self.content_layout.add_widget(card)
 
     def _add_equipment_stats_card(self):
@@ -302,33 +324,43 @@ class TemplateResultWindow(TemplateWindow):
 
         # Таблица
         table = GridLayout(
-            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=45, spacing=5, padding=[0, 0, 0, 0]
+            cols=4, size_hint_x=None, size_hint_y=None, row_default_height=25, spacing=5, padding=[0, 0, 0, 0]
         )
-        table.bind(minimum_height=table.setter('height'))
         table.width = 450
+        table.cols_minimum = {
+            0: table.width * 0.55,
+            1: table.width * 0.15,
+            2: table.width * 0.15,
+            3: table.width * 0.15
+        }
+        table.bind(minimum_height=table.setter('height'))
 
         headers = ['№/Название', 'Nрасч', 'Nприн', 'Kзагр']
         for header in headers:
             table.add_widget(MDLabel(text=header, font_style='Subtitle2', halign='center'))
 
+        height = 125
         for operation in self.workshop.process.operations:
             n_calc = getattr(operation, 'calculated_equipment_count', 0)
             n_accepted = getattr(operation, 'accepted_equipment_count', 0)
             load_coeff = getattr(operation, '_load_factor', 0)
-            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='center'))
+            table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='left'))
             table.add_widget(MDLabel(text=str(fn(n_calc)), halign='center'))
             table.add_widget(MDLabel(text=str(n_accepted), halign='center'))
             table.add_widget(MDLabel(text=str(fn(load_coeff)), halign='center'))
+            height += (table.row_default_height + table.spacing[1])
 
         # Добавляем строку итоговых значений
-        table.add_widget(MDLabel(text="Итого", halign='center', bold=True))
+        table.add_widget(MDLabel(text="Итого:  ", halign='right', bold=True))
         table.add_widget(
             MDLabel(text=str(fn(self.workshop.process.calculated_machines_count)), halign='center', bold=True)
         )
         table.add_widget(MDLabel(text=str(self.workshop.process.accepted_machines_count), halign='center', bold=True))
         table.add_widget(MDLabel(text=str(fn(self.workshop.process.average_load_factor)), halign='center', bold=True))
+        height += (table.row_default_height + table.spacing[1]) 
 
         card.add_widget(table)
+        card.height = height
         self.content_layout.add_widget(card)
 
     def _add_special_zones_equipment_card(self):

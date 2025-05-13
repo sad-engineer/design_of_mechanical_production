@@ -62,14 +62,14 @@ def create_workshop_from_data(parameters_data: Dict[str, Any], process_data: Lis
     grinding_zone_machines_count = {
         "3В642": MachineInfo(
             model="Станок универсально-заточной 3В642",
-            calculated_count=process.accepted_machines_count * GRINDING_ZONE_PERCENT,
+            calculated_count=workshop.process.accepted_machines_count * GRINDING_ZONE_PERCENT,
         )
     }
     workshop.add_zone(*zone_factory.create_grinding_zone(grinding_zone_machines_count))
     repair_zone_machines_count = {
         "3В642": MachineInfo(
             model="Станок универсально-заточной 3В642",
-            calculated_count=process.accepted_machines_count * REPAIR_ZONE_PERCENT,
+            calculated_count=workshop.process.accepted_machines_count * REPAIR_ZONE_PERCENT,
         )
     }
     workshop.add_zone(*zone_factory.create_repair_zone(repair_zone_machines_count))
