@@ -58,16 +58,41 @@ class TemplateResultWindow(TemplateWindow):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             do_scroll_x=False,
         )
-        # Создаем контейнер для карточек с результатами
-        self.content_layout = BoxLayout(
-            orientation='vertical',
+        
+        # Создаем горизонтальный контейнер для двух колонок
+        columns_layout = BoxLayout(
+            orientation='horizontal',
             size_hint_y=None,
             spacing=10,
-            padding=10,
         )
-        self.content_layout.bind(minimum_height=self.content_layout.setter('height'))
-        self.content_layout.bind(pos=self._update_content_debug, size=self._update_content_debug)
-        scroll_view.add_widget(self.content_layout)
+        columns_layout.bind(minimum_height=columns_layout.setter('height'))
+        
+        # Создаем две вертикальные колонки
+        self.left_column = BoxLayout(
+            orientation='vertical',
+            size_hint_x=0.4,
+            size_hint_y=None,
+            spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
+        )
+        self.right_column = BoxLayout(
+            orientation='vertical',
+            size_hint_x=0.6,
+            size_hint_y=None,
+            spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
+        )
+        
+        # Привязываем высоту колонок к их содержимому
+        self.left_column.bind(minimum_height=self.left_column.setter('height'))
+        self.right_column.bind(minimum_height=self.right_column.setter('height'))
+        
+        # Добавляем колонки в горизонтальный контейнер
+        columns_layout.add_widget(self.left_column)
+        columns_layout.add_widget(self.right_column)
+        
+        # Добавляем горизонтальный контейнер в ScrollView
+        scroll_view.add_widget(columns_layout)
         self.content.add_widget(scroll_view)
 
     def _init_buttons(self):
@@ -144,13 +169,16 @@ class TemplateResultWindow(TemplateWindow):
 
     def _update_content(self):
         """Обновляет отображение результатов расчета."""
-        self._add_general_info_card()
-        self._add_process_info_card()
-        self._add_operations_stats_card()
-        self._add_equipment_stats_card()
-        self._add_special_zones_equipment_card()
-        self._add_zones_info_card()
-        self._add_summary_card()
+        # Левая колонка
+        self.left_column.add_widget(self._add_general_info_card())
+        self.left_column.add_widget(self._add_special_zones_equipment_card())
+        self.left_column.add_widget(self._add_zones_info_card())
+        self.left_column.add_widget(self._add_summary_card())
+        
+        # Правая колонка
+        self.right_column.add_widget(self._add_equipment_stats_card())
+        self.right_column.add_widget(self._add_process_info_card())
+        self.right_column.add_widget(self._add_operations_stats_card())
 
     def _add_general_info_card(self):
         """Добавляет карточку с общей информацией о цехе."""
@@ -160,6 +188,7 @@ class TemplateResultWindow(TemplateWindow):
             height=150,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         # Заголовок
@@ -180,7 +209,7 @@ class TemplateResultWindow(TemplateWindow):
         info_layout.add_widget(MDLabel(text=f'Общая площадь цеха: {fn(self.workshop.total_area)} м²'))
 
         card.add_widget(info_layout)
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_process_info_card(self):
         """Добавляет карточку с информацией о технологическом процессе в виде таблицы."""
@@ -189,6 +218,7 @@ class TemplateResultWindow(TemplateWindow):
             size_hint=(1, None),
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         # Заголовок
@@ -242,16 +272,17 @@ class TemplateResultWindow(TemplateWindow):
         card.add_widget(table)
         card.height = height
 
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_operations_stats_card(self):
-        """Добавляет карточку с таблицей по операциям: номер, название, доля от общей трудоемкости, коэффициенты."""
+        """Добавляет карточку с таблицей по операциям."""
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
             height=325,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         # Заголовок
@@ -295,18 +326,17 @@ class TemplateResultWindow(TemplateWindow):
         card.add_widget(table)
         card.height = height
 
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_equipment_stats_card(self):
-        """Добавляет карточку с таблицей по операциям: номер, название, расчетное и принятое количество станков,
-        коэффициент загрузки."""
-        print("Добавляю карточку с таблицей по операциям")
+        """Добавляет карточку с таблицей по оборудованию."""
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
             height=375,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         # Заголовок
@@ -361,17 +391,17 @@ class TemplateResultWindow(TemplateWindow):
 
         card.add_widget(table)
         card.height = height
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_special_zones_equipment_card(self):
-        """Добавляет карточку с расчетным и принятым количеством станков по зонам: заточная, ремонтная,
-        общее количество (каждое значение в отдельном лейбле)."""
+        """Добавляет карточку с информацией о специальных зонах."""
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
             height=400,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         card.add_widget(
@@ -415,7 +445,7 @@ class TemplateResultWindow(TemplateWindow):
 
         card.add_widget(card_layout)
 
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_zones_info_card(self):
         """Добавляет карточку с информацией о зонах цеха."""
@@ -425,6 +455,7 @@ class TemplateResultWindow(TemplateWindow):
             height=350,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
 
         # Заголовок
@@ -458,16 +489,17 @@ class TemplateResultWindow(TemplateWindow):
         )
 
         card.add_widget(zones_layout)
-        self.content_layout.add_widget(card)
+        return card
 
     def _add_summary_card(self):
-        """Добавляет карточку с итоговыми значениями: ширина пролета, число пролетов, длина пролета, площадь."""
+        """Добавляет карточку с итоговыми значениями."""
         card = MDCard(
             orientation='vertical',
             size_hint=(1, None),
             height=180,
             padding=15,
             spacing=10,
+            pos_hint={'top': 1}  # Привязываем к верху
         )
         card.add_widget(
             MDLabel(
@@ -485,7 +517,7 @@ class TemplateResultWindow(TemplateWindow):
         card.add_widget(MDLabel(text=f"Число пролетов: {self.workshop.span_number}", halign='left'))
         card.add_widget(MDLabel(text=f"Длина пролета: {fn(self.workshop.length)} м", halign='left'))
         card.add_widget(MDLabel(text=f"Площадь цеха: {fn(self.workshop.total_area)} м²", halign='left', bold=True))
-        self.content_layout.add_widget(card)
+        return card
 
 
 class ResultWindow(Screen):
