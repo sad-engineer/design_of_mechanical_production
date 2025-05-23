@@ -8,7 +8,6 @@ from kivy.uix.textinput import TextInput
 
 from design_of_mechanical_production.gui.components.interfaces import TableRowFactory
 from design_of_mechanical_production.gui.components.machine_tool_suggest_field import MachineToolSuggestField
-from design_of_mechanical_production.gui.components.machine_tools_cache import MACHINE_TOOLS
 from design_of_mechanical_production.gui.components.spinner_option import MySpinnerOption
 from design_of_mechanical_production.gui.components.time_input import TimeTextInput
 
@@ -64,7 +63,7 @@ class BaseTableRowFactory(TableRowFactory):
         row_widgets.append(time_input)
 
         # Станок
-        machine_input = MachineToolSuggestField(MACHINE_TOOLS)
+        machine_input = MachineToolSuggestField(["16К20", "16К20Ф3"])
         if data[3]:
             machine_input.text = data[3]
         row_widgets.append(machine_input)
