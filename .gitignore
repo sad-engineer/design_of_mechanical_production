@@ -13,6 +13,8 @@ env.bak /
 temp/
 dist/
 settings.yaml
+settings
+settings/
 launch_config.json
 input
 input/

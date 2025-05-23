@@ -645,7 +645,7 @@ docs = ["furo", "sphinx", "sphinx-autoapi (==1.4.0)", "sphinx-copybutton", "sphi
 
 [[package]]
 name = "machine-tools"
-version = "0.2.31"
+version = "0.2.33"
 description = "Пакет для работы с базой данных станков"
 optional = false
 python-versions = "^3.9"
@@ -671,7 +671,7 @@ sqlalchemy = "^2.0.40"
 type = "git"
 url = "https://github.com/sad-engineer/machine_tools.git"
 reference = "postgresql"
-resolved_reference = "0f7af2e8ee719218aae253500c0d3536049d9786"
+resolved_reference = "171238c88ffc4d1fd60093c3bb9cfae9bba42dbd"
 
 [[package]]
 name = "mako"
