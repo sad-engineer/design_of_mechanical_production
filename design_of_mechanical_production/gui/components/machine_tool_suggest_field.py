@@ -20,7 +20,7 @@ class MachineToolSuggestField(BoxLayout):
         suggestions_layout: Layout для отображения подсказок.
     """
 
-    def __init__(self, machine_tools_names: List[str], **kwargs):
+    def __init__(self, text: str, **kwargs):
         """
         Инициализирует поле с автодополнением.
 
@@ -29,8 +29,8 @@ class MachineToolSuggestField(BoxLayout):
             **kwargs: Дополнительные аргументы для BoxLayout.
         """
         super().__init__(orientation='vertical', size_hint_y=None, height=30, **kwargs)
-        self.machine_tools_names = machine_tools_names
-        self.text_input = TextInput(size_hint_y=None, height=30, multiline=False)
+        self.machine_tools_names = ["16К20", "16К20Ф3", "16К20Ф3С32", "16К20Ф3С5", "16К20Ф3С32", "16К20Ф3С5"]
+        self.text_input = TextInput(text=text, size_hint_y=None, height=30, multiline=False)
         self.text_input.bind(text=self.on_text)
         self.add_widget(self.text_input)
         self.suggestions_layout = None

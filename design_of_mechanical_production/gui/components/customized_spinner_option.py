@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-"""
-Модуль содержит класс опции для выпадающего списка.
-"""
 from kivy.uix.spinner import SpinnerOption
 
 
-class MySpinnerOption(SpinnerOption):
+class CustomizedSpinnerOption(SpinnerOption):
     """
     Опция для выпадающего списка с настраиваемой высотой.
     """
@@ -20,4 +17,5 @@ class MySpinnerOption(SpinnerOption):
             **kwargs: Дополнительные аргументы для SpinnerOption.
         """
         super().__init__(**kwargs)
-        self.height = 20
+        self.height = 30
+        self.size_hint_y = None

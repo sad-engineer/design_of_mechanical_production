@@ -58,7 +58,7 @@ class TemplateResultWindow(TemplateWindow):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             do_scroll_x=False,
         )
-        
+
         # Создаем горизонтальный контейнер для двух колонок
         columns_layout = BoxLayout(
             orientation='horizontal',
@@ -66,31 +66,31 @@ class TemplateResultWindow(TemplateWindow):
             spacing=10,
         )
         columns_layout.bind(minimum_height=columns_layout.setter('height'))
-        
+
         # Создаем две вертикальные колонки
         self.left_column = BoxLayout(
             orientation='vertical',
             size_hint_x=0.4,
             size_hint_y=None,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
         self.right_column = BoxLayout(
             orientation='vertical',
             size_hint_x=0.6,
             size_hint_y=None,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
-        
+
         # Привязываем высоту колонок к их содержимому
         self.left_column.bind(minimum_height=self.left_column.setter('height'))
         self.right_column.bind(minimum_height=self.right_column.setter('height'))
-        
+
         # Добавляем колонки в горизонтальный контейнер
         columns_layout.add_widget(self.left_column)
         columns_layout.add_widget(self.right_column)
-        
+
         # Добавляем горизонтальный контейнер в ScrollView
         scroll_view.add_widget(columns_layout)
         self.content.add_widget(scroll_view)
@@ -174,7 +174,7 @@ class TemplateResultWindow(TemplateWindow):
         self.left_column.add_widget(self._add_special_zones_equipment_card())
         self.left_column.add_widget(self._add_zones_info_card())
         self.left_column.add_widget(self._add_summary_card())
-        
+
         # Правая колонка
         self.right_column.add_widget(self._add_equipment_stats_card())
         self.right_column.add_widget(self._add_process_info_card())
@@ -188,7 +188,7 @@ class TemplateResultWindow(TemplateWindow):
             height=150,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         # Заголовок
@@ -218,7 +218,7 @@ class TemplateResultWindow(TemplateWindow):
             size_hint=(1, None),
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         # Заголовок
@@ -236,19 +236,15 @@ class TemplateResultWindow(TemplateWindow):
 
         # Таблица
         table = GridLayout(
-            cols=3, 
-            size_hint_x=None, 
-            size_hint_y=None, 
+            cols=3,
+            size_hint_x=None,
+            size_hint_y=None,
             row_default_height=25,
-            spacing=5, 
+            spacing=5,
             padding=[0, 0, 0, 0],
         )
         table.width = 450
-        table.cols_minimum = {
-            0: table.width * 0.4,
-            1: table.width * 0.2,
-            2: table.width * 0.4
-        }
+        table.cols_minimum = {0: table.width * 0.4, 1: table.width * 0.2, 2: table.width * 0.4}
         table.bind(minimum_height=table.setter('height'))
 
         # Заголовки таблицы
@@ -262,7 +258,7 @@ class TemplateResultWindow(TemplateWindow):
             table.add_widget(MDLabel(text=f"{str(operation.number)} {operation.name}", halign='left'))
             table.add_widget(MDLabel(text=str(fn(operation.time)), halign='center'))
             table.add_widget(MDLabel(text=operation.equipment.model, halign='center'))
-            height += (table.row_default_height + table.spacing[1])
+            height += table.row_default_height + table.spacing[1]
 
         # Добавляем строку с общей трудоемкостью
         table.add_widget(MDLabel(text="Итого:  ", halign='right', bold=True))
@@ -282,7 +278,7 @@ class TemplateResultWindow(TemplateWindow):
             height=325,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         # Заголовок
@@ -307,7 +303,7 @@ class TemplateResultWindow(TemplateWindow):
             0: table.width * 0.55,
             1: table.width * 0.15,
             2: table.width * 0.15,
-            3: table.width * 0.15
+            3: table.width * 0.15,
         }
         table.bind(minimum_height=table.setter('height'))
 
@@ -321,7 +317,7 @@ class TemplateResultWindow(TemplateWindow):
             table.add_widget(MDLabel(text=str(fn(operation.percentage)), halign='center'))
             table.add_widget(MDLabel(text=str(fn(operation.compliance_coefficient)), halign='center'))
             table.add_widget(MDLabel(text=str(fn(operation.progressivity_coefficient)), halign='center'))
-            height += (table.row_default_height + table.spacing[1])
+            height += table.row_default_height + table.spacing[1]
 
         card.add_widget(table)
         card.height = height
@@ -336,7 +332,7 @@ class TemplateResultWindow(TemplateWindow):
             height=375,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         # Заголовок
@@ -361,7 +357,7 @@ class TemplateResultWindow(TemplateWindow):
             0: table.width * 0.55,
             1: table.width * 0.15,
             2: table.width * 0.15,
-            3: table.width * 0.15
+            3: table.width * 0.15,
         }
         table.bind(minimum_height=table.setter('height'))
 
@@ -378,7 +374,7 @@ class TemplateResultWindow(TemplateWindow):
             table.add_widget(MDLabel(text=str(fn(n_calc)), halign='center'))
             table.add_widget(MDLabel(text=str(n_accepted), halign='center'))
             table.add_widget(MDLabel(text=str(fn(load_coeff)), halign='center'))
-            height += (table.row_default_height + table.spacing[1])
+            height += table.row_default_height + table.spacing[1]
 
         # Добавляем строку итоговых значений
         table.add_widget(MDLabel(text="Итого:  ", halign='right', bold=True))
@@ -387,7 +383,7 @@ class TemplateResultWindow(TemplateWindow):
         )
         table.add_widget(MDLabel(text=str(self.workshop.process.accepted_machines_count), halign='center', bold=True))
         table.add_widget(MDLabel(text=str(fn(self.workshop.process.average_load_factor)), halign='center', bold=True))
-        height += (table.row_default_height + table.spacing[1]) 
+        height += table.row_default_height + table.spacing[1]
 
         card.add_widget(table)
         card.height = height
@@ -401,7 +397,7 @@ class TemplateResultWindow(TemplateWindow):
             height=400,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         card.add_widget(
@@ -455,7 +451,7 @@ class TemplateResultWindow(TemplateWindow):
             height=350,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
 
         # Заголовок
@@ -499,7 +495,7 @@ class TemplateResultWindow(TemplateWindow):
             height=180,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1}  # Привязываем к верху
+            pos_hint={'top': 1},  # Привязываем к верху
         )
         card.add_widget(
             MDLabel(
