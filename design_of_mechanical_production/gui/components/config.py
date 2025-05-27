@@ -20,4 +20,3 @@ class TableConfig:
     headers: List[str]
     column_widths: List[Optional[int]]
     initial_data: List[List[str]]
-    operations: List[str]

@@ -54,6 +54,37 @@ class TableEventManager(ABC):
     """Интерфейс для менеджера событий таблицы."""
 
     @abstractmethod
+    def add_row(self, row_widgets: List[Any]):
+        """Добавляет строку в таблицу."""
+        pass
+
+    @abstractmethod
+    def add_empty_row(self):
+        """Добавляет пустую строку в таблицу."""
+        pass
+
+    @abstractmethod
+    def bind_row_events(self, row_widgets: List[Any]):
+        """
+        Связывает события с строками.
+
+        Args:
+            row_widgets: Список виджетов строки.
+        """
+        pass
+
+    @abstractmethod
+    def on_row_text_changed(self, row: List[Any], value: str):
+        """
+        Обрабатывает изменения в строке.
+
+        Args:
+            row: Список виджетов измененной строки.
+            value: Новое значение.
+        """
+        pass
+
+    @abstractmethod
     def on_row_changed(self, row_index: int, data: List[str]):
         """
         Обрабатывает изменение строки.

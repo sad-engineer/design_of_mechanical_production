@@ -44,26 +44,32 @@ class MachineToolSuggestField(BoxLayout):
             value: Новое значение текста
         """
         self.remove_suggestions()
+
+        filtered = self.machine_tools_names
         if len(value) >= 1:
             filtered = [tool for tool in self.machine_tools_names if value.lower() in tool.lower()]
-            if filtered:
-                max_rows = 5
-                row_height = 30
-                max_height = max_rows * row_height
-                content_height = row_height * len(filtered)
-                box = BoxLayout(orientation='vertical', size_hint_y=None, height=content_height)
-                for tool in filtered:
-                    btn = Button(text=tool, size_hint_y=None, height=row_height)
-                    btn.bind(on_release=lambda btn, name=tool: self.select_tool(name))
-                    box.add_widget(btn)
-                scroll = ScrollView(
-                    size_hint=(None, None), size=(self.text_input.width, min(max_height, content_height)), bar_width=8
-                )
-                scroll.add_widget(box)
-                self.suggestions_layout = scroll
-                x_win, y_win = self.text_input.to_window(self.text_input.x, self.text_input.y)
-                self.suggestions_layout.pos = (x_win, y_win - self.suggestions_layout.height)
-                Window.add_widget(self.suggestions_layout)
+
+        if len(filtered) < 2:
+            return
+
+        if filtered:
+            max_rows = 5
+            row_height = 30
+            max_height = max_rows * row_height
+            content_height = row_height * len(filtered)
+            box = BoxLayout(orientation='vertical', size_hint_y=None, height=content_height)
+            for tool in filtered:
+                btn = Button(text=tool, size_hint_y=None, height=row_height)
+                btn.bind(on_release=lambda btn, name=tool: self.select_tool(name))
+                box.add_widget(btn)
+            scroll = ScrollView(
+                size_hint=(None, None), size=(self.text_input.width, min(max_height, content_height)), bar_width=8
+            )
+            scroll.add_widget(box)
+            self.suggestions_layout = scroll
+            x_win, y_win = self.text_input.to_window(self.text_input.x, self.text_input.y)
+            self.suggestions_layout.pos = (x_win, y_win - self.suggestions_layout.height)
+            Window.add_widget(self.suggestions_layout)
 
     def remove_suggestions(self):
         """Удаляет отображение подсказок."""

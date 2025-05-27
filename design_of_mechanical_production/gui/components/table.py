@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from kivy.graphics import Color, Line
 from kivy.uix.boxlayout import BoxLayout
@@ -26,8 +26,7 @@ class EditableTable(FloatLayout):
         self,
         config: TableConfig,
         row_factory: TableRowFactory,
-        event_manager: TableEventManager,
-        table_title: str = 'Название таблицы',
+        event_manager: Optional[TableEventManager] = None,
         height: float = 300,
         **kwargs,
     ):
@@ -37,17 +36,6 @@ class EditableTable(FloatLayout):
         self.event_manager = event_manager
         self.table_rows = []
         self.height = height
-
-        # Заголовок таблицы (будет вне рамки)
-        self.table_label = MDLabel(
-            text=table_title,
-            size_hint=(1, None),
-            height=30,
-            pos_hint={'top': 1, 'x': 0},
-            halign='center',
-            font_style='H6',
-        )
-        self.add_widget(self.table_label)
 
         # Основной вертикальный layout (headers+scroll)
         self.vbox = BoxLayout(
@@ -77,7 +65,6 @@ class EditableTable(FloatLayout):
         )  # высота области прокрутки (можно менять)
         self.scroll.add_widget(self.grid)
         self.vbox.add_widget(self.scroll)
-
         self.add_widget(self.vbox)
 
         # Рамка вокруг vbox (headers+scroll), не затрагивает table_label
@@ -86,12 +73,8 @@ class EditableTable(FloatLayout):
             self._border = Line(rectangle=(0, 0, 0, 0), width=1.5)
         self.bind(pos=self._update_border, size=self._update_border)
 
-        # Инициализация строк
-        self._init_rows()
-        self.add_empty_row()
-
     def _update_border(self, *args):
-        # Рамка только вокруг vbox (headers+scroll), не затрагивает table_label
+        """Обновляет рамку вокруг vbox (headers+scroll), не затрагивает table_label."""
         padding = 5
         x = self.vbox.x - padding
         y = self.vbox.y - padding
@@ -99,66 +82,26 @@ class EditableTable(FloatLayout):
         h = self.vbox.height + 2 * padding
         self._border.rectangle = (x, y, w, h)
 
-    def _init_rows(self):
+    def init(self):
+        """Создает строки по данным в конфиге"""
         for row_data in self.config.initial_data:
-            self._add_row(row_data)
+            row_widgets = self.row_factory.create_row(row_data)
+            self.event_manager.add_row(row_widgets)
+        self.event_manager.add_empty_row()
 
-    def _add_row(self, data: List[str] = None):
-        row_widgets = self.row_factory.create_row(data)
-        self._bind_row_events(row_widgets)
-        self.table_rows.append(row_widgets)
-        self._add_widgets_to_layout(row_widgets)
-
-    def _bind_row_events(self, row_widgets: List[Any]):
-        for widget in row_widgets:
-            if isinstance(widget, TextInput):
-                widget.bind(text=lambda instance, value, row=row_widgets: self._on_row_text_changed(row, value))
-            elif isinstance(widget, Spinner):
-                widget.bind(text=lambda instance, value, row=row_widgets: self._on_row_text_changed(row, value))
-            elif isinstance(widget, MachineToolSuggestField):
-                widget.text_input.bind(
-                    text=lambda instance, value, row=row_widgets: self._on_row_text_changed(row, value)
-                )
-
-    def _on_row_text_changed(self, row: List[Any], value: str):
-        row_index = self.table_rows.index(row)
-        row_data = [
-            w.text if hasattr(w, 'text') else w.text_input.text if isinstance(w, MachineToolSuggestField) else ''
-            for w in row
-        ]
-        self.event_manager.on_row_changed(row_index, row_data)
-        self.clean_empty_rows()
-
-    def clean_empty_rows(self):
-        """Оставляет только одну пустую строку в конце таблицы."""
-        # Считаем пустые строки (все поля пустые)
-        empty_rows = []
-        for idx, row in enumerate(self.table_rows):
-            if all(
-                (getattr(w, 'text', '') == '' if not isinstance(w, MachineToolSuggestField) else w.text == '')
-                for w in row
-            ):
-                empty_rows.append(idx)
-        # Если пустых строк больше одной, удаляем все кроме последней
-        if len(empty_rows) > 1:
-            # Удаляем с конца, чтобы индексы не сбивались
-            for idx in reversed(empty_rows[:-1]):
-                for widget in self.table_rows[idx]:
-                    self.grid.remove_widget(widget)
-                del self.table_rows[idx]
-
-    def _add_widgets_to_layout(self, row_widgets: List[Any]):
+    def add_widgets_to_layout(self, row_widgets: List[Any]):
+        """Добавляет виджеты в контейнер таблицы."""
         for idx, widget in enumerate(row_widgets):
             width = self.config.column_widths[idx]
+            if isinstance(widget, str):
+                print(widget)
             if width:
                 widget.size_hint_x = None
                 widget.width = width
             self.grid.add_widget(widget)
 
-    def add_empty_row(self):
-        self._add_row()
-
     def get_data(self) -> list[dict[str, Union[Union[str, float], Any]]]:
+        """Возвращает данные таблицы в виде списка словарей."""
         data = []
         for row in self.table_rows[:-1]:  # Пропускаем последнюю пустую строку
             row_data = []
@@ -170,13 +113,14 @@ class EditableTable(FloatLayout):
                 else:
                     row_data.append('')
             data.append(row_data)
+
         process_data = []
         for row in data:
-            if len(row) >= 4:
-                process_data.append({'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]})
+            process_data.append({'number': row[0], 'name': row[1], 'time': float(row[2]), 'machine': row[3]})
         return process_data
 
     def set_data(self, new_data: List[List[str]]):
+        """Обновляет данные таблицы."""
         # Очищаем существующие строки
         for row in self.table_rows:
             for widget in row:
@@ -184,6 +128,7 @@ class EditableTable(FloatLayout):
         self.table_rows = []
         # Добавляем новые строки
         for row_data in new_data:
-            self._add_row(row_data)
+            row_widgets = self.row_factory.create_row(row_data)
+            self.event_manager.add_row(row_widgets)
         # Добавляем пустую строку
-        self.add_empty_row()
+        self.event_manager.add_empty_row()

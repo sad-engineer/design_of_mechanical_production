@@ -28,6 +28,7 @@ from design_of_mechanical_production.gui.components.row_factory import BaseTable
 from design_of_mechanical_production.gui.components.table import EditableTable
 from design_of_mechanical_production.gui.windows.template_window import TemplateWindow
 from design_of_mechanical_production.settings import get_setting
+from design_of_mechanical_production.gui.components.customized_text_input import CustomizedTextInput
 
 INPUT_DATA_PATH = Path(get_setting('input_data_path'))
 OPERATIONS = [
@@ -88,19 +89,19 @@ class TemplateInputWindow(TemplateWindow):
 
         # Название цеха
         left_col.add_widget(MDLabel(text='Название цеха:', halign='left', size_hint_y=None, height=30))
-        self.name_input = TextInput(text='Механический цех №1', size_hint_y=None, halign='center', height=30)
+        self.name_input = CustomizedTextInput(text='Механический цех №1', halign='left')
         left_col.add_widget(self.name_input)
 
         # Годовой объем производства
         left_col.add_widget(
             MDLabel(text='Годовой объем производства (шт.):', halign='left', size_hint_y=None, height=30)
         )
-        self.volume_input = TextInput(text='10000', size_hint_y=None, halign='center', height=30)
+        self.volume_input = CustomizedTextInput(text='10000')
         left_col.add_widget(self.volume_input)
 
         # Масса детали
         left_col.add_widget(MDLabel(text='Масса детали (кг):', halign='left', size_hint_y=None, height=30))
-        self.mass_input = TextInput(text='112.8', size_hint_y=None, halign='center', height=30)
+        self.mass_input = CustomizedTextInput(text='112.8')
         left_col.add_widget(self.mass_input)
 
         left_col.add_widget(Widget(size_hint_y=1))
@@ -130,25 +131,23 @@ class TemplateInputWindow(TemplateWindow):
         # Создаем конфигурацию таблицы
         table_config = TableConfig(
             headers=["№", "Операция", "Время", "Станок"],
-            column_widths=[40, 175, 80, None],
+            column_widths=[40, 200, 80, None],
             initial_data=[
                 ["005", "Токарная с ЧПУ", "", ""],
             ],
-            operations=OPERATIONS,
         )
         # Создаем фабрику строк
-        row_factory = BaseTableRowFactory(OPERATIONS)
+        row_factory = BaseTableRowFactory()
         # Создаем таблицу (теперь она сама содержит прокрутку и рамку)
         self.table = EditableTable(
             config=table_config,
             row_factory=row_factory,
-            event_manager=None,
             pos_hint={'x': 0, 'top': 1},
             size_hint=(1, 1),
             height=400,
-            table_title='',
         )
         self.table.event_manager = TableEventManagerImpl(self.table)
+        self.table.init()
         right_col.add_widget(self.table)
 
         right_col.bind(pos=self._update_right_col_debug, size=self._update_right_col_debug)
@@ -218,14 +217,18 @@ class TemplateInputWindow(TemplateWindow):
         self.table.set_data(new_data)
 
     def load_table_data(self, instance):
+        """Загружает данные из файла."""
         file_path = open_native_file_dialog()
         if file_path:
             reader = ExcelReader(file_path)
             process_data = reader.read_process_data()
-            process = [[str(d['number']), d['name'], str(d['time']), str(d['machine'])] for d in process_data]
+            process = []
+            for row in process_data:
+                process.append([str(row['number']), row['name'], str(row['time']), str(row['machine'])])
             self.set_table_data(process)
 
     def exit_manager(self, *args):
+        """Закрывает файловый менеджер."""
         self.file_manager.close()
 
     def clear_table_data(self, instance):

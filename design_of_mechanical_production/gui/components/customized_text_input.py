@@ -12,9 +12,10 @@ class CustomizedTextInput(TextInput):
     def __init__(self, text: str, **kwargs):
         super().__init__(text=text)
         self.multiline = False
-        self.size_hint_y = None
-        self.height = 30
-        self.halign = 'center'
+        self.size_hint_x = getattr(kwargs, 'size_hint_x', 1)
+        self.size_hint_y = getattr(kwargs, 'size_hint_y', None)
+        self.height = getattr(kwargs, 'height', 30)
+        self.halign = getattr(kwargs, 'halign', 'center')
         self.bind(text=self._on_text_changed)
 
     def _on_text_changed(self, instance, value):

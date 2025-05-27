@@ -15,15 +15,6 @@ class BaseTableRowFactory(TableRowFactory):
         operations: Список доступных операций.
     """
 
-    def __init__(self, operations: List[str]):
-        """
-        Инициализирует фабрику строк.
-
-        Args:
-            operations: Список доступных операций.
-        """
-        self.operations = operations
-
     def create_row(self, row_data: List[str] = None) -> List[Any]:
         """
         Создает новую строку таблицы.
