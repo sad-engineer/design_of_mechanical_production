@@ -645,7 +645,7 @@ docs = ["furo", "sphinx", "sphinx-autoapi (==1.4.0)", "sphinx-copybutton", "sphi
 
 [[package]]
 name = "machine-tools"
-version = "0.2.34"
+version = "0.2.36"
 description = "Пакет для работы с базой данных станков"
 optional = false
 python-versions = "^3.9"
@@ -655,12 +655,10 @@ develop = false
 
 [package.dependencies]
 alembic = "^1.15.2"
-black = "^25.1.0"
 chardet = "^5.2.0"
 click = "^8.1.7"
 dependency-injector = "^4.41.0"
-isort = "^6.0.1"
-pandas = "^2.0.3"
+pandas = "^2.2.3"
 psycopg2 = "^2.9.10"
 psycopg2-binary = "^2.9.10"
 pydantic = "^2.11.3"
@@ -670,8 +668,8 @@ sqlalchemy = "^2.0.40"
 [package.source]
 type = "git"
 url = "https://github.com/sad-engineer/machine_tools.git"
-reference = "postgresql"
-resolved_reference = "4c95dab097aeb1c4f0c3b5cb8cf610aad34249b0"
+reference = "HEAD"
+resolved_reference = "c1715ada3677f1c0185a50cde90700723bf8e194"
 
 [[package]]
 name = "mako"
@@ -1793,4 +1791,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "c5b3f91722f752acfb6eca6490828094c689319347c20d28085b204b1db98f45"
+content-hash = "01e20257033624780fd75376fa2de7471643726590e6e989ffb8fdf056ce4f5e"
