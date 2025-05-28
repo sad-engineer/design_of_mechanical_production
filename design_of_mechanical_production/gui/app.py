@@ -5,13 +5,15 @@
 Модуль с основным классом приложения.
 """
 
+from kivy.config import Config
 from kivy.core.window import Window
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 
 from design_of_mechanical_production.gui.windows import InputWindow, ResultWindow, SettingsWindow
+
+Config.set("input", "mouse", "mouse, multitouch_on_demand")
 
 
 class MainScreen(Screen):

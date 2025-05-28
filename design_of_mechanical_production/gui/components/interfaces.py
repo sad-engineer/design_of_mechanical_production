@@ -37,12 +37,13 @@ class TableRowFactory(ABC):
     """Интерфейс для фабрики создания строк таблицы."""
 
     @abstractmethod
-    def create_row(self, data: List[str] = None) -> List[Any]:
+    def create_row(self, data: List[str] = None, machine_name_replace: bool = True) -> List[Any]:
         """
         Создает новую строку таблицы.
 
         Args:
             data: Данные для инициализации строки. Если None, создается пустая строка.
+            machine_name_replace: Флаг для замены названия станка.
 
         Returns:
             List[Any]: Список виджетов строки.

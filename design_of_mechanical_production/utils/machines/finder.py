@@ -43,7 +43,10 @@ class MachineFinderForOperations:
         return self._formatter.format(machines)
 
     def get_names_by_condition(
-        self, group: Optional[int] = None, subgroups: Optional[int] = None, software_control: SoftwareControl = SoftwareControl.NO
+        self,
+        group: Optional[int] = None,
+        subgroups: Optional[int] = None,
+        software_control: SoftwareControl = SoftwareControl.NO,
     ) -> List[Any]:
         """Получение станков по группе, типу и типу управления"""
         self._builder.reset_builder()

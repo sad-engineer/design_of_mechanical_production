@@ -17,7 +17,7 @@ def load_launch_config() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Конфигурация запуска приложения
     """
-    config_path = Path(__file__).parent.parent / "settings" / 'design_launch_config.json'
+    config_path = Path(__file__).parent.parent / "settings" / 'design_launcher_config.json'
     if not config_path.exists():
         # Создаем файл с настройками по умолчанию
         default_config = {'mode': 'gui', 'theme': 'Light'}  # 'Light' или 'Dark'
@@ -35,7 +35,7 @@ def save_launch_config(config: Dict[str, Any]) -> None:
     Args:
         config: Конфигурация запуска приложения
     """
-    config_path = Path(__file__).parent.parent / "settings" / 'design_launch_config.json'
+    config_path = Path(__file__).parent.parent / "settings" / 'design_launcher_config.json'
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
 

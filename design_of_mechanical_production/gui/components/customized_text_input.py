@@ -17,6 +17,7 @@ class CustomizedTextInput(TextInput):
         self.height = getattr(kwargs, 'height', 30)
         self.halign = getattr(kwargs, 'halign', 'center')
         self.bind(text=self._on_text_changed)
+        self.bind(on_touch_down=self._on_touch_down)
 
     def _on_text_changed(self, instance, value):
         self.set_value(value)
@@ -32,6 +33,19 @@ class CustomizedTextInput(TextInput):
     def clear_value(self):
         """Очищает значение поля ввода."""
         self.text = ""
+
+    def _on_touch_down(self, instance, touch):
+        """
+        Обрабатывает нажатие мыши на поле ввода.
+
+        Args:
+            instance: Экземпляр TextInput
+            touch: Объект касания
+        """
+        if instance.collide_point(*touch.pos) and touch.button == 'right':
+            self.clear_value()
+            return True
+        return False
 
 
 class TimeTextInput(CustomizedTextInput):

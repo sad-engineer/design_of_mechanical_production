@@ -135,7 +135,10 @@ class ConfigManager:
 
 # Инициализация путей
 cur_dir = Path(__file__).parent.parent.parent
-CONFIG_FILE = cur_dir / "settings" / "design_of_mp_config.yaml"
+CONFIG_DIR = cur_dir / "settings"
+if not CONFIG_DIR.exists():
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+CONFIG_FILE = CONFIG_DIR / "designer_of_mp_config.yaml"
 
 # Настройки по умолчанию
 DEFAULT_CONFIG: Dict[str, Any] = {

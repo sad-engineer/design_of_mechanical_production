@@ -23,12 +23,12 @@ from kivymd.uix.label import MDLabel
 from design_of_mechanical_production.core.services.workshop_creator import create_workshop_from_data
 from design_of_mechanical_production.data.input import ExcelReader
 from design_of_mechanical_production.gui.components.config import TableConfig
+from design_of_mechanical_production.gui.components.customized_text_input import CustomizedTextInput
 from design_of_mechanical_production.gui.components.event_manager import TableEventManagerImpl
 from design_of_mechanical_production.gui.components.row_factory import BaseTableRowFactory
 from design_of_mechanical_production.gui.components.table import EditableTable
 from design_of_mechanical_production.gui.windows.template_window import TemplateWindow
 from design_of_mechanical_production.settings import get_setting
-from design_of_mechanical_production.gui.components.customized_text_input import CustomizedTextInput
 
 INPUT_DATA_PATH = Path(get_setting('input_data_path'))
 OPERATIONS = [
@@ -61,6 +61,7 @@ class TemplateInputWindow(TemplateWindow):
             select_path=self.load_table_data,
             preview=True,
         )
+        self.label.text = "Ведите начальные данные для расчета"
         # Инициализируем наш контент
         self._init_content()
         # Инициализируем кнопки

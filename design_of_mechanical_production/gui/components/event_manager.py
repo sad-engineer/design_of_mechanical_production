@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
-from typing import List, Any
+from typing import Any, List
 
-from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
+from kivy.uix.textinput import TextInput
 
 from design_of_mechanical_production.gui.components.interfaces import TableEventManager
-from design_of_mechanical_production.gui.components.table import EditableTable
 from design_of_mechanical_production.gui.components.machine_tool_suggest_field import MachineToolSuggestField
+from design_of_mechanical_production.gui.components.table import EditableTable
 
 
 class TableEventManagerImpl(TableEventManager):
@@ -42,7 +42,7 @@ class TableEventManagerImpl(TableEventManager):
         row_widgets = self.table.row_factory.create_row()
         if self.table.table_rows[-1][0].text or self.table.table_rows[-1][2].text or self.table.table_rows[-1][3].text:
             self.add_row(row_widgets)
-    
+
     def remove_row(self, row_index: int):
         """Удаляет строку из таблицы."""
         for widget in self.table.table_rows[row_index]:
@@ -97,5 +97,3 @@ class TableEventManagerImpl(TableEventManager):
             self.add_empty_row()
         if all([data[0] == "", data[2] == "", data[3] == ""]):
             self.remove_row(row_index)
-    
-

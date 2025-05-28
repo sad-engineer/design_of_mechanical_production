@@ -128,7 +128,7 @@ class EditableTable(FloatLayout):
         self.table_rows = []
         # Добавляем новые строки
         for row_data in new_data:
-            row_widgets = self.row_factory.create_row(row_data)
+            row_widgets = self.row_factory.create_row(row_data, machine_name_replace=False)
             self.event_manager.add_row(row_widgets)
         # Добавляем пустую строку
         self.event_manager.add_empty_row()

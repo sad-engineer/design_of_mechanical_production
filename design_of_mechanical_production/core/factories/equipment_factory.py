@@ -4,15 +4,11 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Dict, Optional
+from sys import exit
+
+from machine_tools import Finder, MachineInfo
 
 from design_of_mechanical_production.core.entities import Equipment
-
-# from design_of_mechanical_production.core.entities.machine_tool_source import (
-#     DatabaseMachineToolSource,
-#     DefaultMachineToolSource,
-#     MachineToolSource,
-# )
 from design_of_mechanical_production.core.interfaces import IEquipment, IEquipmentFactory
 
 
@@ -20,18 +16,6 @@ class EquipmentFactory(IEquipmentFactory):
     """
     Фабрика для создания оборудования.
     """
-
-    def __init__(self, source: Optional[MachineToolSource] = None):
-        """
-        Инициализирует фабрику с указанным источником данных.
-
-        Args:
-            source: Источник данных об оборудовании. Если не указан, используется комбинация
-                   DatabaseMachineToolSource и DefaultMachineToolSource
-        """
-        self.source = source or DatabaseMachineToolSource()
-        self.default_source = DefaultMachineToolSource()
-        self._equipment_cache: Dict[str, IEquipment] = {}
 
     def create_equipment(self, model: str) -> IEquipment:
         """
@@ -43,16 +27,21 @@ class EquipmentFactory(IEquipmentFactory):
         Returns:
             IEquipment: Созданное оборудование
         """
-        if model in self._equipment_cache:
-            return self._equipment_cache[model]
+        with Finder(limit=None) as finder:
+            machine_tool: MachineInfo = finder.find_by_name(model, exact_match=True)[0]
+            finder._builder.reset_builder()
+            all_machine_tool = finder.find_all()
 
-        try:
-            machine_tool = self.source.get_machine_tool(model)
-        except (TypeError, ValueError):
-            try:
-                machine_tool = self.default_source.get_machine_tool(model)
-            except ValueError as e:
-                raise ValueError(f"Не удалось создать оборудование: {str(e)}")
+        if not machine_tool:
+            print(
+                f"\nСтанок {model} не найден в базе данных."
+                f"\nВнесите данные по станку в базу и повторите расчет."
+                f"\nИли выберите станок, данные которого содержатся в базе."
+                f"\n"
+                f"\nДоступные станки:"
+                f"\n{chr(10).join(', '.join(all_machine_tool[i:i+50]) for i in range(0, len(all_machine_tool), 200))}"
+            )
+            exit(1)
 
         equipment = None
         try:
@@ -69,5 +58,4 @@ class EquipmentFactory(IEquipmentFactory):
         except AttributeError:
             print(machine_tool)
 
-        self._equipment_cache[model] = equipment
         return equipment

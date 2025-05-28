@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ---------------------------------------------------------------------------------------------------------------------
 from abc import ABC, abstractmethod
-from typing import List, Callable
+from typing import Callable, List
 
 from design_of_mechanical_production.utils.machines.finder import MachineFinderForOperations
 
