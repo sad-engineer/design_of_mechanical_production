@@ -8,8 +8,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
+from kivy.uix.screenmanager import Screen
 
-from design_of_mechanical_production.gui.windows.base_window import BaseWindow
 from design_of_mechanical_production.settings import get_setting, set_setting
 
 
@@ -26,13 +26,13 @@ class SettingsInput(BoxLayout):
         self.height = 40
         self.spacing = 10
         self.padding = [10, 5]
-        self.size_hint_x = 0.5
+        self.size_hint_x = 0.8
         self.pos_hint = {'center_x': 0.5}
 
         # Получаем экземпляр приложения для доступа к теме
         self.app = MDApp.get_running_app()
 
-        self.label = MDLabel(text=label_text, size_hint_x=0.7, halign='right', valign='middle', text_size=(None, None))
+        self.label = MDLabel(text=label_text, size_hint_x=0.55, halign='right', valign='middle', text_size=(None, None))
         self.label.bind(size=self._update_text_size)
 
         self.input = TextInput(
@@ -47,9 +47,12 @@ class SettingsInput(BoxLayout):
             background_color=(1, 1, 1, 1) if self.app.theme_cls.theme_style == "Light" else (0.2, 0.2, 0.2, 1),
             foreground_color=(0, 0, 0, 1) if self.app.theme_cls.theme_style == "Light" else (1, 1, 1, 1),
         )
+        self.suf_label = MDLabel(text="", size_hint_x=0.15, halign='left', valign='middle', text_size=(None, None))
+        self.suf_label.bind(size=self._update_text_size)
 
         self.add_widget(self.label)
         self.add_widget(self.input)
+        self.add_widget(self.suf_label)
 
     @staticmethod
     def _update_text_size(instance, value):
@@ -57,7 +60,7 @@ class SettingsInput(BoxLayout):
         instance.text_size = (instance.width, instance.height)
 
 
-class SettingsWindow(BaseWindow):
+class SettingsWindow(Screen):
     """Окно настроек приложения."""
 
     def __init__(self, **kwargs):
@@ -82,13 +85,14 @@ class SettingsWindow(BaseWindow):
 
         # Контейнер для прокручиваемого содержимого
         content_layout = BoxLayout(
-            orientation='vertical', spacing=10, padding=10, size_hint_y=None, size_hint_x=1, pos_hint={'center_x': 0.5}
+            orientation='vertical', spacing=10, padding=10, size_hint_y=None, size_hint_x=1, pos_hint={'center_x': 0.5},
         )
         content_layout.bind(minimum_height=content_layout.setter('height'))
 
         # Фонд рабочего времени
-        self.fund_of_working = SettingsInput("Фонд рабочего времени (часы):")
+        self.fund_of_working = SettingsInput("Фонд рабочего времени:")
         self.fund_of_working.input.text = str(get_setting("fund_of_working"))
+        self.fund_of_working.suf_label.text = "часов"
         content_layout.add_widget(self.fund_of_working)
 
         # Коэффициенты
@@ -101,24 +105,29 @@ class SettingsWindow(BaseWindow):
         content_layout.add_widget(self.kp)
 
         # Удельные площади
-        self.tool_storage = SettingsInput("Склад инструмента (м²):")
+        self.tool_storage = SettingsInput("Склад инструмента:")
         self.tool_storage.input.text = str(get_setting("specific_areas.tool_storage"))
+        self.tool_storage.suf_label.text = "м²"
         content_layout.add_widget(self.tool_storage)
 
-        self.equipment_warehouse = SettingsInput("Склад приспособлений (м²):")
+        self.equipment_warehouse = SettingsInput("Склад приспособлений:")
         self.equipment_warehouse.input.text = str(get_setting("specific_areas.equipment_warehouse"))
+        self.equipment_warehouse.suf_label.text = "м²"
         content_layout.add_widget(self.equipment_warehouse)
 
-        self.work_piece_storage = SettingsInput("Склад заготовок и деталей (м²):")
+        self.work_piece_storage = SettingsInput("Склад заготовок и деталей:")
         self.work_piece_storage.input.text = str(get_setting("specific_areas.work_piece_storage"))
+        self.work_piece_storage.suf_label.text = "м²"
         content_layout.add_widget(self.work_piece_storage)
 
-        self.control_department = SettingsInput("Контрольное отделение (м²):")
+        self.control_department = SettingsInput("Контрольное отделение:")
         self.control_department.input.text = str(get_setting("specific_areas.control_department"))
+        self.control_department.suf_label.text = "м²"
         content_layout.add_widget(self.control_department)
 
-        self.sanitary_zone = SettingsInput("Санитарно-бытовые помещения (м²):")
+        self.sanitary_zone = SettingsInput("Санитарно-бытовые помещения:")
         self.sanitary_zone.input.text = str(get_setting("specific_areas.sanitary_zone"))
+        self.sanitary_zone.suf_label.text = "м²"
         content_layout.add_widget(self.sanitary_zone)
 
         # Проценты для зон
@@ -131,13 +140,16 @@ class SettingsWindow(BaseWindow):
         content_layout.add_widget(self.repair_zone)
 
         # Площадь проходов
-        self.passage_area = SettingsInput("Площадь проходов (м²):")
+        self.passage_area = SettingsInput("Площадь проходов:")
         self.passage_area.input.text = str(get_setting("passage_area"))
+        self.passage_area.suf_label.text = "м²"
+
         content_layout.add_widget(self.passage_area)
 
         # Настройки цеха
-        self.workshop_span = SettingsInput("Ширина пролета цеха (м):")
+        self.workshop_span = SettingsInput("Ширина пролета цеха:")
         self.workshop_span.input.text = str(get_setting("workshop_span"))
+        self.workshop_span.suf_label.text = "м"
         content_layout.add_widget(self.workshop_span)
 
         self.workshop_nam = SettingsInput("Количество пролетов:")
@@ -234,6 +246,10 @@ class SettingsWindow(BaseWindow):
 
 
 if __name__ == "__main__":
-    print("Запуск окна настроек напрямую")  # Отладочная информация
-    window = SettingsWindow()
-    window.show()
+    from kivymd.app import MDApp
+
+    class TestApp(MDApp):
+        def build(self):
+            return SettingsWindow()
+
+    TestApp().run()

@@ -6,7 +6,7 @@ from __future__ import annotations
 from decimal import Decimal
 from sys import exit
 
-from machine_tools import Finder, MachineInfo
+from machine_tools import Finder, MachineInfo, ListMachineInfoFormatter, ListNameFormatter
 
 from design_of_mechanical_production.core.entities import Equipment
 from design_of_mechanical_production.core.interfaces import IEquipment, IEquipmentFactory
@@ -28,9 +28,10 @@ class EquipmentFactory(IEquipmentFactory):
             IEquipment: Созданное оборудование
         """
         with Finder(limit=None) as finder:
-            machine_tool: MachineInfo = finder.find_by_name(model, exact_match=True)[0]
-            finder._builder.reset_builder()
             all_machine_tool = finder.find_all()
+            finder._builder.reset_builder()
+            finder.set_formatter(ListMachineInfoFormatter())
+            machine_tool: MachineInfo = finder.find_by_name(model, exact_match=True)[0]
 
         if not machine_tool:
             print(
@@ -48,12 +49,12 @@ class EquipmentFactory(IEquipmentFactory):
             equipment = Equipment(
                 name=None,
                 model=model,
-                length=Decimal(str(machine_tool.length)) / 1000,
-                width=Decimal(str(machine_tool.width)) / 1000,
-                height=Decimal(str(machine_tool.height)) / 1000,
-                automation=machine_tool.automation,
+                length=Decimal(str(machine_tool.dimensions.length)) / 1000,
+                width=Decimal(str(machine_tool.dimensions.width)) / 1000,
+                height=Decimal(str(machine_tool.dimensions.height)) / 1000,
+                automation=machine_tool.automation.value,
                 weight=machine_tool.weight,
-                power_consumption=Decimal(str(machine_tool.power_lathe_passport_kvt)),
+                power_consumption=Decimal(str(machine_tool.power)),
             )
         except AttributeError:
             print(machine_tool)

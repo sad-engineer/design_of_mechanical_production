@@ -33,6 +33,7 @@ class TableRow:
         self.time_input = TimeTextInput(text=row_data[2])
         # Станок
         self.machine_input = MachineToolSuggestField(row_data[3])
+        self.machine_input.text_input.bind(text=self._on_model_selected)
         Window.bind(mouse_pos=self._on_machine_mouse_pos)
 
         # Выбираем первую операцию
@@ -118,3 +119,13 @@ class TableRow:
     def __del__(self):
         """Отвязываем обработчик события при удалении виджета."""
         Window.unbind(mouse_pos=self._on_machine_mouse_pos)
+
+    def _on_model_selected(self, instance, value: str):
+        """
+        Обрабатывает изменение текста в поле ввода.
+
+        Args:
+            instance: Экземпляр TextInput
+            value: Новое значение текста
+        """
+        self._validate_machine_name()

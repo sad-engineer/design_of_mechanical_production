@@ -24,6 +24,7 @@ from design_of_mechanical_production.data.output.formatters import NumberFormatt
 from design_of_mechanical_production.data.utils.file_system import (
     create_initial_data_file,
 )
+from design_of_mechanical_production.gui.components.notification_window import NotificationWindow
 from design_of_mechanical_production.gui.windows.template_window import TemplateWindow
 from design_of_mechanical_production.settings import get_setting
 
@@ -42,9 +43,20 @@ class TemplateResultWindow(TemplateWindow):
 
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(screen_manager=screen_manager, debug_mode=debug_mode, **kwargs)
-
+        self.label.text = "Расчетные данные"
         self.screen_manager = screen_manager
         self._workshop = None
+
+        # создаем уведомление для экспорта
+        app = MDApp.get_running_app()
+        self.export_notification = NotificationWindow(
+            title="Экспорт",
+            text="",
+            button1_text="К расчету",
+            button2_text="Выход",
+            button1_callback=self.back_to_input,
+            button2_callback=self.cancel
+        )
         # создаем контент
         self._create_content()
         # Инициализируем кнопки
@@ -105,7 +117,7 @@ class TemplateResultWindow(TemplateWindow):
             text='Назад', size_hint=(None, 1), width=self.max_button_width, on_release=self.back_to_input
         )
         export_results = Button(
-            text='Экспорт', size_hint=(None, 1), width=self.max_button_width, on_release=self.export_results
+            text='Экспорт', size_hint=(None, 1), width=self.max_button_width, on_release=self._on_export
         )
         # Добавляем кнопки в контейнер
         self.buttons_box.add_widget(back_to_input)
@@ -120,27 +132,31 @@ class TemplateResultWindow(TemplateWindow):
             self.content.clear_widgets()
             self.screen_manager.current = 'input_window'
 
-    def export_results(self, instance):
+    def _on_export(self, instance):
+        """
+        Обрабатывает событие экспорта результатов.
+        """
+        report_path = self.export_results()
+        if report_path:
+            self.export_notification.text = f"Отчет успешно сгенерирован и сохранен в:\n{report_path}"
+            self.export_notification.show()
+        else:
+            self.export_notification.text = "Ошибка при сохранении отчета"
+            self.export_notification.show()
+
+    def export_results(self):
         """
         Экспортирует результаты расчета в текстовый отчет.
         """
         if not self.workshop:
             print("Нет данных для экспорта")
             return
-
-        try:
-            # Генерация и сохранение отчета
-            report_generator = TextReportGenerator()
-            report = report_generator.generate_report(self.workshop)
-
-            report_path = Path(get_setting('report_path'))
-            if report_generator.save_report(report, report_path):
-                print(f"Отчет успешно сгенерирован и сохранен в {report_path}")
-            else:
-                print("Ошибка при сохранении отчета")
-
-        except Exception as e:
-            print(f"Ошибка при экспорте результатов: {e}")
+        # Генерация и сохранение отчета
+        report_generator = TextReportGenerator()
+        report = report_generator.generate_report(self.workshop)
+        report_path = Path(get_setting('report_path'))
+        result = report_generator.save_report(report, report_path)
+        return report_path if result else None
 
     def _update_content_debug(self, instance, value):
         if self.debug_mode:
@@ -166,6 +182,17 @@ class TemplateResultWindow(TemplateWindow):
             self.content.clear_widgets()
             self._create_content()
             self._update_content()
+
+    @staticmethod
+    def cancel(instance):
+        """
+        Отменяет ввод данных и завершает работу приложения.
+
+        Args:
+            instance: Экземпляр кнопки
+        """
+        # Завершаем работу приложения
+        MDApp.get_running_app().stop()
 
     def _update_content(self):
         """Обновляет отображение результатов расчета."""
@@ -542,7 +569,6 @@ class ResultWindow(Screen):
 
 
 if __name__ == '__main__':
-
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 
