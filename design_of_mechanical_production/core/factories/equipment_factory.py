@@ -6,7 +6,7 @@ from __future__ import annotations
 from decimal import Decimal
 from sys import exit
 
-from machine_tools import Finder, MachineInfo, ListMachineInfoFormatter, ListNameFormatter
+from machine_tools import Finder, ListMachineInfoFormatter, ListNameFormatter, MachineInfo
 
 from design_of_mechanical_production.core.entities import Equipment
 from design_of_mechanical_production.core.interfaces import IEquipment, IEquipmentFactory

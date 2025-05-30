@@ -11,37 +11,39 @@ class NotificationWindow:
     Окно уведомлений с настраиваемыми кнопками и текстом.
     """
 
-    def __init__(self, title: str, text: str,
-                 button1_text: str = "OK", button1_callback=None,
-                 button2_text: str = "Отмена", button2_callback=None,
-                 **kwargs):
+    def __init__(
+        self,
+        title: str,
+        text: str,
+        button1_text: str = "OK",
+        button1_callback=None,
+        button2_text: str = "Отмена",
+        button2_callback=None,
+        **kwargs,
+    ):
         buttons = []
         app = MDApp.get_running_app()
-        
+
         if button1_callback:
             buttons.append(
                 MDFlatButton(
                     text=button1_text,
                     on_release=lambda x: self._handle_button(button1_callback),
-                    md_bg_color=app.theme_cls.disabled_primary_color
+                    md_bg_color=app.theme_cls.disabled_primary_color,
                 )
             )
-            
+
         if button2_callback:
             buttons.append(
                 MDFlatButton(
                     text=button2_text,
                     on_release=lambda x: self._handle_button(button2_callback),
-                    md_bg_color=app.theme_cls.disabled_primary_color
+                    md_bg_color=app.theme_cls.disabled_primary_color,
                 )
             )
 
         # Создаем диалоговое окно
-        self.dialog = MDDialog(
-            title=title,
-            text=text,
-            buttons=buttons
-        )
+        self.dialog = MDDialog(title=title, text=text, buttons=buttons)
 
     def _handle_button(self, callback):
         """Обрабатывает нажатие кнопки."""
@@ -63,10 +65,10 @@ class NotificationWindow:
 
 
 if __name__ == "__main__":
-    from kivymd.app import MDApp
-    from kivy.uix.boxlayout import BoxLayout
-    from kivymd.uix.button import MDRaisedButton
     from kivy.core.window import Window
+    from kivy.uix.boxlayout import BoxLayout
+    from kivymd.app import MDApp
+    from kivymd.uix.button import MDRaisedButton
 
     class TestApp(MDApp):
         def build(self):
@@ -81,22 +83,18 @@ if __name__ == "__main__":
 
             # Создаем кнопку для демонстрации
             button = MDRaisedButton(
-                text="Показать уведомление",
-                size_hint=(0.5, 0.5),
-                pos_hint={'center_x': 0.5, 'center_y': 0.5}
+                text="Показать уведомление", size_hint=(0.5, 0.5), pos_hint={'center_x': 0.5, 'center_y': 0.5}
             )
             button.bind(on_press=self.show_notification)
             root.add_widget(button)
 
             # Создаем кнопку для смены темы
             theme_button = MDRaisedButton(
-                text="Сменить тему",
-                size_hint=(0.5, 0.5),
-                pos_hint={'center_x': 0.5, 'center_y': 0.3}
+                text="Сменить тему", size_hint=(0.5, 0.5), pos_hint={'center_x': 0.5, 'center_y': 0.3}
             )
             theme_button.bind(on_press=self.toggle_theme)
             root.add_widget(theme_button)
-            
+
             return root
 
         def toggle_theme(self, *args):
@@ -113,7 +111,7 @@ if __name__ == "__main__":
                 button1_text="Сохранить",
                 button1_callback=self.on_save,
                 button2_text="Отмена",
-                button2_callback=self.on_cancel
+                button2_callback=self.on_cancel,
             )
             notification.show()
 

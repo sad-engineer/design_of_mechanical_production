@@ -4,11 +4,11 @@
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivymd.app import MDApp
 from kivymd.uix.label import MDLabel
-from kivy.uix.screenmanager import Screen
 
 from design_of_mechanical_production.settings import get_setting, set_setting
 
@@ -44,7 +44,7 @@ class SettingsInput(BoxLayout):
             padding_x=5,
             input_filter='float',
             halign='center',
-            background_color=self.app.theme_cls.bg_normal,
+            background_color=self.app.theme_cls.opposite_bg_normal,
         )
         self.suf_label = MDLabel(text="", size_hint_x=0.15, halign='left', valign='middle', text_size=(None, None))
         self.suf_label.bind(size=self._update_text_size)
@@ -85,7 +85,12 @@ class SettingsWindow(Screen):
 
         # Контейнер для прокручиваемого содержимого
         content_layout = BoxLayout(
-            orientation='vertical', spacing=10, padding=10, size_hint_y=None, size_hint_x=1, pos_hint={'center_x': 0.5},
+            orientation='vertical',
+            spacing=10,
+            padding=10,
+            size_hint_y=None,
+            size_hint_x=1,
+            pos_hint={'center_x': 0.5},
         )
         content_layout.bind(minimum_height=content_layout.setter('height'))
 

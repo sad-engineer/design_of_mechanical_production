@@ -17,15 +17,21 @@ def load_launch_config() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Конфигурация запуска приложения
     """
+    print("DEBUG: Starting load_launch_config")  # Отладка
     config_path = Path(__file__).parent.parent / "settings" / 'design_launcher_config.json'
+    print(f"DEBUG: Config path: {config_path}")  # Отладка
+
     if not config_path.exists():
+        print("DEBUG: Config file not found, creating default")  # Отладка
         # Создаем файл с настройками по умолчанию
         default_config = {'mode': 'gui', 'theme': 'Light'}  # 'Light' или 'Dark'
         save_launch_config(default_config)
         return default_config
 
     with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        config = json.load(f)
+        print(f"DEBUG: Loaded config: {config}")  # Отладка
+        return config
 
 
 def save_launch_config(config: Dict[str, Any]) -> None:
@@ -35,9 +41,13 @@ def save_launch_config(config: Dict[str, Any]) -> None:
     Args:
         config: Конфигурация запуска приложения
     """
+    print("DEBUG: Starting save_launch_config")  # Отладка
     config_path = Path(__file__).parent.parent / "settings" / 'design_launcher_config.json'
+    print(f"DEBUG: Saving to: {config_path}")  # Отладка
+
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
+    print("DEBUG: Config saved successfully")  # Отладка
 
 
 def set_launch_mode(mode: str) -> None:
@@ -81,16 +91,21 @@ def show_launch_config() -> None:
     """
     Показывает текущие настройки запуска.
     """
+    print("DEBUG: Starting show_launch_config")  # Отладка
     config = load_launch_config()
     print("\nТекущие настройки запуска:")
     for key, value in config.items():
         print(f"  {key}: {value}")
+    print("DEBUG: show_launch_config completed")  # Отладка
 
 
 def main():
     """
     Точка входа в скрипт управления режимом запуска.
     """
+    print("DEBUG: Starting main")  # Отладка
+    print(f"DEBUG: sys.argv = {sys.argv}")  # Отладка
+
     if len(sys.argv) < 2:
         print("Использование:")
         print("  python -m design_of_mechanical_production.launch_manager show  - показать текущие настройки запуска")
@@ -101,6 +116,7 @@ def main():
         sys.exit(1)
 
     command = sys.argv[1].lower()
+    print(f"DEBUG: Command = {command}")  # Отладка
 
     if command == 'show':
         show_launch_config()
@@ -114,3 +130,8 @@ def main():
     else:
         print("Неизвестная команда. Используйте 'show', 'gui', 'console' или 'theme'.")
         sys.exit(1)
+    print("DEBUG: main completed")  # Отладка
+
+
+if __name__ == '__main__':
+    main()

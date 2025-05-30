@@ -55,7 +55,7 @@ class TemplateResultWindow(TemplateWindow):
             button1_text="К расчету",
             button2_text="Выход",
             button1_callback=self.back_to_input,
-            button2_callback=self.cancel
+            button2_callback=self.cancel,
         )
         # создаем контент
         self._create_content()
@@ -216,7 +216,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         # Заголовок
@@ -246,7 +246,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         # Заголовок
@@ -307,7 +307,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         # Заголовок
@@ -362,7 +362,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         # Заголовок
@@ -426,7 +426,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         card.add_widget(
@@ -481,7 +481,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
 
         # Заголовок
@@ -526,7 +526,7 @@ class TemplateResultWindow(TemplateWindow):
             padding=15,
             spacing=10,
             pos_hint={'top': 1},
-            md_bg_color=self.app.theme_cls.disabled_primary_color
+            md_bg_color=self.app.theme_cls.disabled_primary_color,
         )
         card.add_widget(
             MDLabel(
@@ -574,6 +574,7 @@ class ResultWindow(Screen):
 
 
 if __name__ == '__main__':
+
     class TestApp(MDApp):
         """Тестовое приложение для отладки окна."""
 

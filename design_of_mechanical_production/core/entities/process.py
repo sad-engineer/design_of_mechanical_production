@@ -132,14 +132,14 @@ class Process(IProcess):
         """
         self._compliance_coefficient = value
         self.calculate_required_machines()
-    
+
     @property
     def progressivity_coefficient(self) -> Decimal:
         """
         Коэффициент прогрессивности.
         """
-        return self._progressivity_coefficient  
-    
+        return self._progressivity_coefficient
+
     @progressivity_coefficient.setter
     def progressivity_coefficient(self, value: Decimal) -> None:
         """
