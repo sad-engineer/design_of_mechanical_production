@@ -1,6 +1,6 @@
 pandas==2.2.3
 pyyaml==6.0.2
-machine-tools @ git+https://github.com/sad-engineer/machine_tools.git
+machine-tools @ git+https://github.com/sad-engineer/machine_tools.git@main
 kivy==2.3.1
 kivymd==1.2.0
 openpyxl==3.1.5
