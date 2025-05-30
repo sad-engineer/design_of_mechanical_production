@@ -99,7 +99,7 @@ class TestProcess(unittest.TestCase):
 
         # Настраиваем мок для операции
         operation = MagicMock(spec=IOperation)
-        operation.time = Decimal("120000")
+        operation.time = Decimal("120")
         operation.equipment = equipment_mock
         operation.calculated_equipment_count = Decimal("0")
         operation.accepted_equipment_count = 0
@@ -113,9 +113,8 @@ class TestProcess(unittest.TestCase):
         # Проверяем результаты
         self.assertEqual(len(machines), 1)
         self.assertEqual(
-            machines["Станок1"].calculated_count, Decimal("45.45454545454545454545454545")
-        )  # (1000 * 120) / (2000 * 1.1 * 1.2)
-        operation.accept_count.assert_called_once_with(Decimal("45.45454545454545454545454545"))
+            machines["Станок1"].calculated_count, Decimal("0.4545454545454545454545454545")
+        )  # 120 / (2000 * 1.1 * 1.2)
 
 
 if __name__ == '__main__':

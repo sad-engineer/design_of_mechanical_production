@@ -23,8 +23,8 @@ class Process(IProcess):
     """
 
     operations: List[IOperation] = field(default_factory=list)
-    compliance_coefficient: Decimal = KV
-    progressivity_coefficient: Decimal = KP
+    _compliance_coefficient: Decimal = KV
+    _progressivity_coefficient: Decimal = KP
     _fund_of_working: Decimal = FUND_OF_WORKING
     _machines: Dict[str, IMachineInfo] = field(default_factory=dict)
 
@@ -116,4 +116,34 @@ class Process(IProcess):
         Устанавливает действительный фонд времени работы одного станка, ч
         """
         self._fund_of_working = value
+        self.calculate_required_machines()
+
+    @property
+    def compliance_coefficient(self) -> Decimal:
+        """
+        Коэффициент выполнения нормы.
+        """
+        return self._compliance_coefficient
+
+    @compliance_coefficient.setter
+    def compliance_coefficient(self, value: Decimal) -> None:
+        """
+        Устанавливает коэффициент выполнения нормы.
+        """
+        self._compliance_coefficient = value
+        self.calculate_required_machines()
+    
+    @property
+    def progressivity_coefficient(self) -> Decimal:
+        """
+        Коэффициент прогрессивности.
+        """
+        return self._progressivity_coefficient  
+    
+    @progressivity_coefficient.setter
+    def progressivity_coefficient(self, value: Decimal) -> None:
+        """
+        Устанавливает коэффициент прогрессивности.
+        """
+        self._progressivity_coefficient = value
         self.calculate_required_machines()

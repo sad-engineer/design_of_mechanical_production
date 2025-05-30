@@ -14,6 +14,8 @@ from kivymd.app import MDApp
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
 
+from design_of_mechanical_production.launch_manager import set_theme
+
 
 class TemplateWindow(FloatLayout):
     """
@@ -168,8 +170,10 @@ class TemplateWindow(FloatLayout):
         app = MDApp.get_running_app()
         if app.theme_cls.theme_style == "Light":
             app.theme_cls.theme_style = "Dark"
+            set_theme("Dark")
         else:
             app.theme_cls.theme_style = "Light"
+            set_theme("Light")
 
     def open_settings(self, instance):
         """Открывает окно настроек."""

@@ -43,12 +43,12 @@ class TemplateResultWindow(TemplateWindow):
 
     def __init__(self, screen_manager=None, debug_mode=False, **kwargs):
         super().__init__(screen_manager=screen_manager, debug_mode=debug_mode, **kwargs)
+        self.app = MDApp.get_running_app()
         self.label.text = "Расчетные данные"
         self.screen_manager = screen_manager
         self._workshop = None
 
         # создаем уведомление для экспорта
-        app = MDApp.get_running_app()
         self.export_notification = NotificationWindow(
             title="Экспорт",
             text="",
@@ -198,13 +198,13 @@ class TemplateResultWindow(TemplateWindow):
         """Обновляет отображение результатов расчета."""
         # Левая колонка
         self.left_column.add_widget(self._add_general_info_card())
+        self.left_column.add_widget(self._add_summary_card())
         self.left_column.add_widget(self._add_special_zones_equipment_card())
         self.left_column.add_widget(self._add_zones_info_card())
-        self.left_column.add_widget(self._add_summary_card())
 
         # Правая колонка
-        self.right_column.add_widget(self._add_equipment_stats_card())
         self.right_column.add_widget(self._add_process_info_card())
+        self.right_column.add_widget(self._add_equipment_stats_card())
         self.right_column.add_widget(self._add_operations_stats_card())
 
     def _add_general_info_card(self):
@@ -215,7 +215,8 @@ class TemplateResultWindow(TemplateWindow):
             height=150,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         # Заголовок
@@ -233,7 +234,6 @@ class TemplateResultWindow(TemplateWindow):
         info_layout.add_widget(MDLabel(text=f'Название цеха: {self.workshop.name}'))
         info_layout.add_widget(MDLabel(text=f'Годовой объем производства: {fn(self.workshop.production_volume)} шт.'))
         info_layout.add_widget(MDLabel(text=f'Масса детали: {fn(self.workshop.mass_detail)} кг'))
-        info_layout.add_widget(MDLabel(text=f'Общая площадь цеха: {fn(self.workshop.total_area)} м²'))
 
         card.add_widget(info_layout)
         return card
@@ -245,7 +245,8 @@ class TemplateResultWindow(TemplateWindow):
             size_hint=(1, None),
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         # Заголовок
@@ -305,7 +306,8 @@ class TemplateResultWindow(TemplateWindow):
             height=325,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         # Заголовок
@@ -359,7 +361,8 @@ class TemplateResultWindow(TemplateWindow):
             height=375,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         # Заголовок
@@ -374,8 +377,6 @@ class TemplateResultWindow(TemplateWindow):
                 halign='center',
             )
         )
-
-        # Таблица
         table = GridLayout(
             cols=4, size_hint_x=None, size_hint_y=None, row_default_height=25, spacing=5, padding=[0, 0, 0, 0]
         )
@@ -424,7 +425,8 @@ class TemplateResultWindow(TemplateWindow):
             height=400,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         card.add_widget(
@@ -478,7 +480,8 @@ class TemplateResultWindow(TemplateWindow):
             height=350,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
 
         # Заголовок
@@ -522,7 +525,8 @@ class TemplateResultWindow(TemplateWindow):
             height=180,
             padding=15,
             spacing=10,
-            pos_hint={'top': 1},  # Привязываем к верху
+            pos_hint={'top': 1},
+            md_bg_color=self.app.theme_cls.disabled_primary_color
         )
         card.add_widget(
             MDLabel(
@@ -538,7 +542,8 @@ class TemplateResultWindow(TemplateWindow):
         # Добавляем строки
         card.add_widget(MDLabel(text=f"Ширина пролета: {fn(self.workshop.span_width)} м", halign='left'))
         card.add_widget(MDLabel(text=f"Число пролетов: {self.workshop.span_number}", halign='left'))
-        card.add_widget(MDLabel(text=f"Длина пролета: {fn(self.workshop.length)} м", halign='left'))
+        card.add_widget(MDLabel(text=f"Общая ширина цеха: {fn(self.workshop.width)} м", halign='left'))
+        card.add_widget(MDLabel(text=f"Длина цеха: {fn(self.workshop.length)} м", halign='left'))
         card.add_widget(MDLabel(text=f"Площадь цеха: {fn(self.workshop.total_area)} м²", halign='left', bold=True))
         return card
 

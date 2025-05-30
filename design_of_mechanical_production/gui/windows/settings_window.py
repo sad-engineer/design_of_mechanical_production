@@ -44,8 +44,7 @@ class SettingsInput(BoxLayout):
             padding_x=5,
             input_filter='float',
             halign='center',
-            background_color=(1, 1, 1, 1) if self.app.theme_cls.theme_style == "Light" else (0.2, 0.2, 0.2, 1),
-            foreground_color=(0, 0, 0, 1) if self.app.theme_cls.theme_style == "Light" else (1, 1, 1, 1),
+            background_color=self.app.theme_cls.bg_normal,
         )
         self.suf_label = MDLabel(text="", size_hint_x=0.15, halign='left', valign='middle', text_size=(None, None))
         self.suf_label.bind(size=self._update_text_size)
@@ -63,10 +62,11 @@ class SettingsInput(BoxLayout):
 class SettingsWindow(Screen):
     """Окно настроек приложения."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, previous_screen='input_window', **kwargs):
         super().__init__(**kwargs)
         self.name = 'settings'
         self.app = MDApp.get_running_app()
+        self.previous_screen = previous_screen
         self._create_layout()
 
     def _create_layout(self) -> None:
@@ -243,6 +243,11 @@ class SettingsWindow(Screen):
         except ValueError as e:
             print(f"Ошибка при сохранении настроек: {e}")
             # Здесь можно добавить всплывающее окно с ошибкой
+
+    def hide(self):
+        """Закрывает окно настроек и возвращается на предыдущий экран."""
+        self.manager.transition.direction = 'right'
+        self.manager.current = self.previous_screen
 
 
 if __name__ == "__main__":

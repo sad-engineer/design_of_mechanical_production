@@ -67,7 +67,7 @@ class WorkshopDesignApp(MDApp):
         # Создаем и добавляем окно ввода
         input_window = InputWindow(screen_manager=self.screen_manager)
         # Добавляем окно настроек
-        settings_window = SettingsWindow(name='settings')
+        settings_window = SettingsWindow(name='settings', previous_screen='input_window')
 
         result_window = ResultWindow(screen_manager=self.screen_manager)
 
@@ -86,6 +86,9 @@ class WorkshopDesignApp(MDApp):
 
     def show_settings(self, instance):
         """Показывает окно настроек."""
+        # Обновляем предыдущий экран в окне настроек
+        settings_window = self.screen_manager.get_screen('settings')
+        settings_window.previous_screen = self.screen_manager.current
         self.screen_manager.current = 'settings'
 
 

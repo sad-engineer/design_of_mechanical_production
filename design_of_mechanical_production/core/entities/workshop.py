@@ -118,6 +118,13 @@ class Workshop(IWorkshop):
         """
         self._calculated_length = value
 
+    @property
+    def width(self) -> Decimal:
+        """
+        Возвращает ширину цеха.
+        """
+        return self.span_width * self.span_number
+
     def _calculate_total_area(self) -> None:
         """
         Рассчитывает общую площадь цеха.
