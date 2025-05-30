@@ -34,6 +34,6 @@ jobs:
 
     - name: Run tests
       run: |
-        echo "Start pytest at $(date)"
-        python -m pytest --timeout=120 tests/ --cov=design_of_mechanical_production --cov-report=xml
-        echo "End pytest at $(date)"
+        echo "Start tests at $(date)"
+        python -m unittest discover -s tests
+        echo "End tests at $(date)"
