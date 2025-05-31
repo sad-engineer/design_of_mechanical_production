@@ -10,72 +10,19 @@
 
 ## Установка
 
-### Вариант 1: установка Poetry (рекомендуется)
-
-1. Установите Poetry через pip:
-
+### Вариант 1: Poetry (рекомендуется)
 ```bash
-pip install poetry
+poetry add git+https://github.com/sad-engineer/design_of_mechanical_production.git
 ```
 
-2. Инициализируйте проект:
-
+### Вариант 2: pip
 ```bash
-poetry init
+pip install git+https://github.com/sad-engineer/design_of_mechanical_production.git
 ```
 
-3. Установите зависимости:
-
+### Установите зависимости:
 ```bash
 poetry install
-```
-
-
-### Вариант 2: клонирование Poetry
-
-2. Установите Poetry, если еще не установлен:
-
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-2. Клонируйте репозиторий:
-
-```bash
-git clone https://github.com/your-username/design_of_mechanical_production.git
-cd design_of_mechanical_production
-```
-
-3. Установите зависимости и сам пакет:
-
-```bash
-poetry install
-```
-
-
-### Вариант 3: pip
-
-1. Клонируйте репозиторий:
-
-```bash
-git clone https://github.com/your-username/design_of_mechanical_production.git
-cd design_of_mechanical_production
-```
-
-2. Создайте и активируйте виртуальное окружение:
-
-```bash
-python -m venv venv
-# Для Windows:
-venv\Scripts\activate
-# Для Linux/Mac:
-source venv/bin/activate
-```
-
-3. Установите пакет в режиме разработки:
-
-```bash
-pip install -e .
 ```
 
 ## Подготовка базы данных станков
